@@ -1,0 +1,32 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "Hotel Booking API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {"name": "prod", "url": "https://grand-hotel.com/api"}
+  ],
+  "methods": [
+    {
+      "name": "booking.create",
+      "summary": "Create a booking",
+      "params": [
+        {"name": "room_id", "schema": {"type": "string"}, "required": true},
+        {"name": "check_in", "schema": {"type": "string", "format": "date"}, "required": true},
+        {"name": "check_out", "schema": {"type": "string", "format": "date"}, "required": true}
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "booking_id": {"type": "string"},
+            "status": {"type": "string"}
+          },
+          "required": ["booking_id", "status"]
+        }
+      }
+    }
+  ]
+}

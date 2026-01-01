@@ -1,0 +1,20 @@
+{
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req-1",
+    "method": "booking.create",
+    "params": {
+      "room_id": "deluxe-001",
+      "check_in": "2025-01-17",
+      "check_out": "2025-01-19"
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req-1",
+    "result": {
+      "booking_id": "bk_123",
+      "status": "CONFIRMED"
+    }
+  }
+}

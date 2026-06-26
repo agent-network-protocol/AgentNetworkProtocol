@@ -1,6 +1,6 @@
 # Further Reading
 
-For ease of reference, all ANP-related materials are organized by **Specifications / Whitepaper / Blogs / Ecosystem**.
+For ease of reference, all ANP-related materials are organized by **Specifications / Implementation Guidance / Whitepaper / Blogs / Ecosystem**.
 
 ## Specifications
 
@@ -19,6 +19,10 @@ For ease of reference, all ANP-related materials are organized by **Specificatio
 - [Meta-Protocol Design Specification](/06-anp-agent-communication-meta-protocol-specification.md)
 - [Agent Description Protocol Specification](/07-anp-agent-description-protocol-specification.md)
 - [Agent Discovery Protocol Specification](/08-anp-agent-discovery-protocol-specification.md)
+
+## Implementation Guidance
+
+- [ANP Security Considerations](/docs/security-considerations.md)
 
 ## Whitepaper
 

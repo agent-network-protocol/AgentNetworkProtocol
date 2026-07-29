@@ -31,26 +31,56 @@ jobs:
             const startMarker = '<!-- contributors:start -->';
             const endMarker = '<!-- contributors:end -->';
 
-            let response;
+            const contributorsById = new Map();
+            for (let page = 1; ; page += 1) {
+              const pageResponse = await github.request(
+                'GET /repos/{owner}/{repo}/contributors',
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  per_page: 100,
+                  page,
+                },
+              );
+              if (pageResponse.status !== 200 || !Array.isArray(pageResponse.data)) {
+                core.setFailed(`Contributor page ${page} unavailable: HTTP ${pageResponse.status}`);
+                return;
+              }
+
+              for (const contributor of pageResponse.data) {
+                if (!contributor.login || contributor.type === 'Bot') continue;
+                contributorsById.set(contributor.id, {
+                  author: contributor,
+                  total: contributor.contributions ?? 0,
+                });
+              }
+              if (pageResponse.data.length < 100) break;
+            }
+
+            let statsResponse;
             for (let attempt = 0; attempt < 6; attempt += 1) {
-              response = await github.request(
+              statsResponse = await github.request(
                 'GET /repos/{owner}/{repo}/stats/contributors',
                 {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                 },
               );
-              if (response.status === 200) break;
+              if (statsResponse.status === 200) break;
               await new Promise((resolve) => setTimeout(resolve, 10000));
             }
 
-            if (response.status !== 200 || !Array.isArray(response.data)) {
-              core.setFailed(`Contributor statistics unavailable: HTTP ${response.status}`);
+            if (statsResponse.status !== 200 || !Array.isArray(statsResponse.data)) {
+              core.setFailed(`Contributor statistics unavailable: HTTP ${statsResponse.status}`);
               return;
             }
 
-            const contributors = response.data
-              .filter(({ author }) => author && author.type !== 'Bot')
+            for (const contributor of statsResponse.data) {
+              if (!contributor.author || contributor.author.type === 'Bot') continue;
+              contributorsById.set(contributor.author.id, contributor);
+            }
+
+            const contributors = Array.from(contributorsById.values())
               .sort((left, right) => {
                 if (right.total !== left.total) return right.total - left.total;
                 return left.author.login

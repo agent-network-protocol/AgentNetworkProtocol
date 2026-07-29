@@ -1,0 +1,97 @@
+name: Update contributor avatars
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-contributor-avatars
+  cancel-in-progress: true
+
+jobs:
+  update:
+    if: github.repository == 'agent-network-protocol/AgentNetworkProtocol'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update README contributor blocks
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const startMarker = '<!-- contributors:start -->';
+            const endMarker = '<!-- contributors:end -->';
+
+            let response;
+            for (let attempt = 0; attempt < 6; attempt += 1) {
+              response = await github.request(
+                'GET /repos/{owner}/{repo}/stats/contributors',
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                },
+              );
+              if (response.status === 200) break;
+              await new Promise((resolve) => setTimeout(resolve, 10000));
+            }
+
+            if (response.status !== 200 || !Array.isArray(response.data)) {
+              core.setFailed(`Contributor statistics unavailable: HTTP ${response.status}`);
+              return;
+            }
+
+            const contributors = response.data
+              .filter(({ author }) => author && author.type !== 'Bot')
+              .sort((left, right) => {
+                if (right.total !== left.total) return right.total - left.total;
+                return left.author.login
+                  .toLowerCase()
+                  .localeCompare(right.author.login.toLowerCase());
+              });
+
+            const avatars = contributors
+              .map(({ author }) =>
+                `<a href="${author.html_url}"><img src="${author.avatar_url}" width="64" height="64" alt="@${author.login}" /></a>`,
+              )
+              .join('\n');
+
+            for (const file of ['README.md', 'README.cn.md']) {
+              const source = fs.readFileSync(file, 'utf8');
+              const start = source.indexOf(startMarker);
+              const end = source.indexOf(endMarker);
+              if (start < 0 || end < 0 || end <= start) {
+                core.setFailed(`Contributor markers are invalid in ${file}`);
+                return;
+              }
+
+              const updated =
+                source.slice(0, start + startMarker.length) +
+                `\n${avatars}\n` +
+                source.slice(end);
+              fs.writeFileSync(file, updated);
+            }
+
+            core.info(`Rendered ${contributors.length} contributor avatars`);
+
+      - name: Commit updated contributor avatars
+        shell: bash
+        run: |
+          if git diff --quiet -- README.md README.cn.md; then
+            echo "Contributor avatars are already up to date"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md README.cn.md
+          git commit -m "docs: update contributor avatars"
+          git push

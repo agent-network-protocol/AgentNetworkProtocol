@@ -64,6 +64,10 @@ Benefiting from improved AI capabilities, agent description documents can be ent
 
 For agent description format, we recommend using JSON format. We have defined an ANP-compliant agent description document format based on standard JSON.
 
+For practical guidance on the ANP-specific and domain-specific fields used by
+the examples in this repository, see
+[Extended Fields in Agent Description Documents](docs/agent-description-extended-fields-guide.md).
+
 #### Agent Description Document
 
 The following is an example of an agent description document:

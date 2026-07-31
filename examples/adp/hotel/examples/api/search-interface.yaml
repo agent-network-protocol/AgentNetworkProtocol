@@ -2,13 +2,23 @@ openapi: 3.0.0
 info:
   title: Hotel Room Search Interface
   version: "1.0.0"
+  license:
+    name: MIT
+    url: https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/LICENSE
   description: |
     This API allows searching for available hotel rooms based on check-in and check-out dates.
-    The response can either contain a URL to a JSON-LD file or the JSON-LD data directly.
+    The response can contain a URL to an ANP Product document or the product data directly.
+
+servers:
+  - url: https://service.agent-network-protocol.com
+
+security:
+  - didwba_sc: []
 
 paths:
   /agents/hotel/api/search:
     post:
+      operationId: searchHotelRooms
       summary: Search available hotel rooms
       requestBody:
         required: true
@@ -30,41 +40,46 @@ paths:
                 - checkOutDate
       responses:
         '200':
-          description: A successful response containing either a URL to hotel room details in JSON-LD format or the JSON-LD data itself.
+          description: A successful response containing either a URL to hotel room details or the product data itself.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  jsonldUrls:
+                  urls:
                     type: array
-                    description: URLs to the JSON-LD files containing HotelRoom data as defined by schema.org
+                    description: URLs to ANP Product documents containing hotel room data
                     items:
                       type: string
                       format: uri
-                  jsonldData:
+                  data:
                     type: array
-                    description: JSON-LD formatted hotel room data
+                    description: Hotel room data using the ANP Product document format
                     items:
                       $ref: '#/components/schemas/HotelRoom'
-                required:
-                  - jsonldUrls
+        '400':
+          description: The check-in or check-out date is missing or invalid.
 components:
+  securitySchemes:
+    didwba_sc:
+      type: http
+      scheme: didwba
+      description: DID-WBA authentication using the Authorization header.
   schemas:
     HotelRoom:
       type: object
-      description: JSON-LD formatted hotel room data following schema.org's HotelRoom specification.
+      description: Hotel room data using the ANP Product document format.
       properties:
-        "@context":
-          type: object
-          description: JSON-LD context defining vocabulary.
-          example:
-            "@vocab": "https://schema.org/"
-            "ad": "https://service.agent-network-protocol.com/ad#"
-        "@type":
+        protocolType:
           type: string
-          example: "HotelRoom"
-        "@id":
+          example: "ANP"
+        protocolVersion:
+          type: string
+          example: "1.0.0"
+        type:
+          type: string
+          example: "Product"
+        url:
           type: string
           format: uri
           example: "https://service.agent-network-protocol.com/agents/hotel/examples/hotel_room.json"
@@ -100,7 +115,7 @@ components:
           items:
             type: object
             properties:
-              "@type":
+              type:
                 type: string
                 example: "ImageObject"
               url:
@@ -113,12 +128,12 @@ components:
               description:
                 type: string
                 example: "Luxurious room featuring floor-to-ceiling windows with panoramic ocean views"
-        facilities:
+        amenityFeature:
           type: array
           items:
             type: object
             properties:
-              "@type":
+              type:
                 type: string
                 example: "LocationFeatureSpecification"
               name:
@@ -128,58 +143,57 @@ components:
                 type: boolean
                 example: true
         offers:
-          type: array
-          items:
-            type: object
-            properties:
-              "@type":
-                type: string
-                example: "Offer"
-              identifier:
-                type: string
-                example: "RP20250204001"
-              name:
-                type: string
-                example: "标准价"
-              priceSpecification:
-                type: object
-                properties:
-                  "@type":
-                    type: string
-                    example: "UnitPriceSpecification"
-                  price:
-                    type: number
-                    format: float
-                    example: 1280.00
-                  priceCurrency:
-                    type: string
-                    example: "CNY"
-                  unitCode:
-                    type: string
-                    example: "DAY"
-                  priceType:
-                    type: string
-                    example: "https://schema.org/InvoicePrice"
-                  valueAddedTaxIncluded:
-                    type: boolean
-                    example: true
-              priceValidUntil:
-                type: string
-                format: date
-                example: "2025-12-31"
-              seller:
-                type: object
-                properties:
-                  "@type":
-                    type: string
-                    example: "Hotel"
-                  name:
-                    type: string
-                    example: "Sheraton Chuzhou Hotel"
+          type: object
+          properties:
+            type:
+              type: string
+              example: "Offer"
+            identifier:
+              type: string
+              example: "RP20250204001"
+            name:
+              type: string
+              example: "标准价"
+            priceSpecification:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "UnitPriceSpecification"
+                price:
+                  type: number
+                  format: float
+                  example: 1280.00
+                priceCurrency:
+                  type: string
+                  example: "CNY"
+                unitCode:
+                  type: string
+                  example: "DAY"
+                priceType:
+                  type: string
+                  example: "https://schema.org/InvoicePrice"
+                valueAddedTaxIncluded:
+                  type: boolean
+                  example: true
+            priceValidUntil:
+              type: string
+              format: date
+              example: "2025-12-31"
+            seller:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "Hotel"
+                name:
+                  type: string
+                  example: "Sheraton Chuzhou Hotel"
       required:
-        - "@context"
-        - "@type"
-        - "@id"
+        - protocolType
+        - protocolVersion
+        - type
+        - url
         - identifier
         - name
         - description

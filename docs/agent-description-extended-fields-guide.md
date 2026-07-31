@@ -1,182 +1,167 @@
 # Extended Fields in Agent Description Documents
 
-This guide explains how extended fields are used in the Agent Description
+This guide explains the optional fields used by the hotel and coffee-shop
 examples in this repository. It supplements the
-[Agent Description Protocol specification](../07-anp-agent-description-protocol-specification.md);
-it does not add new protocol requirements.
+[Agent Description Protocol specification](../07-anp-agent-description-protocol-specification.md)
+and does not add new protocol requirements.
 
-The examples combine three kinds of terms:
+ANP-07 v1.1 uses standard JSON. Agent Description and Product documents use
+ordinary field names such as `type` and `url`. The examples in this guide
+follow that format.
 
-- fields defined by the Agent Description Protocol;
-- terms from an external vocabulary, such as Schema.org; and
-- ANP-specific terms identified by the `ad` prefix.
+## Start with the ANP-07 Fields
 
-Keeping these groups separate makes a description easier to interpret and
-reduces the chance that two fields with the same short name are treated as the
-same property.
+An Agent Description must contain the fields that ANP-07 marks as required.
+Optional domain fields can then be added alongside them.
 
-## Declaring Vocabularies
+| Field | Type | Status | Purpose |
+| --- | --- | --- | --- |
+| `protocolType` | string | Required | Fixed value `ANP` |
+| `protocolVersion` | string | Required | ANP protocol version used by the document |
+| `type` | string | Required | `AgentDescription` for an Agent Description document |
+| `url` | string | Optional | Address of the Agent Description document |
+| `name` | string | Required | Human-readable agent name |
+| `did` | string | Optional | DID used to identify the agent |
+| `owner` | object | Optional | Person or organization responsible for the agent |
+| `description` | string | Optional | Summary of the agent's purpose and capabilities |
+| `created` | string | Optional | Creation time in ISO 8601 format |
+| `securityDefinitions` | object | Required | Available authentication schemes |
+| `security` | string | Required | Active entry from `securityDefinitions` |
+| `Infomations` | array | Optional | Links to products, services, or other information resources |
+| `interfaces` | array | Optional | Interfaces exposed by the agent |
+| `proof` | object | Optional | Document integrity proof |
 
-The hotel and coffee shop examples use a JSON-LD context:
+`Infomations` is the field name used by the current ANP-07 specification. The
+examples retain that spelling for compatibility with the specification.
 
-```json
-{
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "did": "https://w3id.org/did#",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  }
-}
-```
-
-`@vocab` supplies the vocabulary for unprefixed terms such as `name`,
-`address`, and `telephone`. The `ad` prefix identifies fields and types that
-belong to the ANP description vocabulary. The `did` prefix is available for
-DID-related terms.
-
-Use a prefix for a field that is not defined by the default vocabulary. Do not
-reuse an existing vocabulary term with a different meaning.
-
-## Extensions Used by the Examples
-
-### `ad:domainEntity`
-
-| Property | Value |
-| --- | --- |
-| Expected type | object |
-| Required | No |
-| Used in | Hotel and coffee shop Agent Descriptions |
-
-`ad:domainEntity` associates an agent with the real-world or digital entity it
-represents. Its contents depend on the domain. The hotel example uses a
-Schema.org `Hotel`; the coffee shop example uses `CafeOrCoffeeShop`.
+A minimal description with one domain extension looks like this:
 
 ```json
 {
-  "ad:domainEntity": {
-    "@type": "Hotel",
-    "name": "Example Hotel",
-    "telephone": "+1-555-0100"
-  }
-}
-```
-
-Prefer an established type and properties from the declared vocabulary for the
-object's contents. Add a separate prefixed term only when the selected
-vocabulary does not express the required information.
-
-### `ad:products`
-
-| Property | Value |
-| --- | --- |
-| Expected type | array |
-| Required | No |
-| Used in | Coffee shop Agent Description |
-
-`ad:products` lists products exposed by the domain entity. Each entry can
-contain a short inline description and an `@id` that points to a more detailed
-Product document.
-
-```json
-{
-  "ad:products": [
-    {
-      "@type": "Product",
-      "name": "House Coffee",
-      "description": "The shop's standard brewed coffee.",
-      "@id": "https://example.com/products/house-coffee.json"
-    }
-  ]
-}
-```
-
-Use a stable, dereferenceable `@id` when product details are stored in a
-separate document. Avoid copying a complete product record into the Agent
-Description when a link is sufficient.
-
-### `ad:interfaces`
-
-| Property | Value |
-| --- | --- |
-| Expected type | array |
-| Required | No |
-| Used in | Hotel and coffee shop Agent Descriptions |
-
-`ad:interfaces` lists the interfaces through which another agent can interact
-with the described agent. The examples use ANP-specific interface types with
-`protocol`, `url`, and `description` fields.
-
-```json
-{
-  "ad:interfaces": [
-    {
-      "@type": "ad:NaturalLanguageInterface",
-      "protocol": "YAML",
-      "url": "https://example.com/api/nl-interface.yaml",
-      "description": "Natural-language inquiries and responses."
-    }
-  ]
-}
-```
-
-The current examples contain the following interface types:
-
-| Type | Purpose |
-| --- | --- |
-| `ad:NaturalLanguageInterface` | Conversational requests expressed in natural language |
-| `ad:SearchInterface` | Structured search and filtering |
-| `ad:BookingInterface` | Reservations or bookings |
-| `ad:PurchaseInterface` | Product or service purchases |
-
-An interface entry describes how to find the interface contract; it is not the
-contract itself. Place endpoint paths, request parameters, and response schemas
-in the linked interface document.
-
-For an operation that needs direct user approval, the Agent Description
-specification defines the boolean `humanAuthorization` field. Set it on the
-relevant interface rather than assuming that authentication alone grants
-permission to perform the operation.
-
-### `ad:securityDefinitions` and `ad:security`
-
-| Property | Expected type | Required by the current specification |
-| --- | --- | --- |
-| `ad:securityDefinitions` | object | Yes |
-| `ad:security` | string | Yes |
-
-The JSON-LD examples prefix the security fields with `ad`. The first field
-defines the available security schemes; the second selects one of those
-definitions by name.
-
-```json
-{
-  "ad:securityDefinitions": {
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "AgentDescription",
+  "url": "https://example.com/agents/hotel/ad.json",
+  "name": "Hotel Booking Agent",
+  "did": "did:wba:example.com:agents:hotel",
+  "securityDefinitions": {
     "didwba_sc": {
       "scheme": "didwba",
       "in": "header",
       "name": "Authorization"
     }
   },
-  "ad:security": "didwba_sc"
+  "security": "didwba_sc",
+  "domainEntity": {
+    "type": "Hotel",
+    "name": "Example Hotel",
+    "telephone": "+1-555-0100"
+  }
 }
 ```
 
-These fields describe the authentication mechanism. They must not contain
-private keys, bearer tokens, passwords, or other credentials.
+## Linking Information Resources
 
-### Product customization
+Use `Infomations` for resources that have their own documents. A short entry
+states what the resource contains and where it can be retrieved.
 
-The coffee product examples use `customizationOptions` with the ANP-specific
-type `ad:CustomizationOptions`. Its `options` array contains `PropertyValue`
-objects that describe the choices available to a buyer.
+```json
+{
+  "Infomations": [
+    {
+      "type": "Product",
+      "description": "Room details, rates, and booking conditions.",
+      "url": "https://example.com/products/deluxe-room.json"
+    }
+  ]
+}
+```
+
+The linked Product document uses the standard fields defined in the Product
+Description section of ANP-07. Keep detailed pricing, images, and product
+properties in that document rather than copying them into the Agent
+Description.
+
+## Describing Interfaces
+
+The examples use the two interface types defined by ANP-07:
+
+- `NaturalLanguageInterface` for conversational requests;
+- `StructuredInterface` for operations described by a machine-readable
+  contract.
+
+```json
+{
+  "interfaces": [
+    {
+      "type": "StructuredInterface",
+      "protocol": "YAML",
+      "version": "1.0",
+      "humanAuthorization": true,
+      "url": "https://example.com/api/booking-interface.yaml",
+      "description": "Hotel room booking and reservation management."
+    }
+  ]
+}
+```
+
+Endpoint paths, request parameters, and response schemas belong in the linked
+interface contract. Set `humanAuthorization` to `true` when the operation
+requires direct user approval, such as confirming a booking or purchase.
+
+## Extensions Used by the Examples
+
+### `domainEntity`
+
+| Property | Value |
+| --- | --- |
+| Expected type | object |
+| Required | No |
+| Used in | Hotel and coffee-shop Agent Descriptions |
+
+`domainEntity` describes the organization, place, or other entity represented
+by the agent. The value is an ordinary JSON object. Its `type` identifies the
+kind of entity, while the remaining fields describe that entity.
+
+The hotel example includes address, location, rating, images, amenities, and
+services. The coffee-shop example includes address, opening hours, telephone,
+and location. These properties are optional and should be selected according
+to the domain.
+
+```json
+{
+  "domainEntity": {
+    "type": "CafeOrCoffeeShop",
+    "name": "Example Coffee Shop",
+    "openingHours": "Mo-Su 07:00-22:00",
+    "address": {
+      "type": "PostalAddress",
+      "addressLocality": "Example City",
+      "addressCountry": "CN"
+    }
+  }
+}
+```
+
+### `customizationOptions`
+
+| Property | Value |
+| --- | --- |
+| Expected type | object |
+| Required | No |
+| Used in | Coffee Product documents |
+
+`customizationOptions` lists choices that can be made when ordering a product.
+Each item in `options` has a name, a list of accepted values, and an optional
+`isRequired` flag.
 
 ```json
 {
   "customizationOptions": {
-    "@type": "ad:CustomizationOptions",
+    "type": "CustomizationOptions",
     "options": [
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "Size",
         "isRequired": true,
         "value": ["Small", "Medium", "Large"]
@@ -186,36 +171,59 @@ objects that describe the choices available to a buyer.
 }
 ```
 
-In these examples, `isRequired` means that the buyer must select a value for
-that option. It does not make `customizationOptions` a required field in every
-Product document.
+`isRequired` applies to the individual choice. It does not make
+`customizationOptions` mandatory for every Product document. A purchase
+interface that accepts these choices should use the same option names and
+permitted values.
 
-When an interface accepts these selections, its request schema should use the
-same option names and permitted values as the Product document.
+### Hotel-room fields
+
+The hotel-room Product adds fields that are useful when comparing rooms:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `roomName` | string | Local or alternate room name |
+| `useableArea` | string | Display value for room area |
+| `capacity` | string | Guest capacity as published by the provider |
+| `floor` | string | Floor or floor range |
+| `bedType` | string | Bed configuration |
+| `windowType` | string | Window configuration |
+| `pricePerDay` | array | Daily prices covered by the offer |
+| `stockPerDay` | array | Daily inventory covered by the offer |
+| `instantConfirmation` | boolean | Whether the booking can be confirmed immediately |
+| `containedInPlace` | object | Hotel or property containing the room |
+| `smokingAllowed` | boolean | Whether smoking is permitted |
+| `petsAllowed` | boolean | Whether pets are permitted |
+
+These fields are optional extensions. If an offer contains `pricePerDay` and
+`stockPerDay`, both arrays should cover the same ordered set of dates defined
+by the interface request or surrounding response.
 
 ## Adding a Domain-Specific Field
 
 Before adding a field:
 
-1. Check whether the Agent Description specification already defines it.
-2. Check whether the declared external vocabulary contains a term with the
-   intended meaning.
-3. If neither does, declare or reuse a suitable prefix and use it consistently.
-4. State the expected JSON type and whether the field is optional or required
-   within the extension.
-5. Add a small example and update the interface contract if the field is used
-   as an input or output.
+1. Check whether ANP-07 already defines the field.
+2. Check whether the public definition selected for the product or service
+   already supplies a suitable name and value shape.
+3. Use a concise field name whose meaning does not conflict with an existing
+   field.
+4. Document the JSON type and whether the extension is optional or required.
+5. Add a representative example and update the interface contract when the
+   field is accepted as input or returned as output.
 
-Extensions should remain optional unless a separate specification makes them
-mandatory. A consumer that does not understand an optional extension should
-still be able to read the agent's identity, description, security settings, and
-interface links.
+Domain extensions should remain optional unless a separate specification
+makes them mandatory. A consumer that does not use an extension should still
+be able to read the agent's identity, security configuration, information
+links, and interfaces.
 
 ## Related Examples
 
 - [Hotel Agent Description](../examples/adp/hotel/examples/ad.json)
-- [Hotel room description](../examples/adp/hotel/examples/hotel_room.json)
-- [Coffee shop Agent Description](../examples/adp/lkcoffe/ad.json)
+- [Hotel room Product document](../examples/adp/hotel/examples/hotel_room.json)
+- [Hotel search interface](../examples/adp/hotel/examples/api/search-interface.yaml)
+- [Coffee-shop Agent Description](../examples/adp/lkcoffe/ad.json)
+- [Coffee Product document](../examples/adp/lkcoffe/silk-latte/silk-latte.json)
 - [Coffee purchase interface](../examples/adp/lkcoffe/api/purchase-interface.yaml)
 
 ## Copyright Notice

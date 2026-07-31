@@ -1,98 +1,98 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "Product",
-  "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/orange-americano.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "Product",
+  "url": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/orange-americano.json",
   "identifier": "oa-29ab8cf9",
   "name": "橙C美式",
   "description": "小众果香，搭配浓郁咖啡，适合追求新鲜感和独特口味的消费者。",
   "brand": {
-    "@type": "Brand",
+    "type": "Brand",
     "name": "瑞幸咖啡"
   },
   "additionalProperty": [
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Feature",
       "value": "大师级Espresso，使用IIAC金奖咖啡豆"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Slogan",
       "value": "橙C美式 破亿杯！"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Juice Content",
       "value": "1杯橙汁含量 ≈ 1个橙子"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Flavor",
       "value": "浓郁橙香，清新沁爽"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Coffee Blend",
       "value": "定制融合IIAC金奖浓缩咖啡，口感丰富高亮亮味蕾"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Espresso",
       "value": "大师级定制Espresso，源自IIAC金奖咖啡豆"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Coffee Origin",
       "value": "瑞幸冠军团队经历上百次调试，寻求多产区咖啡豆专业拼配方案，甄选100%阿拉比卡咖啡豆，捕捉埃塞俄比亚、巴西、哥伦比亚、危地马拉等产区风味特征，呈现独特风味与浓醇口感"
     }
   ],
   "offers": {
-    "@type": "Offer",
+    "type": "Offer",
     "price": "20",
     "priceCurrency": "CNY",
     "availability": "https://schema.org/InStock"
   },
-  "image": {
-    "@type": "ImageObject",
-    "url": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/instruction.jpg",
-    "caption": "橙C美式 - 小众果香与浓郁咖啡的完美融合",
-    "description": "一杯清新橙香与浓郁咖啡完美融合的饮品，使用IIAC金奖咖啡豆制作，搭配新鲜橙汁，呈现独特的果香咖啡体验"
-  },
+  "image": [
+    {
+      "type": "ImageObject",
+      "url": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/instruction.jpg",
+      "caption": "橙C美式 - 小众果香与浓郁咖啡的完美融合",
+      "description": "一杯清新橙香与浓郁咖啡完美融合的饮品，使用IIAC金奖咖啡豆制作，搭配新鲜橙汁，呈现独特的果香咖啡体验"
+    }
+  ],
   "audience": {
-    "@type": "Audience",
+    "type": "Audience",
     "audienceType": "咖啡爱好者"
   },
   "manufacturer": {
-    "@type": "Organization",
+    "type": "Organization",
     "name": "瑞幸咖啡",
     "url": "https://luckincoffee.com"
   },
   "customizationOptions": {
-    "@type": "ad:CustomizationOptions",
+    "type": "CustomizationOptions",
     "options": [
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "杯型",
         "isRequired": true,
         "value": ["小杯", "中杯", "大杯"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "咖啡豆",
         "isRequired": true,
         "value": ["IIAC金奖豆"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "温度",
         "isRequired": true,
         "value": ["冰", "热"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "糖度",
         "isRequired": true,
         "value": ["标准甜", "少甜", "少少甜", "微甜", "不另外加糖"]

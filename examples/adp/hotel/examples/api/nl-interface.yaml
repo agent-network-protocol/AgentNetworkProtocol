@@ -7,7 +7,7 @@ interface:
     - name: "askQuestion"
       description: "使用自然语言提问并获取自然语言回答，支持SSE返回。"
       method: "POST"
-      path: "/agents/lkcoffe/api/ask"
+      path: "/agents/hotel/api/ask"
       parameters:
         - name: "question"
           type: "string"

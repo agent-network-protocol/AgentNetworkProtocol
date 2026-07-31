@@ -1,73 +1,73 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "Product",
-  "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/silk-latte.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "Product",
+  "url": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/silk-latte.json",
   "identifier": "sl-29ab8cf9",
   "name": "丝绸拿铁",
   "description": "采用高品质奶源，提供丝滑口感，适合追求健康和口感的消费者。",
   "brand": {
-    "@type": "Brand",
+    "type": "Brand",
     "name": "瑞幸咖啡"
   },
   "additionalProperty": [
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Feature",
       "value": "丝滑厚奶，丝滑蛋白含量 20.99%, 0乳糖、0植脂末、0蔗糖固体、0反式脂肪酸、0香精物加"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Slogan",
       "value": "添加丝绸风味厚奶"
     }
   ],
   "offers": {
-    "@type": "Offer",
+    "type": "Offer",
     "price": "20",
     "priceCurrency": "CNY",
     "availability": "https://schema.org/InStock"
   },
-  "image": {
-    "@type": "ImageObject",
-    "url": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/instruction.jpg",
-    "caption": "丝绸拿铁 - 丝滑浓郁的咖啡体验",
-    "description": "采用高品质奶源制作的丝滑拿铁，0乳糖、0植脂末，带来纯净丝滑的口感体验，搭配优质咖啡豆，呈现完美平衡的咖啡风味"
-  },
+  "image": [
+    {
+      "type": "ImageObject",
+      "url": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/instruction.jpg",
+      "caption": "丝绸拿铁 - 丝滑浓郁的咖啡体验",
+      "description": "采用高品质奶源制作的丝滑拿铁，0乳糖、0植脂末，带来纯净丝滑的口感体验，搭配优质咖啡豆，呈现完美平衡的咖啡风味"
+    }
+  ],
   "audience": {
-    "@type": "Audience",
+    "type": "Audience",
     "audienceType": "咖啡爱好者"
   },
   "manufacturer": {
-    "@type": "Organization",
+    "type": "Organization",
     "name": "瑞幸咖啡",
     "url": "https://luckincoffee.com"
   },
   "customizationOptions": {
-    "@type": "ad:CustomizationOptions",
+    "type": "CustomizationOptions",
     "options": [
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "杯型",
         "isRequired": true,
         "value": ["小杯", "中杯", "大杯"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "咖啡豆",
         "isRequired": true,
         "value": ["IIAC金奖豆", "深烘拼配豆"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "温度",
         "isRequired": true,
         "value": ["冰", "热"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "糖度",
         "isRequired": true,
         "value": ["标准甜", "少甜", "少少甜", "微甜", "不另外加糖"]

@@ -1,37 +1,33 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "did": "https://w3id.org/did#",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "ad:AgentDescription",
-  "@id": "https://service.agent-network-protocol.com/agents/sheraton-chuzhou-hotel/ad.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "AgentDescription",
+  "url": "https://service.agent-network-protocol.com/agents/sheraton-chuzhou-hotel/ad.json",
   "name": "Hotel Booking Agent",
   "did": "did:wba:service.agent-network-protocol.com:wba:hotel",
   "owner": {
-    "@type": "Organization",
+    "type": "Organization",
     "name": "Hotel Chain Group",
-    "@id": "https://example-hotel-group.com"
+    "url": "https://example-hotel-group.com"
   },
   "description": "An intelligent hotel booking agent providing comprehensive hotel information, room availability, and booking services.",
-  "version": "1.0.0",
   "created": "2025-01-29T09:08:44Z",
-  "ad:securityDefinitions": {
+  "securityDefinitions": {
     "didwba_sc": {
       "scheme": "didwba",
       "in": "header",
       "name": "Authorization"
     }
   },
-  "ad:security": "didwba_sc",
-  "ad:domainEntity": {
-    "@type": "Hotel",
+  "security": "didwba_sc",
+  "domainEntity": {
+    "type": "Hotel",
     "hotelID": 372505161,
     "name": "滁州港汇喜来登酒店",
     "description": "滁州港汇喜来登酒店是喜达屋酒店及度假村国际集团旗下的喜来登品牌在滁州市的一家酒店。酒店位于滁州政治、商业和文化中心，毗邻滁州市政府，距离滁州高铁站仅5公里，距离南京也仅40分钟车程。",
-    "@id": "https://service.agent-network-protocol.com/agents/hotel/sheraton-chuzhou-hotel/hotel.json",
+    "url": "https://service.agent-network-protocol.com/agents/hotel/sheraton-chuzhou-hotel/hotel.json",
     "address": {
-      "@type": "PostalAddress",
+      "type": "PostalAddress",
       "streetAddress": "中都大道1599号",
       "addressLocality": "滁州",
       "addressRegion": "安徽省",
@@ -40,31 +36,31 @@
     "telephone": "0550-2201888",
     "openingDate": "2015",
     "starRating": {
-      "@type": "Rating",
+      "type": "Rating",
       "ratingValue": 5,
       "alternateName": "豪华型",
       "isRelatedTo": true
     },
     "geo": {
-      "@type": "GeoCoordinates",
+      "type": "GeoCoordinates",
       "latitude": 32.242098,
       "longitude": 118.332009
     },
     "image": [
       {
-        "@type": "ImageObject",
+        "type": "ImageObject",
         "url": "http://m.tuniucdn.com/fb3/s1/2n9c/Y3cwy3rmCHMeDe7U1ZKfaeFcNuk.jpg",
         "caption": "滁州港汇喜来登酒店 - 行政套房",
         "description": "豪华行政套房配备高档家具和设施，为商务和休闲旅客提供舒适优雅的住宿体验"
       },
       {
-        "@type": "ImageObject",
+        "type": "ImageObject",
         "url": "http://m.tuniucdn.com/fb3/s1/2n9c/6oebPwjLLWWmPt2dVRBPcKXEpVb.jpg",
         "caption": "滁州港汇喜来登酒店 - 豪华客房",
         "description": "宽敞明亮的豪华客房，配备现代化设施，为宾客提供舒适的入住体验"
       },
       {
-        "@type": "ImageObject",
+        "type": "ImageObject",
         "url": "http://m.tuniucdn.com/fb3/s1/2n9c/3dYduEb8VMQzTfaaJiDA3S4kyt5y.jpg",
         "caption": "滁州港汇喜来登酒店 - 行政酒廊",
         "description": "位于酒店高层的行政酒廊，为行政楼层客人提供专属休息和商务空间"
@@ -72,83 +68,94 @@
     ],
     "amenityFeature": [
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "残疾人客房",
         "value": true
       },
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "大堂吧",
         "value": true
       },
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "行政楼层",
         "value": true
       },
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "健身室",
         "value": true
       },
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "自动取款机",
         "value": true
       },
       {
-        "@type": "LocationFeatureSpecification",
+        "type": "LocationFeatureSpecification",
         "name": "餐厅",
         "value": true
       }
     ],
     "makesOffer": [
       {
-        "@type": "Offer",
+        "type": "Offer",
         "itemOffered": {
-          "@type": "Service",
+          "type": "Service",
           "name": "24小时前台服务"
         }
       },
       {
-        "@type": "Offer",
+        "type": "Offer",
         "itemOffered": {
-          "@type": "Service",
+          "type": "Service",
           "name": "商务服务"
         }
       },
       {
-        "@type": "Offer",
+        "type": "Offer",
         "itemOffered": {
-          "@type": "Service",
+          "type": "Service",
           "name": "邮政服务"
         }
       },
       {
-        "@type": "Offer",
+        "type": "Offer",
         "itemOffered": {
-          "@type": "Service",
+          "type": "Service",
           "name": "快速办理入住/退房手续"
         }
       }
     ]
   },
-  "ad:interfaces": [
+  "Infomations": [
     {
-      "@type": "ad:SearchInterface",
+      "type": "Product",
+      "description": "Hotel room details, rates, availability, and booking conditions.",
+      "url": "https://service.agent-network-protocol.com/agents/hotel/examples/hotel_room.json"
+    }
+  ],
+  "interfaces": [
+    {
+      "type": "StructuredInterface",
       "protocol": "YAML",
+      "version": "1.0.0",
       "url": "https://service.agent-network-protocol.com/agents/sheraton-chuzhou-hotel/api/search-interface.yaml",
       "description": "A YAML file for searching and filtering hotel information, such as room information, price information, etc."
     },
     {
-      "@type": "ad:BookingInterface",
+      "type": "StructuredInterface",
       "protocol": "YAML",
+      "version": "1.0",
+      "humanAuthorization": true,
       "url": "https://service.agent-network-protocol.com/agents/sheraton-chuzhou-hotel/api/booking-interface.yaml",
       "description": "A YAML file for hotel room booking and reservation management."
     },
     {
-      "@type": "ad:NaturalLanguageInterface",
+      "type": "NaturalLanguageInterface",
       "protocol": "YAML",
+      "version": "1.0",
       "url": "https://service.agent-network-protocol.com/agents/sheraton-chuzhou-hotel/api/nl-interface.yaml",
       "description": "A YAML file for interacting with the intelligent agent through natural language."
     }

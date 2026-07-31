@@ -1,34 +1,30 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "did": "https://w3id.org/did#",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "ad:AgentDescription",
-  "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/ad.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "AgentDescription",
+  "url": "https://service.agent-network-protocol.com/agents/lkcoffe/ad.json",
   "name": "Luckin Coffee Agent",
   "did": "did:wba:service.agent-network-protocol.com:wba:lkcoffe",
   "owner": {
-    "@type": "Organization",
+    "type": "Organization",
     "name": "Luckin Coffee",
-    "@id": "https://luckincoffee.com"
+    "url": "https://luckincoffee.com"
   },
   "description": "Luckin Coffee's intelligent agent providing product information and customization options.",
-  "version": "1.0.0",
   "created": "2025-01-03T10:56:57Z",
-  "ad:securityDefinitions": {
+  "securityDefinitions": {
     "didwba_sc": {
       "scheme": "didwba",
       "in": "header",
       "name": "Authorization"
     }
   },
-  "ad:security": "didwba_sc",
-  "ad:domainEntity": {
-    "@type": "CafeOrCoffeeShop",
+  "security": "didwba_sc",
+  "domainEntity": {
+    "type": "CafeOrCoffeeShop",
     "name": "Luckin Coffee",
     "address": {
-      "@type": "PostalAddress",
+      "type": "PostalAddress",
       "streetAddress": "XX Road No.XX",
       "addressLocality": "Some City",
       "addressRegion": "Some Province",
@@ -36,44 +32,47 @@
       "addressCountry": "CN"
     },
     "telephone": "+86-10-12345678",
-    "url": "https://www.starbucks.com",
+    "url": "https://luckincoffee.com",
     "openingHours": "Mo-Su 07:00-22:00",
     "geo": {
-      "@type": "GeoCoordinates",
+      "type": "GeoCoordinates",
       "latitude": 39.9042,
       "longitude": 116.4074
-    },
-    "ad:products": [
+    }
+  },
+  "Infomations": [
       {
-        "@type": "Product",
+        "type": "Product",
         "name": "Silk Latte",
         "description": "Made with high-quality milk source, providing a silky smooth taste, suitable for consumers pursuing health and taste.",
-        "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/silk-latte.json"
+        "url": "https://service.agent-network-protocol.com/agents/lkcoffe/silk-latte/silk-latte.json"
       },
       {
-        "@type": "Product",
+        "type": "Product",
         "name": "Orange C Americano",
         "description": "Niche fruit aroma paired with rich coffee, suitable for consumers seeking freshness and unique flavors.",
-        "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/orange-americano.json"
+        "url": "https://service.agent-network-protocol.com/agents/lkcoffe/orange-americano/orange-americano.json"
       },
       {
-        "@type": "Product",
+        "type": "Product",
         "name": "Roasted Coconut Latte",
         "description": "Roasted at around 135°C, featuring unique coconut sugar flavor, perfect for winter consumption. This beverage combines coconut juice and roasted coconut bits, offering a healthy choice with five 'zero' features, using master-crafted Espresso from IIAC gold medal coffee beans.",
-        "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/roasted-coconut-latte.json"
+        "url": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/roasted-coconut-latte.json"
       }
-    ]
-  },
-  "ad:interfaces": [
+  ],
+  "interfaces": [
     {
-      "@type": "ad:NaturalLanguageInterface",
+      "type": "NaturalLanguageInterface",
       "protocol": "YAML",
+      "version": "1.0",
       "url": "https://service.agent-network-protocol.com/agents/lkcoffe/api/nl-interface.yaml",
       "description": "A YAML file for interacting with the intelligent agent through natural language."
     },
     {
-      "@type": "ad:PurchaseInterface",
+      "type": "StructuredInterface",
       "protocol": "YAML",
+      "version": "1.0",
+      "humanAuthorization": true,
       "url": "https://service.agent-network-protocol.com/agents/lkcoffe/api/purchase-interface.yaml",
       "description": "A YAML file for interacting with the intelligent agent through purchase."
     }

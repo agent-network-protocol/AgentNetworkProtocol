@@ -1,42 +1,40 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "Product",
-  "@id": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/roasted-coconut-latte.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "Product",
+  "url": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/roasted-coconut-latte.json",
   "identifier": "rl-29ab8cf9",
   "name": "烤椰拿铁",
   "description": "135°C左右高温烘烤，独特椰子糖味道，适合冬季饮用。这款饮品结合了椰肉汁和烤椰粒，提供五个‘0’轻轻享的健康选择，使用大师级定制的Espresso，源自IIAC金奖咖啡豆。",
   "brand": {
-    "@type": "Brand",
+    "type": "Brand",
     "name": "瑞幸咖啡"
   },
   "additionalProperty": [
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Feature",
       "value": "椰肉汁 & 烤椰粒调配, 5个‘0’轻轻享（0乳糖、0植脂末、0蔗糖固体、0反式脂肪酸、0香精物加）, 大师级定制Espresso，源自IIAC金奖咖啡豆"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Slogan",
       "value": "冬季特饮 暖暖回归"
     },
     {
-      "@type": "PropertyValue",
+      "type": "PropertyValue",
       "name": "Additional Info",
       "value": "记忆中的椰子椰味道"
     }
   ],
   "offers": {
-    "@type": "Offer",
+    "type": "Offer",
     "price": "13",
     "priceCurrency": "CNY",
     "availability": "https://schema.org/InStock"
   },
   "nutrition": {
-    "@type": "NutritionInformation",
+    "type": "NutritionInformation",
     "calories": "150",
     "fatContent": "0g",
     "sugarContent": "0g",
@@ -47,33 +45,35 @@
   "ingredients": "椰奶，浓缩咖啡，烤椰糖浆",
   "category": "饮料",
   "sku": "LK-COCONUT-LATTE",
-  "image": {
-    "@type": "ImageObject",
-    "url": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/instruction.jpeg",
-    "caption": "烤椰拿铁 - 冬季特饮暖暖回归",
-    "description": "采用135°C高温烘烤工艺，完美融合椰肉汁和烤椰粒，搭配IIAC金奖咖啡豆制作的Espresso，带来独特的烤椰香与咖啡香的完美融合"
-  },
+  "image": [
+    {
+      "type": "ImageObject",
+      "url": "https://service.agent-network-protocol.com/agents/lkcoffe/roasted-coconut-latte/instruction.jpeg",
+      "caption": "烤椰拿铁 - 冬季特饮暖暖回归",
+      "description": "采用135°C高温烘烤工艺，完美融合椰肉汁和烤椰粒，搭配IIAC金奖咖啡豆制作的Espresso，带来独特的烤椰香与咖啡香的完美融合"
+    }
+  ],
   "audience": {
-    "@type": "Audience",
+    "type": "Audience",
     "audienceType": "咖啡爱好者",
     "geographicArea": "中国"
   },
   "manufacturer": {
-    "@type": "Organization",
+    "type": "Organization",
     "name": "瑞幸咖啡",
     "url": "https://luckincoffee.com"
   },
   "customizationOptions": {
-    "@type": "ad:CustomizationOptions",
+    "type": "CustomizationOptions",
     "options": [
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "温度",
         "isRequired": true,
         "value": ["冰", "热"]
       },
       {
-        "@type": "PropertyValue",
+        "type": "PropertyValue",
         "name": "糖度",
         "isRequired": true,
         "value": ["标准甜", "少甜", "微甜", "不另外加糖"]

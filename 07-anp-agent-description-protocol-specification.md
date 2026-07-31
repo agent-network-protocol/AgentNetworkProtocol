@@ -579,10 +579,6 @@ The following is an example of an interface description document conforming to t
 To be supplemented
 
 
-### JSON-LD Format
-
-
-
 ### Security Mechanism
 
 The Agent Description Protocol currently uses the did:wba method as its security mechanism. The did:wba method is a web-based Decentralized Identifier (DID) specification designed to meet the needs of cross-platform identity authentication and agent communication.

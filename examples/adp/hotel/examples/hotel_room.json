@@ -1,14 +1,13 @@
 {
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "ad": "https://service.agent-network-protocol.com/ad#"
-  },
-  "@type": "HotelRoom",
-  "@id": "https://service.agent-network-protocol.com/agents/hotel/examples/hotel_room.json",
+  "protocolType": "ANP",
+  "protocolVersion": "1.0.0",
+  "type": "Product",
+  "url": "https://service.agent-network-protocol.com/agents/hotel/examples/hotel_room.json",
   "identifier": "room-deluxe-001",
   "roomName": "豪华海景房",
   "name": "Deluxe Ocean View Room",
   "description": "Spacious deluxe room with breathtaking ocean views, featuring modern amenities and elegant design.",
+  "category": "Hotel Room",
   "useableArea": "45 square meters",
   "capacity": "3",
   "floor": "15-20",
@@ -16,144 +15,83 @@
   "windowType": "Floor-to-ceiling windows",
   "image": [
     {
-      "@type": "ImageObject",
+      "type": "ImageObject",
       "url": "https://service.agent-network-protocol.com/agents/hotel/examples/deluxe-room-1.jpg",
       "caption": "豪华海景房 - 全景",
       "description": "Luxurious room featuring floor-to-ceiling windows with panoramic ocean views"
     },
     {
-      "@type": "ImageObject",
+      "type": "ImageObject",
       "url": "https://service.agent-network-protocol.com/agents/hotel/examples/deluxe-room-2.jpg",
       "caption": "豪华海景房 - 卧室",
       "description": "Bedroom with king-size bed and premium bedding"
     }
   ],
-  "facilities": [
-    {
-      "@type": "LocationFeatureSpecification",
-      "name": "空调",
-      "value": true
+  "offers": {
+    "type": "Offer",
+    "identifier": "RP20250204001",
+    "name": "标准价",
+    "priceSpecification": {
+      "type": "UnitPriceSpecification",
+      "price": 1280.00,
+      "priceCurrency": "CNY",
+      "unitCode": "DAY",
+      "priceType": "https://schema.org/InvoicePrice",
+      "valueAddedTaxIncluded": true
     },
-    {
-      "@type": "LocationFeatureSpecification",
-      "name": "独立卫浴",
-      "value": true
+    "pricePerDay": [1280, 1280, 1280],
+    "stockPerDay": [5, 4, 3],
+    "paymentMethod": {
+      "type": "PaymentMethod",
+      "name": "Prepayment required"
     },
-    {
-      "@type": "LocationFeatureSpecification",
-      "name": "Mini吧",
-      "value": true
-    }
-  ],
-  "offers": [
-    {
-      "@type": "Offer",
-      "identifier": "RP20250204001",
-      "name": "标准价",
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": 1280.00,
-        "priceCurrency": "CNY",
-        "unitCode": "DAY",
-        "priceType": "https://schema.org/InvoicePrice",
-        "valueAddedTaxIncluded": true
-      },
-      "pricePerDay": [1280, 1280, 1280],
-      "stockPerDay": [5, 4, 3],
-      "paymentMethod": {
-        "@type": "PaymentMethod",
-        "name": "Prepayment required"
-      },
-      "instantConfirmation": true,
-      "addOn": {
-        "@type": "Offer",
-        "name": "Breakfast",
-        "description": "含2份免费早餐"
-      },
-      "priceValidUntil": "2025-12-31",
-      "eligibleCustomerType": "https://schema.org/Individual",
-      "availability": "https://schema.org/InStock",
-      "businessFunction": "http://purl.org/goodrelations/v1#LeaseOut",
-      "seller": {
-        "@type": "Hotel",
-        "name": "Sheraton Chuzhou Hotel"
-      },
-      "termsOfService": {
-        "@type": "TermsOfService",
-        "name": "限时取消",
-        "cancelationPolicy": {
-          "@type": "CancellationPolicy",
-          "refundType": "Full refund",
-          "description": "入住日18:00前可免费取消",
-          "validUntil": "2025-02-04T18:00:00Z"
-        }
-      }
+    "instantConfirmation": true,
+    "addOn": {
+      "type": "Offer",
+      "name": "Breakfast",
+      "description": "含2份免费早餐"
     },
-    {
-      "@type": "Offer",
-      "identifier": "RP20250204002",
-      "name": "无早价",
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": 1180.00,
-        "priceCurrency": "CNY",
-        "unitCode": "DAY",
-        "priceType": "https://schema.org/InvoicePrice",
-        "valueAddedTaxIncluded": true
-      },
-      "pricePerDay": [1180, 1180, 1180],
-      "stockPerDay": [5, 4, 3],
-      "paymentMethod": {
-        "@type": "PaymentMethod",
-        "name": "Prepayment required"
-      },
-      "instantConfirmation": true,
-      "addOn": {
-        "@type": "Offer",
-        "name": "Breakfast",
-        "description": "不含早餐"
-      },
-      "priceValidUntil": "2025-12-31",
-      "eligibleCustomerType": "https://schema.org/Individual",
-      "availability": "https://schema.org/InStock",
-      "businessFunction": "http://purl.org/goodrelations/v1#LeaseOut",
-      "seller": {
-        "@type": "Hotel",
-        "name": "Sheraton Chuzhou Hotel"
-      },
-      "termsOfService": {
-        "@type": "TermsOfService",
-        "name": "不可取消",
-        "cancelationPolicy": {
-          "@type": "CancellationPolicy",
-          "refundType": "No refund",
-          "description": "预订成功后不可变更或取消"
-        }
+    "priceValidUntil": "2025-12-31",
+    "eligibleCustomerType": "https://schema.org/Individual",
+    "availability": "https://schema.org/InStock",
+    "businessFunction": "http://purl.org/goodrelations/v1#LeaseOut",
+    "seller": {
+      "type": "Hotel",
+      "name": "Sheraton Chuzhou Hotel"
+    },
+    "termsOfService": {
+      "type": "TermsOfService",
+      "name": "限时取消",
+      "cancelationPolicy": {
+        "type": "CancellationPolicy",
+        "refundType": "Full refund",
+        "description": "入住日18:00前可免费取消",
+        "validUntil": "2025-02-04T18:00:00Z"
       }
     }
-  ],
+  },
   "amenityFeature": [
     {
-      "@type": "LocationFeatureSpecification",
+      "type": "LocationFeatureSpecification",
       "name": "Room Size",
       "value": "45 square meters"
     },
     {
-      "@type": "LocationFeatureSpecification",
+      "type": "LocationFeatureSpecification",
       "name": "View",
       "value": "Ocean View"
     },
     {
-      "@type": "LocationFeatureSpecification",
+      "type": "LocationFeatureSpecification",
       "name": "Bathroom",
       "value": "En-suite bathroom with separate shower and bathtub"
     }
   ],
   "containedInPlace": {
-    "@type": "Hotel",
+    "type": "Hotel",
     "name": "Sheraton Chuzhou Hotel",
     "address": {
-      "@type": "PostalAddress",
+      "type": "PostalAddress",
       "streetAddress": "No. 299 Qingliu North Road",
       "addressLocality": "Chuzhou",
       "addressRegion": "Anhui",

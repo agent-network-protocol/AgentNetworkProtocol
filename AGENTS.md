@@ -8,16 +8,17 @@
 - `blogs/` and `blogs/cn/` store long-form articles; `blogs/images/` holds blog assets.
 - `images/` and `standard/` provide shared figures and standards references.
 - `examples/` contains sample ADP assets and API interface YAMLs.
-- `scripts/` includes small Python utilities for repo maintenance.
+- `scripts/` includes dependency-free Python and JavaScript utilities for repo maintenance.
 
 ## Build, Test, and Development Commands
 
-This repository is documentation-first and does not have a build system or automated test suite.
+This repository is documentation-first and has focused tests for maintenance automation.
 
 - Run maintenance scripts with UV:
   - `uv run python scripts/add_copyright.py`
   - `uv run python scripts/rename_images.py`
   - `uv run python scripts/replace_spaces_with_hyphens.py`
+- Test contributor avatar automation with `node --test tests/update_contributors.test.js`.
 
 ## Coding Style & Naming Conventions
 
@@ -28,7 +29,7 @@ This repository is documentation-first and does not have a build system or autom
 
 ## Testing Guidelines
 
-- No automated tests are defined. For changes, manually verify:
+- Run the focused automated test when changing contributor synchronization. For documentation changes, manually verify:
   - Links resolve inside `README.md` and `docs/`.
   - Images referenced in Markdown exist under `images/` or `blogs/images/`.
 - Any code addition or modification must, in the same task, add or update the corresponding unit tests, system tests, and end-to-end (E2E) tests. Keep each test in its owning repository or harness; when a required test layer is owned by another repository, update that repository in the same task.

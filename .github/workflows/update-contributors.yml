@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: update-contributor-avatars
@@ -27,92 +28,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const startMarker = '<!-- contributors:start -->';
-            const endMarker = '<!-- contributors:end -->';
+            const { updateReadmes } = require('./scripts/update_contributors');
+            await updateReadmes({ github, context, core });
 
-            const contributorsById = new Map();
-            for (let page = 1; ; page += 1) {
-              const pageResponse = await github.request(
-                'GET /repos/{owner}/{repo}/contributors',
-                {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  per_page: 100,
-                  page,
-                },
-              );
-              if (pageResponse.status !== 200 || !Array.isArray(pageResponse.data)) {
-                core.setFailed(`Contributor page ${page} unavailable: HTTP ${pageResponse.status}`);
-                return;
-              }
-
-              for (const contributor of pageResponse.data) {
-                if (!contributor.login || contributor.type === 'Bot') continue;
-                contributorsById.set(contributor.id, {
-                  author: contributor,
-                  total: contributor.contributions ?? 0,
-                });
-              }
-              if (pageResponse.data.length < 100) break;
-            }
-
-            let statsResponse;
-            for (let attempt = 0; attempt < 6; attempt += 1) {
-              statsResponse = await github.request(
-                'GET /repos/{owner}/{repo}/stats/contributors',
-                {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                },
-              );
-              if (statsResponse.status === 200) break;
-              await new Promise((resolve) => setTimeout(resolve, 10000));
-            }
-
-            if (statsResponse.status !== 200 || !Array.isArray(statsResponse.data)) {
-              core.setFailed(`Contributor statistics unavailable: HTTP ${statsResponse.status}`);
-              return;
-            }
-
-            for (const contributor of statsResponse.data) {
-              if (!contributor.author || contributor.author.type === 'Bot') continue;
-              contributorsById.set(contributor.author.id, contributor);
-            }
-
-            const contributors = Array.from(contributorsById.values())
-              .sort((left, right) => {
-                if (right.total !== left.total) return right.total - left.total;
-                return left.author.login
-                  .toLowerCase()
-                  .localeCompare(right.author.login.toLowerCase());
-              });
-
-            const avatars = contributors
-              .map(({ author }) =>
-                `<a href="${author.html_url}"><img src="${author.avatar_url}" width="64" height="64" alt="@${author.login}" /></a>`,
-              )
-              .join('\n');
-
-            for (const file of ['README.md', 'README.cn.md']) {
-              const source = fs.readFileSync(file, 'utf8');
-              const start = source.indexOf(startMarker);
-              const end = source.indexOf(endMarker);
-              if (start < 0 || end < 0 || end <= start) {
-                core.setFailed(`Contributor markers are invalid in ${file}`);
-                return;
-              }
-
-              const updated =
-                source.slice(0, start + startMarker.length) +
-                `\n${avatars}\n` +
-                source.slice(end);
-              fs.writeFileSync(file, updated);
-            }
-
-            core.info(`Rendered ${contributors.length} contributor avatars`);
-
-      - name: Commit updated contributor avatars
+      - name: Open or update contributor pull request
+        env:
+          BRANCH: automation/update-contributor-avatars
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           if git diff --quiet -- README.md README.cn.md; then
@@ -120,8 +42,31 @@ jobs:
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md README.cn.md
-          git commit -m "docs: update contributor avatars"
-          git push
+          git fetch origin "$BRANCH:refs/remotes/origin/$BRANCH" || true
+          if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1 && \
+             git diff --quiet "origin/$BRANCH" -- README.md README.cn.md; then
+            echo "The contributor update branch is already up to date"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git switch --create "$BRANCH"
+            git add README.md README.cn.md
+            git commit -m "docs: update contributor avatars"
+            git push --force-with-lease origin "HEAD:$BRANCH"
+          fi
+
+          pull_request=$(gh pr list \
+            --base main \
+            --head "$BRANCH" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+          if [[ -z "$pull_request" ]]; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "docs: update contributor avatars" \
+              --body "Automatically synchronizes the README contributor avatars from GitHub contributor data."
+          else
+            echo "Updated contributor pull request #$pull_request"
+          fi

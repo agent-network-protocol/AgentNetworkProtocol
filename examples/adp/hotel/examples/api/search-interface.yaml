@@ -3,7 +3,7 @@ info:
   title: Hotel Room Search Interface
   version: "1.0.0"
   license:
-    name: MIT
+    name: Apache-2.0
     url: https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/LICENSE
   description: |
     This API allows searching for available hotel rooms based on check-in and check-out dates.
@@ -57,6 +57,11 @@ paths:
                     description: Hotel room data using the ANP Product document format
                     items:
                       $ref: '#/components/schemas/HotelRoom'
+                anyOf:
+                  - required:
+                      - urls
+                  - required:
+                      - data
         '400':
           description: The check-in or check-out date is missing or invalid.
 components:
@@ -140,8 +145,11 @@ components:
                 type: string
                 example: "空调"
               value:
-                type: boolean
-                example: true
+                oneOf:
+                  - type: boolean
+                  - type: string
+                  - type: number
+                example: "45 square meters"
         offers:
           type: object
           properties:

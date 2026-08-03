@@ -82,8 +82,9 @@ async function fetchContributors({github, context, core, delay = setTimeout}) {
     }
   } else {
     core.warning(
-      `Contributor statistics unavailable; using the contributor list only (HTTP ${statsResponse?.status ?? 'unknown'})`,
+      `Contributor statistics unavailable; leaving READMEs unchanged (HTTP ${statsResponse?.status ?? 'unknown'})`,
     );
+    return null;
   }
 
   return Array.from(contributorsById.values()).sort((left, right) => {
@@ -121,8 +122,16 @@ function renderContributorBlock(source, avatars, file) {
   );
 }
 
-async function updateReadmes({github, context, core, fileSystem = fs}) {
-  const contributors = await fetchContributors({github, context, core});
+async function updateReadmes({
+  github,
+  context,
+  core,
+  fileSystem = fs,
+  delay = setTimeout,
+}) {
+  const contributors = await fetchContributors({github, context, core, delay});
+  if (contributors === null) return;
+
   const avatars = renderAvatars(contributors);
 
   for (const file of README_FILES) {

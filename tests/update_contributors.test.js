@@ -61,7 +61,7 @@ test('fetchContributors merges statistics, excludes bots, and sorts deterministi
   assert.equal(requests.length, 2);
 });
 
-test('fetchContributors falls back when contributor statistics stay unavailable', async () => {
+test('fetchContributors skips updates when contributor statistics stay unavailable', async () => {
   const warnings = [];
   const github = {
     request: async (route) =>
@@ -77,9 +77,35 @@ test('fetchContributors falls back when contributor statistics stay unavailable'
     delay: (resolve) => resolve(),
   });
 
-  assert.equal(contributors.length, 1);
+  assert.equal(contributors, null);
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /HTTP 202/);
+});
+
+test('updateReadmes leaves existing avatars unchanged when statistics are unavailable', async () => {
+  let writeCount = 0;
+
+  await updateReadmes({
+    github: {
+      request: async (route) =>
+        route.includes('/stats/')
+          ? {status: 202, data: {}}
+          : {status: 200, data: [author(1, 'alpha', 2)]},
+    },
+    context: {repo: {owner: 'owner', repo: 'repo'}},
+    core: {info: () => {}, warning: () => {}},
+    delay: (resolve) => resolve(),
+    fileSystem: {
+      readFileSync: () => {
+        throw new Error('README should not be read');
+      },
+      writeFileSync: () => {
+        writeCount += 1;
+      },
+    },
+  });
+
+  assert.equal(writeCount, 0);
 });
 
 test('renderContributorBlock replaces exactly one marked block', () => {

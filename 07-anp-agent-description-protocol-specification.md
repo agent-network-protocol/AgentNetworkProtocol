@@ -633,6 +633,8 @@ When security appears at the top level of the AD document, it indicates that all
 
 If an interface requires human manual authorization when called, such as a purchase interface, the field humanAuthorization can be added to the interface definition. A value of true indicates that the interface call requires human manual authorization to access.
 
+`humanAuthorization` indicates an interface-level human-authorization requirement. It is not a DID verification relationship, an authorization credential, or proof that authorization has been completed. DID-based request authentication continues to use the verification methods referenced by `authentication` in [ANP-03](/03-did-wba-method-design-specification.md). How human authorization is obtained or evidenced is outside the scope of this field and is determined by the applicable business protocol and authorization policies.
+
 ### Proof (Integrity Verification)
 
 To prevent AD documents from being maliciously tampered with, forged, or replayed, we have added verification information Proof to the AD document. The Proof definition can refer to the specification: [https://www.w3.org/TR/vc-data-integrity/#defn-domain](https://www.w3.org/TR/vc-data-integrity/#defn-domain).

@@ -260,21 +260,27 @@ This section systematically explains ANP's security and privacy design from thre
 
 ### 4.1 Distinction Between Human Authorization and Agent Authorization
 
-To ensure human control over sensitive operations, ANP introduces a dedicated verification method called `humanAuthorization` in DID documents.  
-- **Low-risk operations** (such as querying public information, browsing data) allow agents to authorize automatically using their autonomous keys without human intervention.  
-- **High-risk operations** (such as fund transfers, important data submissions, privacy information disclosure) must be explicitly authorized by human users.
+To keep sensitive operations under human control, ANP separates identity authentication from operation authorization. As specified by [ANP-03 v1.1](/03-did-wba-method-design-specification.md), a `did:wba` DID Document declares verification methods that can be used for `authentication`; it does not define a dedicated `humanAuthorization` verification relationship.
 
-When executing high-risk requests, user agents must sign using the `humanAuthorization` method. This process requires agents to first initiate an authorization request to the human user, and only after explicit confirmation by the user (for example, through biometric verification, password verification, or hardware security module confirmation) can they call the private key bound to that method for signing and submission.
+- **Low-risk operations** (such as querying public information or browsing data) may be initiated automatically by agents when permitted by the local authorization policy.
+- **High-risk operations** (such as fund transfers, important data submissions, or private information disclosure) may require explicit human authorization before the operation proceeds.
 
-This mechanism effectively ensures that **the final step of important decision operations must be driven by human will**, preventing agents from being misused or executing high-risk instructions without awareness.
+The human-authorization requirement is expressed above the DID layer:
+
+- In [ANP-07](/07-anp-agent-description-protocol-specification.md), `humanAuthorization: true` on an interface declares that calling the interface requires human authorization.
+- In the draft [ANP-06](/06-anp-agent-communication-meta-protocol-specification.md), `requiresHumanAuthorization: true` is a negotiation constraint and does not mean that human authorization has been completed.
+
+When human authorization is required, the user agent should first complete the confirmation process defined by the applicable authorization policy, and then sign and initiate the request with an `authentication` key allowed by that policy. The server verifies whether the request satisfies the agreed higher-level authorization policy. A request signature produced with an `authentication` verification method does not, by itself, prove that a human authorized the operation.
+
+This separation keeps identity proof distinct from operation authorization and allows higher-layer policies to require human control for sensitive actions. ANP-03 does not define how human authorization is obtained or evidenced; those details are defined by the applicable business protocol and authorization policies.
 
 ### 4.2 Private Key Management and Permission Isolation
 
-Agent developers need to implement strict permission isolation and security management for various keys, especially the `humanAuthorization` key, including but not limited to:
+Agent developers need to implement strict permission isolation and security management for `authentication` keys used in high-risk operations, including but not limited to:
 
-- **Hierarchical management**: Separate ordinary request keys from highly sensitive keys, managing and using them separately.
+- **Risk-based management**: Classify `authentication` keys according to the operations for which policy permits their use, and apply controls appropriate to the associated risk.
 - **Local encrypted storage**: Private keys should be stored in securely encrypted local devices (such as TEE, HSM) or protected key management systems.
-- **Dynamic verification**: Accessing highly sensitive private keys requires additional dynamic verification (such as fingerprint, facial recognition, one-time passwords).
+- **Additional confirmation**: When required by the applicable policy, obtain additional confirmation (such as fingerprint, facial recognition, one-time passwords, or secure hardware approval) before an `authentication` key is used for a high-risk operation.
 - **Operation logging**: Complete operation logs should be recorded for each sensitive signing operation to facilitate post-event auditing and tracking.
 
 These mechanisms maximize protection against risks of key leakage, theft, or misuse.

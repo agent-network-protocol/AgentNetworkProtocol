@@ -800,10 +800,12 @@ For requests that are not very important, the user agent can automatically autho
 
 For important requests, such as booking a hotel room, the hotel agent may require manual confirmation from a human. However, the semantics of "whether human confirmation is required" belong to an upper-layer authorization policy, not to an independent field in the DID Document. The `did:wba` DID Document only declares the verification methods that can be used for `authentication` and no longer defines the `humanAuthorization` field.
 
-The agent can define the authorization type of the document or interface in the agent description document. By default, all ordinary authorizations are sufficient. If a request requires manual authorization by a human, this should be clearly defined in the documentation, for example:
+An Agent Description can declare that an interface requires human authorization, while the applicable business protocol can define the requirement for a specific operation. The vocabulary used to express this requirement is defined at those upper layers. The following labels are non-normative examples of an application-defined policy vocabulary:
 
 - `authorizationLevel: normal`
 - `authorizationLevel: user-presence-required`
+
+ANP-03 defines neither the `authorizationLevel` field nor these values. The current [ANP-07 Agent Description Protocol](/07-anp-agent-description-protocol-specification.md) declares the interface-level requirement with `humanAuthorization: true`. The draft [ANP-06 meta-protocol](/06-anp-agent-communication-meta-protocol-specification.md) can carry `requiresHumanAuthorization: true` as a negotiation constraint, but this does not prove that authorization has been completed.
 
 When a request requires manual human authorization, the user agent should first complete the corresponding confirmation process locally (such as click confirmation, biometrics, secure hardware approval, etc.), and then use the `authentication` key allowed by the policy to sign and initiate the request.
 

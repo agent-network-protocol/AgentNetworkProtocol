@@ -91,8 +91,9 @@ DID 文档的存放位置取决于 DID 的形式：
 
 可选字段：
 - **keyAgreement**：用于密钥协商的公钥信息
-- **humanAuthorization**：用于人类授权的公钥信息
 - **service**：与 DID 关联的服务列表，如智能体描述服务
+
+> 注意：根据 [ANP-03 v1.1](/chinese/03-did-wba方法规范.md)，`did:wba` DID 文档不定义 `humanAuthorization` 验证关系。接口级的人类授权要求由 [ANP-07](/chinese/07-ANP-智能体描述协议规范.md) 中的 `humanAuthorization` 字段声明；基于 DID 的请求认证仍使用由 `authentication` 引用的验证方法。具体操作如何取得或证明人类授权，由适用的业务协议和授权策略定义。
 
 ### 解析 DID:WBA
 

@@ -633,6 +633,8 @@ AD中的安全配置是必需的。必须通过智能体级别的security成员�
 
 如果一个接口在调用的时候，必须经过人类的手动授权，比如购买接口。这个时候可以在接口定义中添加字段humanAuthorization。true表示接口调用需要经过人类的手动授权才能够访问。
 
+`humanAuthorization` 用于声明接口级的人类授权要求。它不是 DID 验证关系或授权凭证，也不能证明授权已经完成。基于 DID 的请求认证仍使用 [ANP-03](/chinese/03-did-wba方法规范.md) 中由 `authentication` 引用的验证方法。如何取得或证明人类授权不属于该字段的定义范围，应由适用的业务协议和授权策略确定。
+
 ### Proof（完整性校验）
 
 为了防止AD文档被恶意篡改、假冒或重复使用，我们在AD文档中增加了校验信息Proof。Proof定义可以参考规范：[https://www.w3.org/TR/vc-data-integrity/#defn-domain](https://www.w3.org/TR/vc-data-integrity/#defn-domain)。

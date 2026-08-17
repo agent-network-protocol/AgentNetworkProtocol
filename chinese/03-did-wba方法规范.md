@@ -801,10 +801,12 @@ sequenceDiagram
 
 对于重要的请求，比如要预定酒店房间，这个时候酒店智能体可能需要人类的手动确认。但“是否需要人类确认”的语义属于上层授权策略，而不是 DID Document 的独立字段。did:wba DID 文档只声明可以用于 `authentication` 的验证方法，不再定义 `humanAuthorization` 字段。
 
-智能体可以在智能体描述文档中，定义文档或接口的授权类型，默认情况下所有普通授权即可。如果请求需要人类手动授权，应在文档中明确定义，例如：
+智能体描述文档可以声明某个接口需要人类授权，而适用的业务协议可以定义特定操作的授权要求。用于表达这一要求的词汇由这些上层协议定义。以下标签仅是应用自定义策略词汇的非规范性示例：
 
 - `authorizationLevel: normal`
 - `authorizationLevel: user-presence-required`
+
+ANP-03 既不定义 `authorizationLevel` 字段，也不定义这些取值。当前 [ANP-07 智能体描述协议](/chinese/07-ANP-智能体描述协议规范.md) 使用 `humanAuthorization: true` 声明接口级要求。草案 [ANP-06 元协议](/chinese/06-ANP-智能体通信元协议规范.md) 可以在协商中携带 `requiresHumanAuthorization: true` 约束，但这不能证明授权已经完成。
 
 当请求需要人类手动授权时，用户智能体应先在本地完成相应的确认流程（如点击确认、生物识别、安全硬件批准等），然后再使用被该策略允许的 `authentication` 密钥进行签名并发起请求。
 

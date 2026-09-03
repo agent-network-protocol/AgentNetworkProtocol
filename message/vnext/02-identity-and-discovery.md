@@ -690,10 +690,10 @@ A transition result **MUST** preserve its actual assurance:
 
 - `verified`: the old DID's bound root key signs the deactivation and successor relationship;
 - `recovery_verified`: a recovery key that was authorized in a previously trusted old document establishes the transition;
-- `provider_asserted`: a did:wba Provider supplies a `providerTransitionAssertion` that verifies under Section 2.5.6 of Specification 03, but there is no proof from the old binding key or a pre-authorized recovery key. TLS, `successorDid`, a Handle, or a 409 hint alone does not reach this level;
+- `provider_asserted`: there is no proof from the old binding key or a pre-authorized recovery key, but either authenticated same-origin HTTPS resolution verifies the complete direct-successor chain through a proof-valid active DID, or the identity Provider supplies the predecessor-to-successor fact through a separately authenticated recovery/transition authority channel. An isolated `successorDid`, a Handle/WNS mapping, a standalone unsigned hop, or a 409 hint alone does not reach this level;
 - `unverified`: no accepted continuity evidence exists.
 
-The transition resolver and verification layer **MUST NOT** itself merge identities or make a high-trust business authorization decision from `provider_asserted`; it reports that assurance unchanged to the owning business layer. Any automated inheritance based on `provider_asserted` occurs only because that business system has an explicit policy accepting the provider-compromise and account-recovery tradeoff, not because the assertion was upgraded to cryptographic continuity.
+The transition resolver reports `provider_asserted` only after authenticated complete-chain resolution succeeds; a separately authenticated Provider authority channel is evaluated by the owning business system. Neither source upgrades the result to binding-key or recovery-key cryptographic continuity. The owning business system decides which relationships and authorizations the result may inherit.
 
 An owning business Profile **MUST NOT** treat `provider_asserted` as `verified` or `recovery_verified`. It also **MUST NOT** fail solely because the assurance is `provider_asserted`: the owning business system decides whether that assurance is sufficient and which business relationships or authorizations to inherit. `unverified` does not establish transition continuity.
 

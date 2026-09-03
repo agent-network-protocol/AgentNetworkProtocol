@@ -394,7 +394,7 @@ The following steps must be performed to parse a DID Document from a `did:wba` D
   - If the document also contains `successorDid`, the verifier MUST verify that the old and new DIDs have the same stable subject path;
   - If the document-wide `proof` was signed by the original binding key, the migration may be treated as verified;
   - If the document-wide `proof` was signed by a pre-authorized recovery key, the migration may be treated as recovery-verified only if the verifier already holds a trusted DID Document from before deactivation and can confirm that the trusted document pre-authorized the recovery key in `assertionMethod`;
-  - If no valid `proof` is present, a client MAY read `successorDid` as an unverified migration hint, but MUST NOT use it to merge identities automatically or make a high-assurance authorization decision. The hop can be reported as `provider_asserted` only when a `providerTransitionAssertion` is also present and passes Section 2.5.6.
+  - If no top-level `proof` is present, a standalone hop verifier MAY read `successorDid` as an `unverified` migration hint. A resolver that obtained every document through authenticated same-origin HTTPS, verified every direct hop, and reached a final active `e1_` DID with a valid binding proof MAY report the unsigned hop as `provider_asserted`. An isolated `successorDid` or document supplied without that authenticated complete-chain context remains `unverified`.
 - When performing DNS resolution during an HTTP GET request, clients should use [[RFC8484](https://w3c-ccg.github.io/did-method-web/#bib-rfc8484)] to prevent tracking of the identity being resolved.
 - For an active `e1_` DID, the above proof verification is not affected by a local policy switch and is a necessary condition for successful parsing.
 - For other profiles, if the local policy enables DID Document proof verification and the document contains `proof`, it should be verified according to the corresponding profile rules.
@@ -434,7 +434,7 @@ For a path-type did:wba that has been superseded by a new DID because of binding
 
 #### 2.5.5 DID Document proof
 
-Whether the top-level `proof` field appears in a `did:wba` DID Document depends on the profile and document state. For an active document using the default `e1_` profile, `proof` is required. A deactivated `e1_` transition document with `successorDid` follows the binding, recovery, provider-asserted, and unverified branches defined below, so its top-level `proof` MAY be absent. For other profiles, the DID Document MAY contain a top-level `proof` field to provide proof of document integrity. This field is used to prove that the DID Document has not been tampered with after the proof was generated and indicates that the signer controlled the corresponding private key when the proof was created. Proof itself does not replace DID method parsing, nor does it replace the `id` consistency check on its own.
+Whether the top-level `proof` field appears in a `did:wba` DID Document depends on the profile and document state. For an active document using the default `e1_` profile, `proof` is required. A deactivated `e1_` transition document with `successorDid` follows the binding, recovery, authenticated-Provider, and unverified branches defined below, so its top-level `proof` MAY be absent. For other profiles, the DID Document MAY contain a top-level `proof` field to provide proof of document integrity. This field is used to prove that the DID Document has not been tampered with after the proof was generated and indicates that the signer controlled the corresponding private key when the proof was created. Proof itself does not replace DID method parsing, nor does it replace the `id` consistency check on its own.
 
 For the default `e1_` profile, the `proof` profile defined by the master specification MUST conform to:
 
@@ -467,7 +467,14 @@ For an old DID Document that sets `deactivated = true` and `successorDid`, the t
 - When signed by the old DID's binding key, the result provides strong cryptographic continuity;
 - When signed by a recovery key that the old DID authorized through `assertionMethod` before deactivation, the verifier MUST confirm that prior authorization from a previously trusted state;
 - If a top-level `proof` is present, it MUST verify as either an old-binding proof or a pre-authorized recovery proof. A malformed, unauthorized, or cryptographically invalid proof MUST invalidate the transition and MUST NOT be downgraded to a provider assertion or an unverified hint;
-- When neither the old private key nor a pre-authorized recovery key is available, the top-level `proof` MAY be absent and the document MAY retain an unverified `successorDid` hint. A verifier may report `provider_asserted` only when the signed object in Section 2.5.6 verifies successfully; without that object it MUST report `unverified`.
+- When neither the old private key nor a pre-authorized recovery key is available, the top-level `proof` MAY be absent. A standalone hop verifier MUST report that hop as `unverified`. A complete-chain resolver MAY report it as `provider_asserted` only after obtaining the predecessor and every successor through authenticated same-origin HTTPS, verifying the stable subject path and direct-successor relationship at every hop, and reaching a final active `e1_` DID whose binding proof verifies. A failed or incomplete chain MUST NOT produce `provider_asserted`.
+
+Transition assurance has exactly the following meanings:
+
+- `verified`: the predecessor's original binding key signs the document-wide deactivation and direct-successor relationship;
+- `recovery_verified`: a recovery key pre-authorized by `assertionMethod` in a trusted pre-deactivation document signs that relationship;
+- `provider_asserted`: either an authenticated same-origin HTTPS Provider resolution completes the entire structurally valid chain to a proof-valid active DID, or the identity Provider supplies the same predecessor-to-successor fact through a separately authenticated recovery/transition authority channel. This assurance is not a DID Document property and MUST NOT be promoted to `verified` or `recovery_verified`;
+- `unverified`: only an isolated `successorDid`, `alsoKnownAs`, Handle/WNS mapping, HTTP 409 hint, standalone unsigned hop, incomplete chain, or document without authenticated Provider provenance is available.
 
 For non-`e1_` profiles, implementations MAY choose one of the following two modes according to the corresponding profile rules or local policy:
 
@@ -476,43 +483,6 @@ For non-`e1_` profiles, implementations MAY choose one of the following two mode
 **Normative Note**:
 
 For DIDs using the `e1_` profile, this specification requires that the top-level `proof` of the DID Document use the W3C standard Data Integrity proof mechanism. Its proof data model, proof configuration, document transformation, hashing, proof serialization and verification rules follow [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) and [Data Integrity EdDSA Cryptosuites v1.0](https://www.w3.org/TR/vc-di-eddsa/) respectively. This specification only restricts the use location, field requirements and verification relationship of proof in the did:wba scenario, and does not repeatedly define the underlying cryptographic algorithm; if a conflict occurs, the upstream W3C specification shall prevail.
-
-#### 2.5.6 Provider transition assertion
-
-When neither the predecessor binding private key nor a pre-authorized recovery key is available, the did:wba Provider MAY add a method-level `providerTransitionAssertion` to that predecessor's deactivated DID Document. Its only standard shape is:
-
-```json
-{
-  "type": "DidWbaProviderTransitionAssertion",
-  "providerDid": "did:wba:example.com",
-  "predecessorDid": "did:wba:example.com:users:alice:e1_<old>",
-  "successorDid": "did:wba:example.com:users:alice:e1_<new>",
-  "stableSubjectPath": "example.com:users:alice",
-  "issuedAt": "2026-08-25T00:00:00Z",
-  "proof": {
-    "type": "DataIntegrityProof",
-    "cryptosuite": "eddsa-jcs-2022",
-    "verificationMethod": "did:wba:example.com#provider-assertion-key",
-    "proofPurpose": "assertionMethod",
-    "created": "2026-08-25T00:00:00Z",
-    "proofValue": "z..."
-  }
-}
-```
-
-A verifier MUST perform all of the following checks:
-
-1. The object MUST contain exactly the fields shown above. The complete object after removing its `proof` member is the protected document and is verified using UTF-8 RFC 8785 JCS and `eddsa-jcs-2022`;
-2. `predecessorDid` MUST equal the containing deactivated document's `id`, and `successorDid` MUST equal that document's top-level `successorDid`;
-3. The predecessor and successor MUST both be path-based `e1_` did:wba DIDs, and their canonical stable subject paths MUST be equal to each other and to `stableSubjectPath`;
-4. `providerDid` MUST be the bare-domain did:wba DID constructed from the same host and explicit port as the predecessor's HTTPS origin;
-5. `proof.verificationMethod` MUST belong to `providerDid`, exist in that Provider DID Document, and be authorized by its `assertionMethod`;
-6. `proof.created` MUST equal `issuedAt`, and both values MUST use canonical RFC 3339 UTC representation;
-7. A missing or invalid proof, an unknown field, a cross-origin Provider, or any binding mismatch MUST make the transition invalid; the object MUST NOT be downgraded into a valid hint.
-
-On successful verification, the hop's assurance is exactly `provider_asserted`. It proves only that the Provider signed a statement binding the specified predecessor, direct successor, and stable subject path. It does not prove binding-key or recovery-key cryptographic continuity and MUST NOT be promoted to `verified` or `recovery_verified`.
-
-With only a TLS-protected `successorDid`, WNS/Handle, `alsoKnownAs`, a matching stable subject path, or a 409 `currentDid`, the assurance remains `unverified`. When a hop carries more than one kind of evidence, a verifier MUST first reject any evidence that is present but malformed or cryptographically invalid. If every present item is valid, it reports the strongest result in the order `verified`, `recovery_verified`, `provider_asserted`, `unverified`; a weaker result cannot hide an invalid proof.
 
 ### 2.6 Security and Privacy Considerations
 

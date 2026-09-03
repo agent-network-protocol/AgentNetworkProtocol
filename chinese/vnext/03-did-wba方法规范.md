@@ -395,7 +395,7 @@ did:wba:example.com%3A3000:user:alice:e1_<fingerprint>
   - 若文档同时包含 `successorDid`，验证者必须（MUST）验证新旧 DID 的稳定主体路径相同；
   - 若整体 `proof` 由原绑定密钥签署，则该迁移可以被视为已验证；
   - 若整体 `proof` 由预授权恢复密钥签署，只有在验证者已持有停用前的可信 DID Document，并能确认该恢复密钥已在该可信文档的 `assertionMethod` 中被预先授权时，才可以将该迁移视为恢复验证通过；
-  - 缺少有效 `proof` 时，客户端可以（MAY）读取 `successorDid` 作为未验证迁移提示，但不得（MUST NOT）据此自动合并身份或作出高信任授权决定；只有同时存在并通过 2.5.6 节验证的 `providerTransitionAssertion` 时，才可以把该 hop 报告为 `provider_asserted`。
+  - 缺少顶层 `proof` 时，standalone hop 验证器可以（MAY）读取 `successorDid` 作为 `unverified` 迁移提示。resolver 只有通过已认证的同源 HTTPS 获取每份文档、验证每个直接 hop，并最终到达 binding proof 有效的 active `e1_` DID 后，才可以（MAY）把无签名 hop 报告为 `provider_asserted`。孤立的 `successorDid`，或缺少上述已认证完整链上下文的文档，仍为 `unverified`。
 - 在HTTP GET请求期间执行DNS解析时，客户端应使用[[RFC8484](https://w3c-ccg.github.io/did-method-web/#bib-rfc8484)]以防止跟踪正在解析的身份。
 - 对活动 `e1_` DID，上述 proof 校验不受本地策略开关影响，而是解析成功的必要条件。
 - 对其他 profile，如果本地策略启用了 DID Document proof 校验，且文档包含 `proof`，则应按对应 profile 规则进行校验。
@@ -435,7 +435,7 @@ did:wba:example.com%3A3000:user:alice:e1_<fingerprint>
 
 #### 2.5.5 DID Document proof
 
-did:wba DID Document 的顶层 `proof` 字段是否出现，取决于所采用的 profile 和文档状态。对于使用默认 `e1_` profile 的活动文档，`proof` 是必须字段。设置了 `successorDid` 的已停用 `e1_` transition 文档按下文定义的 binding、recovery、provider-asserted 和 unverified 分支处理，因此其顶层 `proof` 可以（MAY）缺失。对于其他 profile，DID Document 可以（MAY）包含顶层 `proof` 字段，用于提供文档完整性证明。该字段用于证明 DID Document 在生成 proof 之后未被篡改，并表明 proof 创建时签名者控制了对应私钥。proof 本身不单独替代 DID method 解析过程，也不单独替代 `id` 一致性检查。
+did:wba DID Document 的顶层 `proof` 字段是否出现，取决于所采用的 profile 和文档状态。对于使用默认 `e1_` profile 的活动文档，`proof` 是必须字段。设置了 `successorDid` 的已停用 `e1_` transition 文档按下文定义的 binding、recovery、已认证 Provider 和 unverified 分支处理，因此其顶层 `proof` 可以（MAY）缺失。对于其他 profile，DID Document 可以（MAY）包含顶层 `proof` 字段，用于提供文档完整性证明。该字段用于证明 DID Document 在生成 proof 之后未被篡改，并表明 proof 创建时签名者控制了对应私钥。proof 本身不单独替代 DID method 解析过程，也不单独替代 `id` 一致性检查。
 
 对于默认 `e1_` profile，主规范定义的 `proof` profile 必须（MUST）符合：
 
@@ -468,7 +468,14 @@ did:wba DID Document 的顶层 `proof` 字段是否出现，取决于所采用�
 - 由旧 DID 绑定密钥签署时，验证结果为强密码学连续性；
 - 由旧 DID 在停用前已通过 `assertionMethod` 授权的恢复密钥签署时，验证者必须（MUST）依据此前可信状态确认该预授权关系；
 - 如果顶层 `proof` 存在，它必须（MUST）验证为旧 binding proof 或预授权 recovery proof。格式错误、未授权或密码学验证失败的 proof 必须（MUST）使 transition 失效，且不得（MUST NOT）降级为 provider assertion 或 unverified hint；
-- 当旧私钥和预授权恢复密钥均不可用时，顶层 `proof` 可以（MAY）缺失，文档可以（MAY）保留未验证的 `successorDid` 提示。只有 2.5.6 节的签名对象验证成功时，验证者才可以向上层报告 `provider_asserted`；没有该对象时必须（MUST）报告 `unverified`。
+- 当旧私钥和预授权恢复密钥均不可用时，顶层 `proof` 可以（MAY）缺失。standalone hop 验证器必须（MUST）将该 hop 报告为 `unverified`。完整链 resolver 只有通过已认证的同源 HTTPS 获取 predecessor 和每个 successor、逐 hop 验证稳定主体路径与直接后继关系，并最终到达 binding proof 有效的 active `e1_` DID 后，才可以（MAY）报告 `provider_asserted`。失败或不完整的链不得（MUST NOT）产生 `provider_asserted`。
+
+迁移 assurance 只有以下四种含义：
+
+- `verified`：predecessor 原 binding key 对覆盖停用和直接后继关系的整体文档签名；
+- `recovery_verified`：停用前可信文档通过 `assertionMethod` 预授权的 recovery key 对该关系签名；
+- `provider_asserted`：已认证的同源 HTTPS Provider 解析完整、结构有效的迁移链并到达 proof 有效的 active DID，或身份 Provider 通过独立认证的 recovery/transition 权威通道提供同一 predecessor→successor 事实。该 assurance 不是 DID Document 属性，且不得（MUST NOT）提升为 `verified` 或 `recovery_verified`；
+- `unverified`：只有孤立的 `successorDid`、`alsoKnownAs`、Handle/WNS 映射、HTTP 409 hint、standalone 无签名 hop、不完整链，或没有已认证 Provider 来源的文档。
 
 对于非 `e1_` profile，实现可以（MAY）按对应 profile 规则或本地策略在以下两种模式中选择其一：
 
@@ -477,43 +484,6 @@ did:wba DID Document 的顶层 `proof` 字段是否出现，取决于所采用�
 **规范性说明**：
 
 对于采用 `e1_` profile 的 DID，本规范要求 DID Document 的顶层 `proof` 使用 W3C 标准的 Data Integrity proof 机制。其 proof 数据模型、proof configuration、document transformation、hashing、proof serialization 以及 verification 规则，分别遵循 [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) 和 [Data Integrity EdDSA Cryptosuites v1.0](https://www.w3.org/TR/vc-di-eddsa/)。本规范仅约束 did:wba 场景下 proof 的使用位置、字段要求与验证关系，不重复定义底层密码学算法；若出现冲突，以上游 W3C 规范为准。
-
-#### 2.5.6 Provider transition assertion
-
-当 predecessor 的原绑定私钥和预授权 recovery key 均不可用时，did:wba Provider 可以（MAY）在该 predecessor 的停用 DID Document 中加入方法级 `providerTransitionAssertion`。该对象的唯一标准形状为：
-
-```json
-{
-  "type": "DidWbaProviderTransitionAssertion",
-  "providerDid": "did:wba:example.com",
-  "predecessorDid": "did:wba:example.com:users:alice:e1_<old>",
-  "successorDid": "did:wba:example.com:users:alice:e1_<new>",
-  "stableSubjectPath": "example.com:users:alice",
-  "issuedAt": "2026-08-25T00:00:00Z",
-  "proof": {
-    "type": "DataIntegrityProof",
-    "cryptosuite": "eddsa-jcs-2022",
-    "verificationMethod": "did:wba:example.com#provider-assertion-key",
-    "proofPurpose": "assertionMethod",
-    "created": "2026-08-25T00:00:00Z",
-    "proofValue": "z..."
-  }
-}
-```
-
-验证者必须（MUST）执行以下检查：
-
-1. 对象必须（MUST）且只能包含示例中的字段；移除对象内 `proof` 后的完整对象是 protected document，并按 UTF-8 RFC 8785 JCS 和 `eddsa-jcs-2022` 验签；
-2. `predecessorDid` 必须（MUST）等于承载该对象的停用文档 `id`，`successorDid` 必须（MUST）等于该文档顶层 `successorDid`；
-3. predecessor 与 successor 必须（MUST）都是路径型 `e1_` did:wba，其规范 stable subject path 必须相同并等于 `stableSubjectPath`；
-4. `providerDid` 必须（MUST）是由 predecessor HTTPS origin 的同一 host 和显式 port 构造的裸域名 did:wba DID；
-5. `proof.verificationMethod` 必须（MUST）属于 `providerDid`，存在于该 Provider DID Document 中，并由其 `assertionMethod` 授权；
-6. `proof.created` 必须（MUST）等于 `issuedAt`，两者必须使用规范 RFC 3339 UTC 表示；
-7. proof 缺失/无效、未知字段、跨 origin Provider 或任一绑定不一致时，必须（MUST）将 transition 判为无效，不得把该对象降级成有效提示。
-
-验证成功时，该 hop 的 assurance 精确为 `provider_asserted`。它只证明 Provider 对指定 predecessor、直接 successor 和 stable subject path 作出签名声明，不证明旧 binding key 或 recovery key 的密码学连续性，因此不得（MUST NOT）提升为 `verified` 或 `recovery_verified`。
-
-仅有 TLS 保护下返回的 `successorDid`、WNS/Handle、`alsoKnownAs`、相同 stable subject path 或 409 `currentDid` 时，assurance 仍为 `unverified`。如果同一 hop 同时存在多种证据，验证者必须先拒绝任何已出现但格式或签名无效的证据；全部已出现证据均有效时，按 `verified`、`recovery_verified`、`provider_asserted`、`unverified` 的顺序报告最强结果，不能用较弱结果掩盖无效 proof。
 
 ### 2.6 安全和隐私注意事项
 

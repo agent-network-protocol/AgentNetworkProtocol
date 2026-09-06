@@ -1,5 +1,12 @@
 # Repository Guidelines
 
+## Shared rules
+
+Engineering work follows [AI Coding Rules](../../awiki-harness/rules/ai-coding-rules.md).
+Behavior changes and verification follow the relevant [Verification Policy](../../awiki-harness/rules/verification-policy.md)
+sections; production behavior needs owning unit coverage and applicable System/product E2E review.
+If Harness is absent, use local docs/tests/CI and disclose missing acceptance evidence.
+
 ## Project Structure & Module Organization
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
@@ -38,7 +45,6 @@ This repository is documentation-first and has focused tests for maintenance aut
 - Run the focused automated test when changing contributor synchronization. For documentation changes, manually verify:
   - Links resolve inside `README.md` and `docs/`.
   - Images referenced in Markdown exist under `images/` or `blogs/images/`.
-- Any code behavior change must add or update its focused unit/maintenance test in the same task, or identify the existing exact test and record the result. Before completion, review the corresponding `../../awiki-system-test` suite and case catalog; update it when protocol success, relevant failure, interoperability, persistence/cleanup, or regression coverage is incomplete, and record the reason when no System Test applies. Product E2E is owned only by `../../awiki-me/tests/e2e/`; this repository does not add or require repository-local E2E tests.
 
 ## Commit & Pull Request Guidelines
 

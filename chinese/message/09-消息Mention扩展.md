@@ -2,14 +2,16 @@
 
 - Document ID: ANP-P9
 - Title: Message Mentions Extension
-- Status: draft
-- Version: 1.1
+- Status: Released
+- Version: 1.2
+- Specification Set: ANP Messaging 1.2
 - Language: Chinese
-- Applicability: 本 Profile 定义 ANP 群消息中的 mention 应用载荷扩展，用于同时表达人类可读和机器可读的 mention。它适用于 `anp.group.base.v1` 和 `anp.group.e2ee.v1` 中承载结构化 JSON 应用载荷的场景。
+- Binding Version: v1 扩展；不定义独立的 `meta.profile`
+- Applicability: 本 Profile 定义 ANP 群消息中的 mention 应用载荷扩展，用于同时表达人类可读和机器可读的 mention。在本 Messaging 1.2 规范集中，它与 `anp.group.base.v2`、`anp.group.e2ee.v2` 组合，并用于承载结构化 JSON 应用载荷的场景。
 - Dependencies:
   - `anp.core.binding.v1`
-  - 使用非 E2EE 群消息时依赖 `anp.group.base.v1`
-  - 使用群 E2EE 消息时依赖 `anp.group.e2ee.v1`
+  - 使用非 E2EE 群消息时依赖 `anp.group.base.v2`
+  - 使用群 E2EE 消息时依赖 `anp.group.e2ee.v2`
 
 ---
 
@@ -55,6 +57,8 @@ Mention 是一个结构化应用层对象，用于把人类可见的界面表达
 
 ---
 
+本 Profile 适用于 `did:wba`、`did:web` 及其他已支持的 DID 方法；身份解析与验证遵循 [P2](02-身份与发现.md#method-validation)。
+
 ## 2. 术语和规范性约定
 
 ### 2.1 规范性关键词
@@ -69,7 +73,7 @@ Mention 是一个结构化应用层对象，用于把人类可见的界面表达
 - **Mention Target**：mention 的机器可读目标。它可以是 human DID、agent DID 或群选择器。
 - **Group Selector Mention**：目标为群范围选择器的 mention，例如 `all`、`agents` 或 `humans`。
 - **Terminal-side Validation**：接收客户端、用户代理或 Agent runtime 在收到或解密应用载荷之后执行的本地校验和处理。该术语不引入设备级或终端级协议身份。
-- **Group Host Service**：`anp.group.base.v1` 中定义的群服务。在本 Profile 中，它不校验 mention 语义。
+- **Group Host Service**：`anp.group.base.v2` 中定义的群服务。在本 Profile 中，它不校验 mention 语义。
 
 ---
 
@@ -148,6 +152,18 @@ member
 
 本 Profile 的 group selector 是 mention target，不是授权角色。
 
+### 3.6 Mention target 不是设备 target
+
+单目标 Mention 标识一个 human 或 Agent DID，group-selector Mention 标识一组 P4 业务成员。两种形式都不标识设备或 MLS Leaf。同一 DID 下的多个设备或 Leaf 仍是一个 Mention 主体。
+
+P6 独占拥有承载 Group E2EE 消息中的发送或接收设备绑定。Mention 对象 **MUST NOT** 复制、推断或覆盖这些外层设备 selector。
+
+### 3.7 历史 Mention 与 DID 迁移
+
+历史 Mention target 保持消息被接受时携带的精确 DID。DID 变化后，Group Host、relay 或客户端 **MUST NOT** 改写已签名或已加密的历史 Mention payload。
+
+接收产品 **MAY** 按 P2 验证从历史 DID 到当前 DID 的迁移，并在本地业务策略接受返回的 assurance 后，把历史展示或通知行为关联到当前身份。该关联只存在于本地，不改变 payload。新创建的 Mention **MUST** 使用目标当前完整 DID。
+
 ---
 
 ## 4. Profile 绑定模型
@@ -168,8 +184,8 @@ member
 
 外层群消息操作保持原有 Profile 名称，例如：
 
-- 非 Group E2EE 的 `group.send` 使用 `anp.group.base.v1`；
-- `group.e2ee.send` 使用 `anp.group.e2ee.v1`。
+- 非 Group E2EE 的 `group.send` 使用 `anp.group.base.v2`；
+- `group.e2ee.send` 使用 `anp.group.e2ee.v2`。
 
 ### 4.3 Content type
 
@@ -177,7 +193,7 @@ member
 
 对于非 E2EE Group Base：
 
-```json
+```text
 "meta": {
   "content_type": "application/json"
 }
@@ -284,7 +300,10 @@ mention 对象 **MUST NOT** 包含：
 - `auth`；
 - `origin_proof`；
 - `proof`；
-- `signature`。
+- `signature`；
+- `sender_device_id`；
+- `recipient_device_id`；
+- `device_id` 或 MLS Leaf 标识符。
 
 ---
 
@@ -477,11 +496,12 @@ v1 允许的取值：
 
 ### 7.1 非 E2EE Group Base
 
-对于 `anp.group.base.v1` 下的 `group.send`：
+对于 `anp.group.base.v2` 下的 `group.send`：
 
 - `params.meta.content_type` **MUST** 为 `application/json`；
 - `params.body.payload` **MUST** 承载带 mention 的消息对象；
 - `params.auth.origin_proof` 是 Group Base 要求的发送者证明；
+- `params.meta.sender_device_id` 与 `params.meta.recipient_device_id` **MUST NOT** 出现；
 - Group Host 执行现有 Group Base 校验；
 - Group Host **MUST NOT** 执行 mention 专属授权或 selector 展开。
 
@@ -494,7 +514,7 @@ v1 允许的取值：
   "method": "group.send",
   "params": {
     "meta": {
-      "profile": "anp.group.base.v1",
+      "profile": "anp.group.base.v2",
       "security_profile": "transport-protected",
       "sender_did": "did:wba:example.com:user:alice",
       "target": {
@@ -540,12 +560,14 @@ v1 允许的取值：
 
 ### 7.2 Group E2EE
 
-对于 `anp.group.e2ee.v1` 下的 `group.e2ee.send`：
+对于 `anp.group.e2ee.v2` 下的 `group.e2ee.send`：
 
 - 外层 `params.meta.content_type` 保持为 `application/anp-group-cipher+json`；
 - 外层 `params.body` 承载 `group_cipher_object`；
 - 带 mention 的对象 **MUST** 在 MLS `PrivateMessage` 加密前放入 inner `Group Application Plaintext.payload`；
 - inner `application_content_type` **MUST** 为 `application/json`。
+
+该加密投递所需的任何发送或接收设备字段都保留在 P6 外层 envelope 中，不属于 Mention payload。
 
 加密前 inner plaintext 示例：
 
@@ -582,6 +604,7 @@ Group Host 看到的是外层 ciphertext object。它按照 Group E2EE 和 Group
 - 推送载荷 **MUST** 与已接受的原始消息语义等价；
 - 如果外层 Profile 允许把原始 `auth.origin_proof` 复制到 notification 中，service **SHOULD** 包含无损复制，以便终端侧把 mention 载荷绑定到原始发送者；
 - 中间服务在转发或推送消息时 **MUST NOT** 重写 `mentions`。
+- Group Base 投递仍以 DID 寻址，Group E2EE 设备投递仅遵循承载 P6 的 selector 字段。
 
 ---
 
@@ -804,7 +827,9 @@ Mention target 可能暴露社交注意力模式。
 9. 非 E2EE `application/json` 群消息中，带 mention 的载荷位于 `params.body.payload`；
 10. Group E2EE 消息中，带 mention 的载荷位于 inner `Group Application Plaintext.payload`；
 11. 保留外层 ANP Message Profile 的发送者证明和发送权限语义；
-12. v1 不做服务端 mention 授权或 selector 展开。
+12. v1 不做服务端 mention 授权或 selector 展开；
+13. Mention target 使用 DID 或 group selector，设备绑定交由承载 P6 消息。
+14. 历史 Mention DID 保持不变；与当前 DID 的关联必须先完成 P2 迁移验证并由本地业务策略接受。
 
 ---
 

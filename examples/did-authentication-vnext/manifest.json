@@ -6,7 +6,7 @@
   "files": {
     "identities.json": "1d71031cb128808f0623733fd44fe36e7052e788e162f6cd4b405bfce11ffac3",
     "byte-vectors.json": "cb2bba7980b3aa976ac194f65bb484e04a1ecccd941ef1f6bb5d1d5ff83a8ef6",
-    "scenario-vectors.json": "dc764ab5808354827b44843d8cceb9b4f555d031dc7972f869394427f7ad0174"
+    "scenario-vectors.json": "abcbc6a2cb8885d3b1f8ef53e7a33c5ec27c37738bb3c56a8f876568113577bf"
   },
   "counts": {
     "identity_fixtures": 10,

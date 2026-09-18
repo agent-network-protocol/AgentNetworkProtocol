@@ -1,23 +1,27 @@
 # ANP Getting Started Guide
 
+- Specification Set: ANP 1.2
+
 ## Overview
 
 ### What is ANP
 
 ANP (Agent Network Protocol) is an open protocol suite for the Agentic Web. It is designed to let agents on the open internet identify each other, publish capabilities, discover services, negotiate usable interfaces, exchange secure messages, and build application-level collaborations.
 
-The current specification set is organized around the ANP 1.1 release line. It covers:
+This guide follows the ANP 1.2 document set in the current working tree. Its core and messaging specifications cover:
 
-- `did:wba` identity and cross-domain authentication
+- [ANP-02 common DID request authentication](../02-anp-did-authentication-protocol-specification.md) for `did:wba` and native `did:web`
+- ANP-03 WBA method rules and identity continuity
 - WNS (WBA Name Space) human-readable handles
 - Agent Description documents
 - Agent Discovery documents and search registration
 - End-to-end instant messaging profiles
-- Application protocols such as AP2 agent payments
 
-The meta-protocol specification is still a draft. It is useful for semantic negotiation, but it is not required for the currently released architecture.
+ANP-06 remains a draft. P6 Group E2EE is included in full but remains a candidate pending its stable registered MLS ExtensionType; the provisional `0xF0A1` release gate has not been removed. The AP2 payment adaptation is independently versioned and remains a draft / not released.
 
-> Version note: `Version: 1.1` is the document release version. It does not change ANP payload fields such as `"protocolVersion": "1.0.0"` in examples.
+Document status does not establish SDK or product implementation, conformance, public capability enablement, or completion of a tag / GitHub Release.
+
+> Version note: `Version: 1.2` is the specification/document version, not a wire version. P1/P2/P3/P7/P8 retain `.v1`; P4/P5/P6 use the `.v2` contracts already defined in vNext. P9 retains its v1 binding extension without an independent `meta.profile`. Fields such as `protocolVersion` follow their owning specifications and are not globally renumbered.
 
 ### Why ANP is Needed
 
@@ -38,7 +42,7 @@ With ANP:
 1. The personal assistant has its own DID and may also have a human-readable WNS handle.
 2. It discovers hotel agents through search, `.well-known/agent-descriptions`, or a handle.
 3. It reads the hotel agent's Agent Description document to understand products, services, and interfaces.
-4. It authenticates requests with `did:wba` instead of creating a platform-specific account.
+4. It authenticates requests under ANP-02 with a supported `did:wba` or native `did:web` identity; the service separately decides business permissions.
 5. It can use a structured interface for booking and a natural-language interface for special requests.
 6. If payment or human authorization is required, that requirement is visible in the interface description and handled by the relevant application protocol.
 
@@ -75,8 +79,8 @@ This layer answers: **who is the agent, how can the peer verify it, and how can 
 It includes:
 
 - W3C DID-based identity
-- the `did:wba` DID method
-- HTTP Message Signatures style authentication
+- ANP-03 `did:wba` method rules and the native `did:web` method binding
+- ANP-02 HTTP Message Signatures / JSON authentication metadata carriage
 - DID Document service discovery
 - key separation for signing and key agreement
 - end-to-end encryption foundations for direct and group messaging
@@ -126,6 +130,13 @@ The important separation is:
 
 ## Identity: `did:wba`
 
+<a id="authentication-model"></a>
+### Separate Authentication from DID Methods
+
+[ANP-02](../02-anp-did-authentication-protocol-specification.md) owns common request authentication. [ANP-03](../03-did-wba-method-design-specification.md) owns WBA identifiers, DID Documents, resolution, key binding, and transitions. The [native did:web integration appendix](../appendix-b-compatibility-with-native-did-web.md) explains how Web identities use the same authentication and messaging contracts without conversion to WBA or WBA-specific root-proof requirements.
+
+Ordinary API authentication does not require WNS, messaging Profiles, or a `deviceManifest`. The WBA examples below do not impose extra requirements on other DID methods. Methods such as `did:webvh` need their own binding and implementation support; DID Core compatibility alone does not imply that support.
+
 ### What `did:wba` Provides
 
 `did:wba` is ANP's Web-based DID method. It gives agents decentralized identity while still using ordinary Web infrastructure.
@@ -165,7 +176,7 @@ did:wba:example.com%3A3000:user:alice:e1_<fingerprint>
 - A **root domain DID** such as `did:wba:example.com` usually represents a domain-level subject or service identity.
 - A **path DID** such as `did:wba:example.com:user:alice:e1_<fingerprint>` represents a specific subject under the domain.
 - New path DIDs should use the default `e1_` Ed25519 binding fingerprint profile.
-- When the binding key changes, a path DID may rotate. Use WNS handles when you need a stable human-readable reference.
+- When the binding key changes, a path DID may rotate; WNS handles can provide a stable human-readable reference. Neither a matching stable subject path nor a Handle resolving to a new DID independently proves authority continuity. Verify the ANP-03 transition chain from the previously trusted DID, then apply business policy.
 
 ### Minimal DID Document Shape
 
@@ -239,13 +250,13 @@ Example:
 
 ### Authentication Flow
 
-At a high level:
+The common flow follows [ANP-02 HTTP request authentication](../02-anp-did-authentication-protocol-specification.md#http-binding):
 
-1. Agent A signs an HTTP request with the private key corresponding to its DID Document.
-2. Agent B resolves Agent A's DID Document.
-3. Agent B checks that the key is authorized for authentication.
-4. Agent B verifies the request signature.
-5. After authentication, the parties can use the selected ANP interface or messaging profile.
+1. Agent A signs with a key authorized by `authentication`, using `Signature-Input` and `Signature`; a request body also requires a computed and signed `Content-Digest`.
+2. Agent B resolves and validates A's DID Document under its method, then checks `keyid` and authentication-key authorization.
+3. B reconstructs the signature base from the actual HTTP request and verifies the signature, digest, coverage, time window, and replay protection.
+4. B independently checks business permissions. Authentication is not operation authorization or evidence of human approval.
+5. An optional token flow follows ANP-02 and service policy. Message origin proofs remain separately governed by P1 and the owning Profile.
 
 ## Name Service: WNS Handles
 
@@ -302,12 +313,12 @@ Example response:
 }
 ```
 
-Important rules:
+The following rules describe mainline WBA WNS. Native Web uses the weaker domain-declaration compatibility model in [Appendix B](../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle), which does not establish `exact-handle`:
 
 - The top-level `did` is the authoritative identity result.
 - `profile` is public display metadata only.
 - `profile` must not be used for authentication, authorization, routing, E2EE binding, or service endpoint selection.
-- For security-sensitive operations, clients must verify the Handle-to-DID binding through the DID Document's `ANPHandleService`.
+- For security-sensitive use of a WBA Handle, clients must verify the Handle-to-DID binding through the DID Document's `ANPHandleService`; ordinary DID-based API authentication does not require a Handle.
 - `exact-handle` verification is required when a specific handle must be trusted; `provider-confirmed` alone is not enough for high-assurance handle binding.
 
 ## Agent Description
@@ -400,6 +411,8 @@ If a structured interface can satisfy the task, agents should prefer it for prec
 }
 ```
 
+> Authentication note: this example preserves ANP-07's `didwba` declaration and its legacy `Authorization` field label. It does not replace ANP-02 request-header rules: new signed requests use `Signature-Input`, `Signature`, and applicable `Content-Digest`; do not infer the legacy DIDWba authorization scheme from this declaration.
+
 > Note: the current Agent Description specification uses the field name `Infomations` in examples. Implementations should follow the active specification while being careful with compatibility if future versions correct the spelling.
 
 ## Agent Discovery
@@ -482,7 +495,7 @@ ANP end-to-end instant messaging is a profile suite for cross-domain agent messa
 
 The current messaging profiles expect a DID Document to expose a single public `ANPMessageService` for cross-domain interaction. Internally, an implementation may have separate components for direct messages, groups, keys, objects, and federation, but externally these capabilities converge behind the unified service endpoint.
 
-A service entry may include static hints:
+This example declares only ordinary DID-addressed messaging and attachment capabilities, without E2EE or a device Manifest requirement:
 
 ```json
 {
@@ -492,13 +505,12 @@ A service entry may include static hints:
   "serviceDid": "did:wba:example.com",
   "profiles": [
     "anp.core.binding.v1",
+    "anp.identity.discovery.v1",
     "anp.direct.base.v1",
-    "anp.direct.e2ee.v1",
     "anp.attachment.v1"
   ],
   "securityProfiles": [
-    "transport-protected",
-    "direct-e2ee"
+    "transport-protected"
   ]
 }
 ```
@@ -511,23 +523,25 @@ anp.get_capabilities
 
 Runtime results are authoritative when static DID hints and runtime capability results differ.
 
+Enabling `anp.direct.e2ee.v2` or candidate `anp.group.e2ee.v2` requires the full dependencies and P2 current `deviceManifest` eligibility rules. Appending a Profile string to the Base example is insufficient, and v1 sessions must not be silently interpreted as v2. See the [full messaging index](../message/README.md) and its multi-device examples.
+
 ### Messaging Profile Index
 
-The instant messaging suite is split into nine profiles:
+The [ANP Messaging 1.2 index](../message/README.md) contains nine documents. Ordinary Base operations remain DID/Group DID-addressed. P4 v2 defines DID-only membership and Host-coordinated DID updates; only P5/P6 v2 introduce cryptographic device endpoints. P6 remains a candidate pending its registered MLS ExtensionType release gate.
 
-| Profile | Purpose |
-| --- | --- |
-| [P1 Core Binding](../message/01-core-binding.md) | JSON-RPC 2.0 binding, `params` structure, capability negotiation, idempotency, and errors |
-| [P2 Identity and Discovery](../message/02-identity-and-discovery.md) | Agent DID / Group DID, DID Document interpretation, and `ANPMessageService` discovery |
-| [P3 Direct Messaging Base Semantics](../message/03-direct-messaging-base-semantics.md) | `direct.send`, content model, receipts, ordering, and sender proof boundaries |
-| [P4 Group Messaging Base Semantics](../message/04-group-messaging-base-semantics.md) | group lifecycle, membership, group messages, group state versions, and host ordering |
-| [P5 Direct End-to-End Encryption](../message/05-direct-end-to-end-encryption.md) | direct E2EE using DID-bound key material and ratcheting concepts |
-| [P6 Group End-to-End Encryption](../message/06-group-end-to-end-encryption.md) | MLS-based group E2EE and group cryptographic state |
-| [P7 Attachments and Object Transfer](../message/07-attachments-and-object-transfer.md) | attachment manifests, object service, upload / download tickets, and object-level encryption |
-| [P8 Federation and Cross-Domain](../message/08-federation-and-cross-domain.md) | cross-domain service invocation, routing, relaying, and result witnessing |
-| [P9 Message Mentions Extension](../message/09-message-mentions.md) | structured group-message mentions and selector semantics |
+| Profile | Identifier / status | Purpose |
+| --- | --- | --- |
+| [P1 Core Binding](../message/01-core-binding.md) | `anp.core.binding.v1` | JSON-RPC 2.0 binding, `params` structure, capability negotiation, idempotency, and errors |
+| [P2 Identity and Discovery](../message/02-identity-and-discovery.md) | `anp.identity.discovery.v1` | Agent DID / Group DID, DID Document interpretation, and `ANPMessageService` discovery |
+| [P3 Direct Messaging Base Semantics](../message/03-direct-messaging-base-semantics.md) | `anp.direct.base.v1` | `direct.send`, content model, receipts, ordering, and sender proof boundaries |
+| [P4 Group Messaging Base Semantics](../message/04-group-messaging-base-semantics.md) | `anp.group.base.v2` | group lifecycle, membership, group messages, group state versions, and host ordering |
+| [P5 Direct End-to-End Encryption](../message/05-direct-end-to-end-encryption.md) | `anp.direct.e2ee.v2` | direct E2EE using DID-bound key material and ratcheting concepts |
+| [P6 Group End-to-End Encryption](../message/06-group-end-to-end-encryption.md) | `anp.group.e2ee.v2`; candidate | MLS-based group E2EE and group cryptographic state |
+| [P7 Attachments and Object Transfer](../message/07-attachments-and-object-transfer.md) | `anp.attachment.v1` | attachment manifests, object service, upload / download tickets, and object-level encryption |
+| [P8 Federation and Cross-Domain](../message/08-federation-and-cross-domain.md) | `anp.federation.relay.v1` | cross-domain service invocation, routing, relaying, and result witnessing |
+| [P9 Message Mentions Extension](../message/09-message-mentions.md) | v1 binding; no independent Profile | structured group-message mentions and selector semantics |
 
-Recommended reading order: P1/P2 first, P3/P4 next, then P5/P6, and finally P7/P8/P9 as needed.
+Recommended reading order: ANP-02 and the applicable method binding first, then P1/P2, P3/P4, P5/P6, and P7/P8/P9 as needed.
 
 ## Protocol SDK: AgentConnect
 
@@ -537,7 +551,7 @@ The ANP open-source SDK and reference implementation is maintained in AgentConne
 
 AgentConnect provides SDK support for identity, authentication, proofs, WNS, Agent Description, OpenRPC / JSON-RPC, crawling, AP2, E2EE, and examples.
 
-Registry status below follows the AgentConnect README checked on 2026-06-27:
+The table below is a historical SDK navigation snapshot checked on 2026-06-27, not current registry status or an ANP 1.2 conformance matrix. Confirm package names, versions, Profile support, and enablement in the SDK repository and the implementation's verification evidence:
 
 | Language | Package / module | How to start | Status |
 | --- | --- | --- | --- |
@@ -584,7 +598,7 @@ Typical generated endpoints:
 ## Recommended Reading Path
 
 1. Read the [README](../README.md) for the current specification index and architecture.
-2. Read [ANP-03: did:wba](../03-did-wba-method-design-specification.md) and [ANP-04: WNS](../04-anp-did-wba-name-space-specification.md) for identity and naming.
+2. Read [ANP-02: DID Authentication](../02-anp-did-authentication-protocol-specification.md) first, then [ANP-03: did:wba](../03-did-wba-method-design-specification.md) or the [native did:web integration appendix](../appendix-b-compatibility-with-native-did-web.md) for the applicable method; read [ANP-04: WNS](../04-anp-did-wba-name-space-specification.md) when human-readable naming is needed.
 3. Read [ANP-07: Agent Description](../07-anp-agent-description-protocol-specification.md) and [ANP-08: Agent Discovery](../08-ANP-Agent-Discovery-Protocol-Specification.md) to publish and find agents.
 4. Read [ANP-09](../09-ANP-end-to-end-instant-messaging-protocol-specification.md) and the messaging profiles when building messaging.
 5. Use [AgentConnect](https://github.com/agent-network-protocol/AgentConnect) to build or test a working implementation.
@@ -605,6 +619,6 @@ The ANP process mainly includes the following steps:
 
 4. **Authentication**: After receiving the request, Agent B obtains Agent A's DID document based on the DID identifier in the request, extracts the public key from it, and verifies the validity of the request signature, confirming Agent A's identity.
 
-5. **Service Interaction**: After authentication is successful, Agent B returns the requested data or service response. Agent A completes tasks based on the returned data, such as booking a hotel, querying information, etc. The entire process is based on standardized interfaces and data formats, ensuring cross-platform interoperability.
+5. **Service Interaction**: After authentication and independent business-authorization checks succeed, Agent B returns the requested data or service response. Agent A completes tasks based on the returned data, such as booking a hotel, querying information, etc. The entire process is based on standardized interfaces and data formats, ensuring cross-platform interoperability.
 
 This method of authentication based on DIDs and standardized description documents enables agents to securely and efficiently discover and interact with each other on the internet without relying on centralized platforms.

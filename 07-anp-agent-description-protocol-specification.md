@@ -3,7 +3,7 @@
 - Document ID: ANP-07
 - Title: ANP Agent Description Protocol Specification
 - Status: Released
-- Version: 1.1
+- Version: 1.2
 - Language: English
 - Applicability: This specification applies to Agent Description documents, interface descriptions, and capability publication in ANP.
 
@@ -16,7 +16,7 @@ This specification defines the information interaction patterns between two agen
 The core content of the specification includes:
 1. Using JSON as the basic data format, supporting linked data and semantic web features
 2. Defining core vocabularies for agent basic information, products, services, interfaces, etc.
-3. Adopting the did:wba method as a unified security mechanism to achieve cross-platform identity authentication. The identity authentication method is also extensible to support other methods in the future
+3. Adopting the common DID authentication defined by [ANP-02](02-anp-did-authentication-protocol-specification.md), supporting `did:wba` and native `did:web`, with DID Documents validated under their respective methods
 4. Supporting interoperability with existing standard protocols (such as OpenAPI, JSON-RPC)
 
 This specification aims to improve interoperability and communication efficiency between agents, providing foundational support for building agent networks.
@@ -72,7 +72,9 @@ the examples in this repository, see
 
 The following is an example of an agent description document:
 
-```json
+The following annotated JSON example contains comments; remove them before transmitting it as JSON.
+
+```jsonc
 {
   "protocolType": "ANP",
   "protocolVersion": "1.0.0",
@@ -581,9 +583,9 @@ To be supplemented
 
 ### Security Mechanism
 
-The Agent Description Protocol currently uses the did:wba method as its security mechanism. The did:wba method is a web-based Decentralized Identifier (DID) specification designed to meet the needs of cross-platform identity authentication and agent communication.
+DID request authentication in the Agent Description Protocol follows [ANP-02](02-anp-did-authentication-protocol-specification.md). `did:wba` and native `did:web` share the authentication flow while identity material is validated under the applicable DID method. Further methods use the ANP-02 method-binding extension mechanism.
 
-Other identity authentication schemes can be extended based on future requirements.
+The following `DIDWBASecurityScheme` retains the existing WBA description vocabulary and configuration examples. It neither defines a new generic scheme identifier nor makes a WBA configuration a capability declaration for other DID methods. Interface declarations and peer capabilities should identify the methods actually supported.
 
 #### DIDWBASecurityScheme (DID WBA Security Scheme)
 
@@ -593,7 +595,7 @@ For all security schemes, any keys, passwords, or other sensitive information th
 
 Security schemes typically require additional authentication parameters, such as digital signatures. The location of this information is indicated by the value associated with name, usually combined with the value of in. The value associated with in can take one of the following values:
 
-- header: The parameter will be given in a header provided by the protocol, with the header name provided by the value of name. In the did:wba method, authentication information is passed through the Authorization header.
+- header: The parameter will be given in a header provided by the protocol, with the header name provided by the value of name. Initial ANP-02 signatures use `Signature-Input` and `Signature`, plus `Content-Digest` when a body is present. `Authorization` carries an optional subsequent Bearer Access Token; it does not replace the initial signature.
 - query: The parameter will be appended to the URI as a query parameter, with the query parameter name provided by name.
 - body: The parameter will be provided in the body of the request payload, with the data schema element used provided by name.
 - cookie: The parameter is stored in a cookie identified by the value of name.
@@ -625,6 +627,8 @@ The following is an example of a security configuration using the did:wba method
 }
 ```
 
+The `Authorization` configuration above describes only optional Access Token carriage, not all headers required for initial ANP-02 signatures. Actual request construction and verification follow ANP-02.
+
 Security configuration in the AD is required. Security definitions must be activated through the security member at the agent level. This configuration is the security mechanism required for interacting with the agent.
 
 When security appears at the top level of the AD document, it indicates that all resources must be verified using this security mechanism when accessed. When it appears inside a specific resource, it indicates that the resource can only be accessed when this security mechanism is satisfied. If the security specified at the top level differs from the security specified in a resource, the security specified in the resource takes precedence.
@@ -633,7 +637,7 @@ When security appears at the top level of the AD document, it indicates that all
 
 If an interface requires human manual authorization when called, such as a purchase interface, the field humanAuthorization can be added to the interface definition. A value of true indicates that the interface call requires human manual authorization to access.
 
-`humanAuthorization` indicates an interface-level human-authorization requirement. It is not a DID verification relationship, an authorization credential, or proof that authorization has been completed. DID-based request authentication continues to use the verification methods referenced by `authentication` in [ANP-03](/03-did-wba-method-design-specification.md). How human authorization is obtained or evidenced is outside the scope of this field and is determined by the applicable business protocol and authorization policies.
+`humanAuthorization` indicates an interface-level human-authorization requirement. It is not a DID verification relationship, an authorization credential, or proof that authorization has been completed. DID-based request authentication continues to use the verification methods referenced by `authentication` in [ANP-02](02-anp-did-authentication-protocol-specification.md). How human authorization is obtained or evidenced is outside the scope of this field and is determined by the applicable business protocol and authorization policies.
 
 ### Proof (Integrity Verification)
 

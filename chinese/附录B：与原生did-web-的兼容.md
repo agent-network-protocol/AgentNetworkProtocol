@@ -1,51 +1,34 @@
+# 附录 B：原生 did:web 集成
 
-## 附录 B：与原生 `did:web` 的兼容
+- 状态：已发布
+- 版本：1.2
+- 英文镜像：[Native did:web Integration](../appendix-b-compatibility-with-native-did-web.md)
 
-### B.1 目标与范围
+## B.1 范围与归属
 
-本附录定义 did:wba 网络对原生 `did:web` 的兼容模式。
+本附录是原生 Web 身份接入 DID 方法无关 ANP 合同的入口，不定义另一套认证或消息协议。主体保留 `did:web` 身份，无需转换为 WBA。
 
-兼容模式的目标是：在不要求对方把 DID 迁移为 `did:wba` 的前提下，使原生 `did:web` 仍然可以接入本规范定义的能力，包括但不限于：
+| 合同 | 规范性拥有者 |
+|---|---|
+| Web 身份输入与请求认证 | [ANP-02 Web 绑定](02-ANP-基于DID的身份认证协议.md#web-binding)及通用认证 |
+| WBA 特有 Document 验证 | [ANP-03 方法规则](03-did-wba方法规范.md) |
+| Handle 正反向绑定与状态 | [ANP-04 WNS](04-ANP-基于DID-WBA的命名空间规范.md#binding-verification) |
+| 消息身份、设备与服务 | [消息 P2](message/02-身份与发现.md) |
+| 原发者与对象证明绑定 | [消息 P1](message/01-核心绑定.md) |
+| 私聊/群聊 E2EE 与扩展 | 所选 P5/P6/P7/P9 Profile 及其依赖 |
 
-- 跨平台身份认证（第 3 章、第 4 章）
-- Handle / WNS 集成
-- 端到端加密通信（E2EE）
-- ANP 服务发现（包括 `AgentDescription` 与 `ANPMessageService`）
+## B.2 方法验证
 
-在兼容模式下，`did:web` 继续按 `did:web` 方法规范进行创建、解析和更新；本附录只定义 did:wba 网络如何接受和验证原生 `did:web`。
+消费 Web 身份材料前，验证者 MUST 执行 ANP-02 的 Web 绑定。WBA E1/K1 指纹和 WBA 特有的 Document proof 要求不适用于原生 Web。该方法差异不免除所选 ANP Profile 要求的任何用途授权、对象签名、设备资格或消息认证。
 
-### B.2 解析与验证规则
+## B.3 认证集成
 
-当实现接收到一个原生 `did:web` 时，必须（MUST）按 `did:web` 方法规范执行解析，并至少完成以下检查：
+Web 和 WBA 调用方使用 ANP-02 相同的 HTTP 组件、摘要、签名、挑战、重放和可选 Token 规则。普通 API 不要求 Handle 或 `deviceManifest`。消息 P1 增加应用原发者上下文，P8 使用实际 HTTP 服务跳认证。服务跳签名成功不建立业务发送者的 origin proof。
 
-1. 按 `did:web` 规则解析 DID Document；
-2. 检查 DID Document 的 `id` 是否与请求的 `did:web` 完全一致；
-3. 按 DID Core 规则检查相关验证方法是否存在，并且是否位于正确的 verification relationship 中。
+<a id="legacy-web-handle"></a>
+## B.4 Handle / WNS 集成（沿用原方案）
 
-在兼容模式下，实现**不得（MUST NOT）**对原生 `did:web` 强制执行以下 did:wba 特有检查：
-
-- `e1_` / `k1_` 路径绑定公钥指纹检查；
-- did:wba 主规范中的路径绑定 profile 语义检查；
-- did:wba 特有的路径型 DID 轮换语义检查；
-- 将 did:wba 特有 proof 规则作为 `did:web` 解析成功的前提条件。
-
-如果原生 `did:web` DID Document 自身携带了标准 proof（例如 Data Integrity proof），实现可以（MAY）按照该 proof 的声明 profile 和本地策略执行验证；但 `did:web` 解析成功本身不以 did:wba 的 `proof` 规则为前提。
-
-### B.3 与跨平台身份认证的兼容
-
-原生 `did:web` 可以兼容本规范第 3 章和第 4 章定义的跨平台身份认证流程。
-
-当客户端使用 `did:web` 参与跨平台身份认证时：
-
-1. `keyid` 仍然必须（MUST）为完整 DID URL；
-2. 服务端仍然必须（MUST）解析 DID Document；
-3. 服务端仍然必须（MUST）验证 `keyid` 指向的验证方法存在；
-4. 服务端仍然必须（MUST）验证该验证方法位于 DID Document 的 `authentication` 关系中；
-5. 随后的 HTTP Message Signatures / `Content-Digest` 验证逻辑与 did:wba 相同。
-
-兼容模式下，`did:web` 的身份绑定语义来自 `did:web` 的解析结果本身，而不是 did:wba 的路径绑定公钥指纹。
-
-### B.4 与 Handle / WNS 的兼容
+以下保留原兼容附录 B.4 的正文。该方案确认 Handle 的正向 DID 映射与 DID 对 Provider 域的声明，不要求精确端点解引用，也不自动得到 WBA 主线的 `exact-handle` 或私密端点 `provider-confirmed` 结果。本次不新增 Web 弱绑定迁移、WBA 跨域 Handle 或 Provider 管理要求。
 
 原生 `did:web` 可以兼容 did:wba 的 Handle / WNS 体系。
 
@@ -73,74 +56,25 @@
 
 而**不需要**执行 did:wba 的 `e1_` / `k1_` 指纹绑定检查。
 
-### B.5 与端到端加密通信（E2EE）的兼容
+## B.5 E2EE 集成
 
-原生 `did:web` 可以兼容 did:wba 网络中的端到端加密通信。
+Web 设备使用经方法验证的 Document 和当前 P2 Manifest，再执行与 WBA 设备相同的 P5/P6 验证。仅有 `keyAgreement` 条目不表示支持多设备 E2EE。所选套件、完整 Profile 依赖集、精确设备/密钥引用及当前资格 MUST 齐备。
 
-当 `did:web` DID Document 包含可识别的 `keyAgreement` 条目时，实现可以（MAY）按上层即时消息或 E2EE 协议使用这些密钥进行密钥协商与加密通信。
+P5 Bundle Object Proof、X3DH-like 输入、Session/AAD/AEAD 认证及重放检查仍按 P5 要求执行。P5 MTI 密文不增加额外 origin signature 要求。P6 `did_wba_binding` 保留为方法无关的 DID/设备与 MLS 绑定的现有 wire 字段名；其 Object Proof、嵌入扩展、KeyPackage/Leaf 签名、credential 身份、套件与群状态检查仍分别必需。没有 WBA 专属 Document proof 从来不是省略这些对象或 MLS 检查的理由。
 
-若上层协议采用 ANP 即时消息相关 Profile，则公开材料的发现和访问也可以（MAY）通过 DID Document 中声明的 `ANPMessageService` 完成；`did:web` 在这一点上的处理方式与 `did:wba` 一致。
+## B.6 服务、附件与 Mention
 
-例如：
+服务选择遵循 P2 的已验证 `ANPMessageService`、声明 Profile 和安全能力。联邦需要认证服务时，独立于 Agent DID，按服务 DID 的方法解析并验证声明的 `serviceDid`。主体不能通过填写他人的端点获得托管权威或本域账号权限。
 
-- `X25519KeyAgreementKey2019`
-- 或其他被上层协议明确支持的 key agreement 类型
+P7 普通/加密附件和 P9 Mention payload 对 WBA/Web 使用相同组合规则。完整 payload 的签名/AEAD 覆盖、对象授权、未知扩展处理和禁止降级规则仍归所选 Profile，不增加 Web 专属附件或 Mention wire 格式。
 
-在兼容模式下，E2EE 能力的前提是：
+## B.7 连续性与证据
 
-1. DID Document 可成功解析；
-2. 所需的 `keyAgreement` 验证方法存在；
-3. 若所使用的 ANP Profile 依赖统一消息入口，则 DID Document 中存在可用的 `ANPMessageService`；
-4. 上层协议支持对应算法与公钥表示方式。
+当前 Handle 解析和当前 DID 认证不建立跨 DID 权限迁移。本规范的 P2 没有注册 Web 自动迁移验证 Profile。同 DID 密钥更新与跨 DID 变化 MUST 分开处理；群角色、附件授权和 E2EE 状态需要各自有效的连续性与迁移合同。
 
-### B.6 与 ANP 服务发现和 `ANPMessageService` 的兼容
+[混合方法向量](../examples/did-authentication-vnext/README.cn.md)覆盖合同边界，并标明哪些用例仍是 SDK/产品执行的设计输入。规范发布不等于实现符合性或生产上线。
 
-原生 `did:web` DID Document 也可以（MAY）声明 did:wba 网络中的服务类型，例如：
+## 版权声明
 
-- `AgentDescription`
-- `ANPHandleService`
-- `ANPMessageService`
-
-其中：
-
-- `AgentDescription` 用于发现遵循 [07-ANP-智能体描述协议规范](07-ANP-智能体描述协议规范.md) 的智能体描述文档；
-- `ANPHandleService` 用于表达 DID 持有者接受某个 Handle Provider domain 的名称绑定关系；
-- `ANPMessageService` 用于表达 ANP 在 DID 文档中公开发现的统一消息与交互入口。
-
-若 `ANPMessageService` 条目声明了 `serviceDid`，则该字段用于表达“该服务在跨域服务到服务 HTTP 身份认证中使用哪个 DID 进行签名”。对于原生 `did:web` 部署：
-
-- `serviceDid` **SHOULD** 优先使用裸域名 DID，例如 `did:web:example.com`；
-- 外层 HTTP `Signature-Input` 中的 `keyid` 所属 DID **MUST** 与该 `serviceDid` 一致；
-- 验证方 **MUST** 解析该 `serviceDid`，检查 `keyid` 指向的验证方法是否被 `authentication` 关系授权，并使用其公钥验证请求签名。
-
-若原生 `did:web` 主体参与 ANP 即时消息协议，则：
-
-1. Agent DID 文档应当（SHOULD）至少包含一个 `ANPMessageService`；
-2. Group DID 文档必须（MUST）至少包含一个 `ANPMessageService`；
-3. 同一个 `ANPMessageService` 可以（MAY）同时承载直接消息、群消息、能力协商、安全 Overlay 公开材料访问以及对象控制等能力；
-4. Home Role、Key Role、Group Role、Join Role、Capability Role、Object Role 是 `ANPMessageService` 背后的逻辑角色，而不是 DID Document 中额外独立的标准 `service.type`；
-5. 若该服务会参与跨域服务到服务调用，其 `ANPMessageService` 条目应当（SHOULD）声明 `serviceDid`；
-6. 若存在多个 `ANPMessageService`，调用方应当（SHOULD）根据 `profiles`、`securityProfiles`、`priority` 或本地策略选择。
-
-只要这些服务条目在 DID Document 中声明正确，实现就可以按 did:wba/ANP 的应用层或消息层协议使用这些服务，而不要求 DID 方法必须是 `did:wba`。
-
-### B.7 实现建议
-
-实现者应当（SHOULD）区分两种解析模式：
-
-1. **did:wba 模式**  
-   - 按主规范（以及附录 A，如启用）执行完整的路径绑定、公钥指纹和 proof 规则。
-
-2. **did:web 兼容模式**  
-   - 按 `did:web` 规范解析；
-   - 不执行 did:wba 特有的路径绑定、公钥指纹和 proof 强制规则；
-   - 若存在 `ANPHandleService`，按 WNS v1 规则执行基于 domain 的名称绑定校验；
-   - 若存在 `ANPMessageService`，按 ANP Profile 2 的统一消息入口语义进行服务发现和能力选择；
-   - 若 `ANPMessageService` 声明了 `serviceDid`，则按 P8 的规则使用该 DID 完成跨域服务到服务身份认证；
-   - 仍然可以接入 did:wba 的跨平台身份认证、Handle、ANP 服务发现和 E2EE 等上层能力。
-
-应用实现**不应（SHOULD NOT）**仅因为某个 DID 是原生 `did:web`、且不包含 did:wba 特有的 `e1_` / `k1_` 路径绑定或 proof，而拒绝其参与跨域身份认证、Handle 集成、`ANPMessageService` 服务发现或端到端加密通信。
-
-应用实现也**不应（SHOULD NOT）**要求原生 `did:web` 为 Home / Key / Group / Join / Capability / Object 等逻辑角色分别暴露独立的 DID service type；若其通过单一 `ANPMessageService` 暴露这些能力，应视为符合 ANP 的当前服务发现模型。
-
-同时，新部署如果希望获得更强的“路径绑定公钥可验证性”和统一的标准 proof 体验，仍应当（SHOULD）优先选择 did:wba 主规范的 `e1_` profile。
+Copyright (c) 2024 ANP 开源社区
+本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

@@ -1,3 +1,8 @@
+# Appendix A: did:wba `k1_` Compatibility Extension
+
+- Status: Released
+- Version: 1.2
+- Language: English
 
 ### A.1 Scope of application
 
@@ -176,7 +181,7 @@ Note: The `k1_` DID Document proof defined in this appendix is ​​a compatibl
 
 ### A.6 `k1_` Identity Authentication
 
-When an implementation enables this appendix, the `k1_` DID can be used in the cross-platform HTTP authentication flow defined in Chapter 3.
+When an implementation enables this appendix, the `k1_` DID can use the cross-platform HTTP authentication flow defined in [ANP-02 Chapter 3](02-anp-did-authentication-protocol-specification.md#http-binding), subject to the WBA `k1_` method constraints in this appendix.
 
 Certification requirements are as follows:
 

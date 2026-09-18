@@ -8,13 +8,13 @@
 
 > ANP 致力于成为智能体互联网时代的 HTTP：为智能体提供身份、命名、发现、协商、安全消息和应用层协作协议。
 
-**当前规范集：** 核心协议文档已经围绕 ANP 1.1 版本线整理。已发布规范覆盖 `did:wba` 身份、WNS Handle、智能体描述、智能体发现、端到端即时消息，以及 AP2 智能体支付协议；元协议规范仍处于草案状态，当前尚未发布。
+**当前规范集：ANP 1.2。** 核心规范与全部九份消息文档已从 vNext 合入正式文档路径。ANP-02 提供与 DID 方法无关的身份认证，支持 `did:wba` 与原生 `did:web`；ANP-03 定义 WBA 方法规则和身份连续性；ANP-04 定义 WNS 命名。智能体描述与发现文档同步对齐本次版本。
 
-**ANP 核心协议 vNext 草案：** [核心草案索引](chinese/vnext/README.md)现包含 ANP-02 通用 DID 身份认证、ANP-03 WBA 方法修订和 ANP-04 原有 WNS 规则及原生 Web 兼容。草案不替代已发布规范。
+**发布范围：** 根目录规范与 `message/` 为当前英文文档，中文镜像位于 `chinese/`。ANP-06 仍为草案。P6 群组 E2EE 全文纳入 1.2 文档，但在完成稳定 MLS `ExtensionType` 注册门槛前保留候选状态；临时值 `0xF0A1` 不代表注册已完成。应用协议独立版本化；ANP-10 是 AP2 支付适配草案，不是已正式发布的稳定支付标准。
 
-**ANP Messaging 1.2 草案：** [混合版本草案集](chinese/message/vnext/README.md)通过 ANP-02/P1/P2 解耦 DID 方法与认证、消息验证。P1/P2/P3/P7/P8 及 P9 binding 保持 v1；P4 群基础语义、P5/P6 E2EE 使用 v2。草案存在不代表实现支持或公开能力宣告。
+**ANP Messaging 1.2：** [Profile 索引](chinese/message/README.md)定义混合版本规范集。P1/P2/P3/P7/P8 及 P9 binding 保持 v1；P4 群基础语义、P5/P6 E2EE 使用 v2。规范发布不代表 SDK 或产品已经实现；公开能力宣告必须符合实际支持情况和各 Profile 的发布限制。
 
-**版本说明：** `版本：1.1` 表示规范/文档发布版本；它不改变 ANP 载荷字段 `protocolVersion`。本次发布未修改协议字段、流程或安全要求，因此示例与协议字段中的 `"protocolVersion": "1.0.0"` 保持不变。
+**版本说明：** `版本：1.2` 表示规范/文档发布版本，不是 wire 版本。Profile 标识、`protocolVersion`、接口版本、算法和签名/AAD 格式由各自规范管理，不能统一改号。P4/P5/P6 沿用 vNext 已定义的 v2 合同；其他 Profile 标识及示例中的 wire 版本字段保持不变。
 
 **备注：** 本项目未在任何平台、任何区块链发布数字货币。
 
@@ -49,7 +49,7 @@ Agent Network Protocol（ANP）是一个开源的智能体通信协议，目标�
 ANP 构建在现有互联网基础设施之上，将已发布的协议能力组织为两个核心协议层，并在其上承载具体领域的应用协议：
 
 - 🌐 **开放互联网基础设施：** ANP 复用 HTTP、CA、DNS、CDN、Search、TLS 等成熟基础设施，而不是重新构建一套网络栈。
-- 🔒 **身份与加密通信层：** 基于 W3C DID 和 Web 基础设施，提供智能体身份、`did:wba` 认证和端到端加密消息基础能力。
+- 🔒 **身份与加密通信层：** 基于 W3C DID 和 Web 基础设施。ANP-02 将通用认证与 DID 方法验证解耦，支持 `did:wba` 与原生 `did:web`；消息 Profile 定义 DID 定址和设备绑定 E2EE。
 - 📡 **应用协议层：** 包含智能体描述、智能体发现和智能体应用协议。智能体支付、授权、认证、交易等领域协议构建在这一层之上。
 - 🧪 **元协议状态：** ANP-06 当前仍为草案，暂不属于已发布架构；更新后的草案将其定位为基于 Agent Description 的语义元协议协商层，通过 `MetaProtocolInterface`、`anp.get_capabilities` 和 `anp.negotiate` 选择后续接口、Profile、安全模式和 Schema。
 
@@ -57,47 +57,47 @@ ANP 构建在现有互联网基础设施之上，将已发布的协议能力组�
 
 | 领域 | 文档 | 状态 | 定义内容 |
 | --- | --- | --- | --- |
-| 总览 | [ANP 技术白皮书](chinese/01-AgentNetworkProtocol技术白皮书.md) | 白皮书 | 愿景、设计原则和三层协议架构 |
-| 认证 | [ANP-02：基于 DID 的身份认证协议](chinese/vnext/02-ANP-基于DID的身份认证协议.md) | Draft / 未发布 | 方法无关 HTTP/JSON 认证、WBA/Web 绑定；复用已废弃的 02 编号，历史 did:all 保留 |
-| 身份 | [ANP-03：did:wba 方法规范](chinese/03-did-wba方法规范.md) | 已发布 v1.1 + [vNext 草案](chinese/vnext/03-did-wba方法规范.md) | Web DID 方法、跨平台认证、`e1_` Ed25519 绑定、`k1_` 兼容扩展 |
-| 命名 | [ANP-04：基于 DID:WBA 的命名空间规范](chinese/04-ANP-基于DID-WBA的命名空间规范.md) | 已发布 v1.1 + [vNext 草案](chinese/vnext/04-ANP-基于DID-WBA的命名空间规范.md) | WNS Handle（如 `alice.example.com`）、Handle 到 DID 的解析、DID 轮换支持 |
-| 元协议 | [ANP-06：智能体通信元协议规范](chinese/06-ANP-智能体通信元协议规范.md) | Draft / 未发布 | 可选的语义元协议协商、`MetaProtocolInterface` 声明、`anp.negotiate`，以及接口 / Profile / 安全模式 / Schema 选择 |
-| 描述 | [ANP-07：智能体描述协议规范](chinese/07-ANP-智能体描述协议规范.md) | 已发布 v1.1 | 智能体描述文档、接口描述和能力发布 |
-| 发现 | [ANP-08：智能体发现协议规范](chinese/08-ANP-智能体发现协议规范.md) | 已发布 v1.1 | 基于 `.well-known` 的主动发现，以及向搜索智能体注册的被动发现 |
-| 消息 | [ANP-09：端到端即时消息协议规范总纲](chinese/09-ANP-端到端即时消息协议规范.md) | 已发布 v1.1 + vNext 草案 | 私聊、群聊、端到端加密、附件、联邦、mention 及独立版本化多设备草案的 Profile 索引 |
-| 支付 | [ANP-10：智能体支付协议规范（AP2）](chinese/application/10-ANP-智能体支付协议规范.md) | 中文草案 v0.1；英文 v1.1 | 智能体支付、授权凭证、收据、基于 DID 的签名和交易流程 |
+| 总览 | [ANP-01：技术白皮书](chinese/01-AgentNetworkProtocol技术白皮书.md) | 资料性文档 v1.2 | 愿景、设计原则和概念架构；规范性状态以各规范为准 |
+| 认证 | [ANP-02：基于 DID 的身份认证协议](chinese/02-ANP-基于DID的身份认证协议.md) | 已发布 v1.2 | 方法无关 HTTP/JSON 认证及 WBA/Web 绑定；独立于消息和 WNS |
+| 身份 | [ANP-03：did:wba 方法规范](chinese/03-did-wba方法规范.md) | 已发布 v1.2 | Web DID 方法、`e1_` 绑定、稳定主体路径与可验证 DID 迁移 |
+| 命名 | [ANP-04：基于 DID:WBA 的命名空间规范](chinese/04-ANP-基于DID-WBA的命名空间规范.md) | 已发布 v1.2 | WNS Handle、名称到 DID 解析、WBA 绑定与既有原生 Web 兼容 |
+| 元协议 | [ANP-06：智能体通信元协议规范](chinese/06-ANP-智能体通信元协议规范.md) | 草案；文档版本 1.2 | 可选语义协商、`MetaProtocolInterface` 及接口 / Profile / 安全模式 / Schema 选择 |
+| 描述 | [ANP-07：智能体描述协议规范](chinese/07-ANP-智能体描述协议规范.md) | 已发布 v1.2 | 智能体描述文档、接口描述和能力发布 |
+| 发现 | [ANP-08：智能体发现协议规范](chinese/08-ANP-智能体发现协议规范.md) | 已发布 v1.2 | 基于 `.well-known` 的主动发现与向搜索智能体注册的被动发现 |
+| 消息 | [ANP-09：端到端即时消息协议规范总纲](chinese/09-ANP-端到端即时消息协议规范.md) | 已发布 v1.2 目录；P6 为候选 | 私聊、群聊、设备绑定 E2EE、附件、联邦和 Mention |
+| 支付 | [ANP-10：AP2 支付适配草案](chinese/application/10-ANP-智能体支付协议规范.md) | 草案 / 未发布；英文文档 v1.1、中文文档 v0.1 | 拟议的 ANP 支付适配、授权凭证、收据和交易流程；不是稳定支付互操作标准 |
 
-[核心 vNext 索引](chinese/vnext/README.md)及其[英文镜像](vnext/README.md)新增 ANP-02 认证入口，并提供 ANP-03/04 和 Web 集成候选修订；已发布 1.1 文件保持原文。
+[核心协议发布前归档](chinese/vnext/README.md)及其[英文镜像](vnext/README.md)保留历史草案供差异审查。当前规范引用使用上方正式路径，而非归档草案。已废弃的历史 did:all 文档保留原有身份；当前 ANP-02 编号表示基于 DID 的身份认证协议。
 
 ### 即时消息 Profile
 
-已发布的 ANP 1.1 端到端即时消息规范集拆分为多个独立 Profile：
+[ANP Messaging 1.2 中文索引](chinese/message/README.md)及其[英文镜像](message/README.md)包含全部九份文档：
 
-1. [P1 核心绑定](chinese/message/01-核心绑定.md)：JSON-RPC 2.0 绑定、请求/响应/错误约定。
-2. [P2 身份与发现](chinese/message/02-身份与发现.md)：基于 DID 的服务发现和端点能力发现。
-3. [P3 私聊基础语义](chinese/message/03-私聊基础语义.md)：私聊发送和回执。
-4. [P4 群组基础语义](chinese/message/04-群组基础语义.md)：群生命周期、成员关系和群消息语义。
-5. [P5 私聊端到端加密](chinese/message/05-私聊端到端加密.md)：私聊消息的 E2EE Overlay。
-6. [P6 群组端到端加密](chinese/message/06-群组端到端加密.md)：群消息的 E2EE Overlay。
-7. [P7 附件与对象传输](chinese/message/07-附件与对象传输.md)：Manifest、对象服务和大对象传输。
-8. [P8 联邦与跨域](chinese/message/08-联邦与跨域.md)：跨域路由、转发和结果见证。
-9. [P9 消息 Mention 扩展](chinese/message/09-消息Mention扩展.md)：群消息 mention 载荷和 selector 语义。
+| Profile | Wire 标识 | 文档 |
+| --- | --- | --- |
+| P1 | `anp.core.binding.v1` | [核心绑定](chinese/message/01-核心绑定.md) |
+| P2 | `anp.identity.discovery.v1` | [身份与发现](chinese/message/02-身份与发现.md) |
+| P3 | `anp.direct.base.v1` | [私聊基础语义](chinese/message/03-私聊基础语义.md) |
+| P4 | `anp.group.base.v2` | [群组基础语义](chinese/message/04-群组基础语义.md) |
+| P5 | `anp.direct.e2ee.v2` | [私聊端到端加密](chinese/message/05-私聊端到端加密.md) |
+| P6 | `anp.group.e2ee.v2`，候选状态，待稳定 code point | [群组端到端加密](chinese/message/06-群组端到端加密.md) |
+| P7 | `anp.attachment.v1` | [附件与对象传输](chinese/message/07-附件与对象传输.md) |
+| P8 | `anp.federation.relay.v1` | [联邦与跨域](chinese/message/08-联邦与跨域.md) |
+| P9 | v1 binding 扩展；不定义独立 `meta.profile` | [消息 Mention 扩展](chinese/message/09-消息Mention扩展.md) |
 
-[ANP Messaging 1.2 中文草案索引](chinese/message/vnext/README.md)及其[英文镜像](message/vnext/README.md)定义一组合法的混合版本能力：P1/P2/P3、Attachment 与 Federation 保持 v1，P4 Group Base、Direct E2EE 与 Group E2EE 使用 v2。普通私聊、群聊、Mention 和附件操作只使用业务 DID 或 Group DID 定址，设备 fan-out 保留在接收域内部。只有 E2EE v2 Profile 要求密码学端点时才引入 `device_id`，包括独立 Direct Session 和同 DID 多 MLS Leaf；P8 v1 也只对这类外层 Profile 保留设备 selector。实现不得把 E2EE v1 状态重新解释为 v2，也不得静默降级 E2EE v2 操作。
+普通私聊、群聊、Mention 和附件操作仍使用业务 DID 或 Group DID 定址，设备 fan-out 留在接收域内部。P4 v2 引入 DID-only 成员关系和由 Host 协调的成员 DID 更新。P5/P6 v2 使用独立密码学设备端点，包括设备对 Direct Session 和同 DID 多个 MLS Leaf。实现不得把 E2EE v1 状态重新解释为 v2，也不得静默降级 E2EE v2 操作。P6 的候选状态及稳定注册 code point 发布门槛仍然有效。
 
 ### DID 兼容性附录
 
 - [附录 A：did:wba `k1_` 兼容扩展](chinese/附录A：did-wba-k1_兼容扩展.md)
-- [附录 B：与原生 `did:web` 的兼容](chinese/附录B：与原生did-web-的兼容.md)
-
-- [原生 did:web 集成候选附录](chinese/vnext/附录B：与原生did-web-的兼容.md)：ANP-02 认证、原有 WNS/Web 兼容和消息组合；已发布兼容附录继续保留。
+- [附录 B：原生 `did:web` 集成](chinese/附录B：与原生did-web-的兼容.md)：ANP-02 认证、既有 WNS/Web 兼容和消息组合，无需转为 WBA。
 
 ## 快速上手
 
-- 设计方法无关的普通 API 认证时，阅读 [ANP-02 候选规范](chinese/vnext/02-ANP-基于DID的身份认证协议.md)；它独立于消息、Handle 和设备 Manifest，尚未发布。
+- 设计方法无关的普通 API 认证时，阅读 [ANP-02](chinese/02-ANP-基于DID的身份认证协议.md)；它不依赖消息、Handle 或设备 Manifest。
 
 - 如果想快速了解 ANP 概念和使用方式，请阅读 [ANP 入门指南](docs/chinese/ANP入门指南.md)。
-- 如果要实现**已发布 ANP 1.1** 的智能体身份与认证，请从 [ANP-03：did:wba 方法规范](chinese/03-did-wba方法规范.md) 和已发布 DID 兼容性附录开始；采用 **vNext 候选认证**时，从上述 ANP-02 开始，候选 ANP-03 只提供 WBA 方法规则。
+- 实现 ANP 1.2 身份时，从 ANP-02 开始；WBA 方法验证阅读 [ANP-03](chinese/03-did-wba方法规范.md)，原生 `did:web` 集成阅读[附录 B](chinese/附录B：与原生did-web-的兼容.md)。
 - 如果要发布智能体，请阅读 [ANP-07：智能体描述协议规范](chinese/07-ANP-智能体描述协议规范.md) 和 [ANP-08：智能体发现协议规范](chinese/08-ANP-智能体发现协议规范.md)。
 - 如果要构建即时消息，请从 [ANP-09](chinese/09-ANP-端到端即时消息协议规范.md) 开始，再按需选择具体 Profile。
 - 如果想运行 ANP 相关 Demo，请查看 [ANP 示例程序](docs/chinese/ANP示例程序.md)。
@@ -120,14 +120,14 @@ AWiki 是基于 ANP 的智能体身份与消息开源实现，包含以下项目
 
 ## 仓库结构
 
-- `01-*.md`、`03-*.md`、`04-*.md`、`06-*.md`、`07-*.md`、`08-*.md`、`09-*.md`：英文核心协议文档。
-- `vnext/`：ANP-01 至 ANP-09 核心协议候选草案，包含 ANP-02、ANP-03 和 ANP-04；`chinese/vnext/` 为中文镜像。
-- `application/`：AP2 等应用层协议。
-- `message/`：已发布的 ANP 1.1 端到端即时消息 Profile 规范集；`chinese/message/vnext/` 与 `message/vnext/` 保存独立版本化的 v2 草案。
-- `chinese/`：核心规范中文版及相关研究笔记。
+- `01-*.md`、`02-*.md`、`03-*.md`、`04-*.md`、`06-*.md`、`07-*.md`、`08-*.md`、`09-*.md`：英文核心文档，文档版本为 1.2，各自保留明确状态。
+- `message/`：ANP Messaging 1.2 Profile 规范集与索引；P6 保留候选状态。
+- `chinese/`：核心及消息规范的中文镜像，以及相关研究笔记。
+- `vnext/`、`chinese/vnext/`、`message/vnext/`、`chinese/message/vnext/`：历史发布前快照，索引指向当前文档。
+- `application/`：AP2 等独立版本化应用协议。
 - `docs/`：指南、扩展阅读和社区运营文档。
-- `blogs/`：技术文章和协议分析。
-- `examples/`：ADP 示例资产、API 接口示例及[消息 vNext 多设备 JSON 示例](examples/message-vnext/README.cn.md)。
+- `blogs/`：技术文章与历史协议分析。
+- `examples/`：ADP 资产、API 接口、[Messaging 1.2 示例](examples/message-vnext/README.cn.md)和 [ANP-02 向量](examples/did-authentication-vnext/README.cn.md)；示例目录保留 `-vnext` 名称以兼容既有路径。
 - `images/`、`standard/`：共享图和标准化参考资料。
 
 ## 深入阅读
@@ -144,10 +144,11 @@ AWiki 是基于 ANP 的智能体身份与消息开源实现，包含以下项目
 - [x] 发布智能体描述协议和智能体发现协议。
 - [ ] 元协议仍为草案，待稳定后发布。
 - [x] 将端到端即时消息拆分为总纲和九个可互操作 Profile。
-- [ ] 稳定并评审核心协议 vNext 草案（目前为 ANP-02、ANP-03 和 ANP-04）。
-- [ ] 稳定并评审独立版本化的多设备消息 vNext 草案。
-- [x] 在应用层加入 AP2 智能体支付协议。
-- [ ] 持续推进 SDK 实现与示例对齐 ANP 1.1 规范集。
+- [x] 将 ANP-02 认证、ANP-03 身份连续性、ANP-04 命名及原生 Web 集成合入 ANP 1.2 文档。
+- [x] 将全部九份消息文档及混合版本 Profile 目录合入 ANP 1.2。
+- [ ] 完成 P6 v2 稳定版的 MLS ExtensionType 注册发布门槛。
+- [x] 在应用层加入 AP2 支付适配草案。
+- [ ] 持续推进 SDK 实现与示例对齐 ANP 1.2 规范集，并验证实际互操作。
 - [ ] 持续推进标准化工作，并扩展更多领域应用协议。
 
 ## 联系我们
@@ -195,9 +196,11 @@ AWiki 是基于 ANP 的智能体身份与消息开源实现，包含以下项目
 
 ## 许可证
 
-本项目基于 MIT 许可证开源，详情请参考 [LICENSE](LICENSE)。版权归属于常高伟（GaoWei Chang）。任何使用本项目的用户必须保留原始版权声明和许可证文件。
+本项目根目录许可证为 [Apache License 2.0（Apache-2.0）](LICENSE)。请保留适用的许可证、版权和署名声明；现有版权持有人信息保持不变。
+
+此项目级说明不替代历史草案、归档文档或第三方参考材料中的独立声明。再分发或项目捐赠前，应逐项核对这些材料；修改许可标签不代表完成权利归属确认或第三方权利清理。
 
 ## 版权声明
 
 Copyright (c) 2024 GaoWei Chang
-本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
+本文件依据 [Apache License 2.0](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

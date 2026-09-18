@@ -173,20 +173,20 @@ for (const vector of bytes) {
 }
 
 const scenarios = [];
-const authRef = '../../vnext/02-anp-did-authentication-protocol-specification.md';
-const p1 = '../../message/vnext/01-core-binding.md';
-const p2 = '../../message/vnext/02-identity-and-discovery.md';
-const p3 = '../../message/vnext/03-direct-messaging-base-semantics.md';
-const p4 = '../../message/vnext/04-group-messaging-base-semantics.md';
-const p5 = '../../message/vnext/05-direct-end-to-end-encryption.md';
-const p6 = '../../message/vnext/06-group-end-to-end-encryption.md';
-const p7 = '../../message/vnext/07-attachments-and-object-transfer.md';
-const p8 = '../../message/vnext/08-federation-and-cross-domain.md';
-const p9 = '../../message/vnext/09-message-mentions.md';
-const wns = '../../vnext/04-anp-did-wba-name-space-specification.md';
+const authRef = '../../02-anp-did-authentication-protocol-specification.md';
+const p1 = '../../message/01-core-binding.md';
+const p2 = '../../message/02-identity-and-discovery.md';
+const p3 = '../../message/03-direct-messaging-base-semantics.md';
+const p4 = '../../message/04-group-messaging-base-semantics.md';
+const p5 = '../../message/05-direct-end-to-end-encryption.md';
+const p6 = '../../message/06-group-end-to-end-encryption.md';
+const p7 = '../../message/07-attachments-and-object-transfer.md';
+const p8 = '../../message/08-federation-and-cross-domain.md';
+const p9 = '../../message/09-message-mentions.md';
+const wns = '../../04-anp-did-wba-name-space-specification.md';
 function scenario(id, category, input, actions, expected, refs) {
   const authenticationExample = refs.some(ref => ref.startsWith(authRef));
-  scenarios.push({id, category, execution_status: 'design-only-not-run-against-sdk-or-product', ...(authenticationExample ? {applicability: 'illustrative-implementation-policy-not-additional-anp02-conformance', policy_note: 'Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.'} : {}), input, actions, expected, normative_refs: refs});
+  scenarios.push({id, category, execution_status: 'design-only-not-run-against-sdk-or-product', ...(authenticationExample ? {applicability: 'illustrative-implementation-policy-not-additional-anp02-conformance', policy_note: 'Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.'} : {}), input, actions, expected, normative_refs: refs});
 }
 const authCases = [
   ['ACCEPT', 'none', null, 'authenticated', null],
@@ -301,7 +301,7 @@ for (const method of ['wba', 'web']) {
   scenario('UNKNOWN-EXTENSION-' + method, 'extension', {identity_fixture: 'alice-' + method, supported_extensions: [], requested_extension: 'example.unnegotiated-control'}, [{operation: 'attempt-unnegotiated-extension'}], {outcome: 'apply-owning-profile-unknown-extension-rule-without-downgrade', unconditional_acceptance: false}, [p1, p7, p9]);
 }
 
-const webHandleRef = '../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle';
+const webHandleRef = '../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle';
 for (const method of ['wba', 'web']) {
   const did = identities['alice-' + method].did;
   const provider = method === 'wba' ? 'identity-wba.example' : 'names.example';
@@ -362,7 +362,7 @@ scenario('AUTH-web-DOCUMENT-REMOVED', 'method-evidence', {identity_fixture: 'api
 const artifacts = {
   'identities.json': {schema_version: 1, status: 'offline-public-fixtures', fixed_time: now, test_key_derivation: 'SHA-256("ANP02-PUBLIC-TEST-ONLY:" + key label); all keys are public test material, never production credentials.', network_boundary: 'No HTTPS, DNS, method resolver or state freshness is exercised by generating these documents.', profiles, identities},
   'byte-vectors.json': {schema_version: 1, status: 'offline-cryptographic-byte-vectors', source_commit: sourceCommit, fixed_time: now, scope: 'Request signature/digest construction, E1/Object Proof bytes, and P5 AEAD bytes. Not SDK, complete method, X3DH/Ratchet or MLS conformance.', positives: bytes, negatives},
-  'scenario-vectors.json': {schema_version: 1, status: 'protocol-design-not-sdk-product-results', source_commit: sourceCommit, scope: 'Authentication-related setups/actions/outcomes are illustrative implementation-policy examples, not additional conformance requirements. The extracted original ANP-03 vNext text is authoritative. Static validation does not execute scenarios.', fixture_capabilities: {request_signature_algorithm: 'Ed25519', request_key_formats: ['Multikey', 'JsonWebKey2020-OKP-Ed25519'], status: 'selected-for-these-fixtures-not-a-new-anp02-minimum'}, method_pairs: pairs, scenarios},
+  'scenario-vectors.json': {schema_version: 1, status: 'protocol-design-not-sdk-product-results', source_commit: sourceCommit, scope: 'Authentication-related setups/actions/outcomes are illustrative implementation-policy examples, not additional conformance requirements. The ANP-02 1.2 authentication text is authoritative. Static validation does not execute scenarios.', fixture_capabilities: {request_signature_algorithm: 'Ed25519', request_key_formats: ['Multikey', 'JsonWebKey2020-OKP-Ed25519'], status: 'selected-for-these-fixtures-not-a-new-anp02-minimum'}, method_pairs: pairs, scenarios},
 };
 const rendered = Object.fromEntries(Object.entries(artifacts).map(([name, value]) => [name, JSON.stringify(value, null, 2) + '\n']));
 rendered['manifest.json'] = JSON.stringify({schema_version: 1, source_commit: sourceCommit, generation_command: 'node scripts/generate-anp02-vectors.mjs --write', checking_command: 'node scripts/check-anp02-vectors.mjs', files: Object.fromEntries(Object.entries(rendered).map(([name, text]) => [name, sha256(text).toString('hex')])), counts: {identity_fixtures: Object.keys(identities).length, positive_byte_vectors: bytes.length, negative_byte_vectors: negatives.length, design_scenarios: scenarios.length}}, null, 2) + '\n';

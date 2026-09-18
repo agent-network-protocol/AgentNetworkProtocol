@@ -1,149 +1,135 @@
 # DID:WBA 入门指南
 
+- 规范集：ANP 1.2
+
+本指南介绍 WBA 身份的创建、解析和请求认证。通用认证以 [ANP-02](../chinese/02-ANP-基于DID的身份认证协议.md) 为准，WBA 方法规则以 [ANP-03](../chinese/03-did-wba方法规范.md) 为准；本指南不是另一份规范。
+
 ## 什么是 DID？
 
-DID（去中心化标识符，Decentralized Identifier）是一种新型的标识符，用于可验证的"自我主权"数字身份。与传统的中心化标识符不同，DID 完全由标识符的主体控制，独立于任何中心化注册表、身份提供商或证书颁发机构。
-
-DID 具有以下关键特性：
-
-- **持久性**：只要底层系统存在，标识符就可以持久存在
-- **加密可验证**：使用密码学证明控制权
-- **可解析**：通过 DID 可以发现更多信息
-- **自我主权**：由标识符主体自行控制
+DID（去中心化标识符，Decentralized Identifier）用于标识主体。DID Document 可以公开用于验证主体的公钥、验证方法和服务入口。具体身份材料的可信依据、解析与生命周期规则由 DID 方法定义，不能仅凭 DID 字符串推定控制权或业务权限。
 
 ## DID:WBA 简介
 
-did:wba（Web-Based Agent）是一种基于 Web 的去中心化标识符方法，特别为满足跨平台身份认证和智能体通信的需求而设计。它在 did:web 基础上进行了扩展和优化，保留了兼容性的同时增强了针对智能体场景的适配性。
+`did:wba`（Web-Based Agent）使用域名、HTTPS 和 DID Document 提供 Web 身份解析，并为默认路径型 DID 定义公钥指纹绑定、文档证明与身份连续性规则。部署可以自己托管身份文档，也可以使用身份服务商；私钥不应交给公开文档服务器保存。
 
-did:wba 的设计原则是既充分利用现有的成熟技术和完善的 Web 基础设施，又实现去中心化。它实现了类似 email 的特点，各个平台可以以中心化的方式实现自己的账户体系，同时各平台之间可以互联互通。
+ANP 1.2 将两类职责分开：**ANP-03 管 WBA 方法，ANP-02 管通用 HTTP/JSON 请求认证**。原生 `did:web` 可按 [Web 方法绑定与集成附录](../chinese/附录B：与原生did-web-的兼容.md) 使用同一套认证机制，无需转换为 WBA，也不能被要求满足 WBA 特有的根 proof 规则。
+
+普通 API 认证不要求 WNS、消息 Profile 或 `deviceManifest`。消息和设备资格由各自 Profile 定义；规范存在不等于 SDK、服务或产品已经支持。
 
 ## DID:WBA 的格式
 
-did:wba 的格式如下：
+裸域名形式与默认路径型形式分别为：
 
+```text
+did:wba:example.com
+did:wba:example.com:user:alice:e1_<fingerprint>
+did:wba:example.com%3A3000:user:alice:e1_<fingerprint>
 ```
-did:wba:<domain-name>[:<path>]
+
+`<fingerprint>` 是占位符，真实值按 ANP-03 从 Ed25519 绑定公钥计算。`%3A3000` 表示端口；新建默认路径型 DID 的最后一段必须为 `e1_` 绑定指纹。`k1_` 属于[附录 A 的非默认兼容扩展](../chinese/附录A：did-wba-k1_兼容扩展.md)，不应与默认 E1 规则混用。
+
+对应的文档地址为：
+
+```text
+https://example.com/.well-known/did.json
+https://example.com/user/alice/e1_<fingerprint>/did.json
+https://example.com:3000/user/alice/e1_<fingerprint>/did.json
 ```
 
-其中：
-- `did:wba` 是固定前缀
-- `<domain-name>` 是域名，需由 TLS/SSL 证书保护
-- `[:<path>]` 是可选的路径部分，使用冒号（:）作为分隔符
+## 如何创建 DID:WBA
 
-示例：
-- `did:wba:example.com` - 基本形式
-- `did:wba:example.com:user:alice` - 带路径
-- `did:wba:example.com%3A3000:user:alice` - 带端口（注意端口冒号需编码为 %3A）
+1. 确定托管域名与主体路径，并在客户端安全生成和保存密钥。公开 DID Document 只含公钥，不含私钥或完整密钥对。
+2. 对默认路径型 DID，按 ANP-03 计算 Ed25519 公钥指纹并构造完整 DID。为需要持续标识的主体分配不可回收、不可重新分配的稳定主体路径。
+3. 构造 DID Document，声明验证方法及其 `authentication` 等用途；活动 E1 文档按 ANP-03 生成必需的 `DataIntegrityProof`。
+4. 通过 HTTPS 发布到该 DID 对应地址，再验证解析、指纹、文档 proof 和密钥用途。
 
-## 如何使用 DID:WBA
+### DID Document 结构
 
-### 创建 DID:WBA
-
-创建 did:wba 标识符需要以下步骤：
-
-1. **获取域名**：向域名注册商申请使用域名
-2. **配置 DNS**：在 DNS 查询服务中存储托管服务的位置和 IP 地址
-3. **创建 DID 文档**：创建符合规范的 DID 文档 JSON-LD 文件，包含验证方法和必要的密钥对
-4. **发布 DID 文档**：将 DID 文档放置在正确的位置
-
-DID 文档的存放位置取决于 DID 的形式：
-- 对于 `did:wba:example.com`，DID 文档应位于 `https://example.com/.well-known/did.json`
-- 对于 `did:wba:example.com:user:alice`，DID 文档应位于 `https://example.com/user/alice/did.json`
-- 对于 `did:wba:example.com%3A3000:user:alice`，DID 文档应位于 `https://example.com:3000/user/alice/did.json`
-
-### DID 文档结构
-
-一个基本的 did:wba 文档应包含以下核心元素：
+以下只是默认 E1 文档的结构示意，指纹、公钥、时间和签名值均需替换为实际计算结果，不能作为密码学测试向量：
 
 ```json
 {
-    "@context": [
-      "https://www.w3.org/ns/did/v1",
-      "https://w3id.org/security/suites/jws-2020/v1",
-      "https://w3id.org/security/suites/secp256k1-2019/v1"
-    ],
-    "id": "did:wba:example.com:user:alice",
-    "verificationMethod": [
-      {
-        "id": "did:wba:example.com:user:alice#key-1",
-        "type": "EcdsaSecp256k1VerificationKey2019",
-        "controller": "did:wba:example.com:user:alice",
-        "publicKeyJwk": {
-          "crv": "secp256k1",
-          "x": "..."
-          "y": "...",
-          "kty": "EC",
-          "kid": "..."
-        }
-      }
-    ],
-    "authentication": [
-      "did:wba:example.com:user:alice#key-1"
-    ]
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/data-integrity/v2",
+    "https://w3id.org/security/multikey/v1"
+  ],
+  "id": "did:wba:example.com:user:alice:e1_<fingerprint>",
+  "verificationMethod": [
+    {
+      "id": "did:wba:example.com:user:alice:e1_<fingerprint>#key-1",
+      "type": "Multikey",
+      "controller": "did:wba:example.com:user:alice:e1_<fingerprint>",
+      "publicKeyMultibase": "z<ed25519-public-key>"
+    }
+  ],
+  "authentication": [
+    "did:wba:example.com:user:alice:e1_<fingerprint>#key-1"
+  ],
+  "assertionMethod": [
+    "did:wba:example.com:user:alice:e1_<fingerprint>#key-1"
+  ],
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-jcs-2022",
+    "created": "2026-09-18T00:00:00Z",
+    "verificationMethod": "did:wba:example.com:user:alice:e1_<fingerprint>#key-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z<signature>"
+  }
 }
 ```
 
-重要字段说明：
-- **@context**：必须字段，定义 DID 文档的语义
-- **id**：必须字段，DID 标识符
-- **verificationMethod**：必须字段，包含验证方法的数组
-- **authentication**：必须字段，用于身份验证的验证方法列表
+`id` 必须与请求解析的 DID 匹配；`verificationMethod` 提供公开验证材料；`authentication` 授权请求认证密钥。`@context` 的有无与处理遵循 ANP-03 的 JSON/JSON-LD 规则，不是所有表示形式都强制带有它。活动 E1 文档必须满足其方法规定的 proof 和路径指纹验证。
 
-可选字段：
-- **keyAgreement**：用于密钥协商的公钥信息
-- **service**：与 DID 关联的服务列表，如智能体描述服务
+`keyAgreement`、`service` 以及 `deviceManifest` 按所采用能力的规范要求声明，不能从上面的普通认证示例推定消息或 E2EE 支持。
 
-> 注意：根据 [ANP-03 v1.1](/chinese/03-did-wba方法规范.md)，`did:wba` DID 文档不定义 `humanAuthorization` 验证关系。接口级的人类授权要求由 [ANP-07](/chinese/07-ANP-智能体描述协议规范.md) 中的 `humanAuthorization` 字段声明；基于 DID 的请求认证仍使用由 `authentication` 引用的验证方法。具体操作如何取得或证明人类授权，由适用的业务协议和授权策略定义。
+`humanAuthorization` 不是 DID 验证关系。[ANP-07](../chinese/07-ANP-智能体描述协议规范.md) 的同名字段仅声明接口级人类授权要求；请求仍按 ANP-02 使用 `authentication` 授权的密钥。认证签名本身不证明人类已经批准该操作。
 
-### 解析 DID:WBA
+## 如何解析和验证
 
-解析 did:wba 文档的步骤：
+按 [ANP-03 方法规则](../chinese/03-did-wba方法规范.md#wba-method-rules) 从完整 DID 构造 HTTPS URL，正确处理路径和编码端口。除获取 JSON 之外，还应验证 TLS 服务身份、文档 `id`、密钥关系及适用的方法证明。
 
-1. 将方法特定标识符中的 ":" 替换为 "/" 获得域名和路径
-2. 如果包含端口，对冒号进行百分比解码
-3. 添加 "https://" 前缀
-4. 如果未指定路径，附加 "/.well-known"
-5. 附加 "/did.json" 完成 URL
-6. 执行 HTTP GET 请求获取 DID 文档
-7. 验证文档中的 ID 是否与请求的 DID 匹配
+活动 E1 文档须验证 `eddsa-jcs-2022` proof，并用 `proof.verificationMethod` 对应公钥重算指纹，与 DID 末段比较。裸域名形式不要求 E1 路径指纹，但仍须满足方法及请求认证要求。
 
-## 基于 DID:WBA 的跨平台身份认证
+### 稳定主体路径与迁移
 
-did:wba 提供了一个基于 HTTP 协议的流程，使服务端能够快速验证来自其他平台客户端的身份。
+更换绑定密钥可以产生新 DID。相同稳定主体路径、`alsoKnownAs` 或 Handle 指向新 DID 都不能独立证明连续性。验证必须从此前可信的 DID 开始，按 ANP-03 校验迁移链与证明，再由业务策略决定权限、成员关系等是否延续。
 
-认证流程：
+停用 DID 不得继续用于新的认证；WBA 特定的 [HTTP 409 DID 已被替代响应](../chinese/03-did-wba方法规范.md#http-superseded) 及重试流程以 ANP-03 为准。
 
-1. **初始请求**：客户端在 HTTP 请求头中携带 DID 和签名
-   ```
-   Authorization: DIDWba did="did:wba:example.com:user:alice", nonce="abc123", timestamp="2024-12-05T12:34:56Z", verification_method="key-1", signature="..."
-   ```
+## 基于 ANP-02 的跨平台身份认证
 
-2. **服务端验证**：
-   - 验证时间戳是否在合理范围内
-   - 验证 nonce 是否已被使用
-   - 验证 DID 权限
-   - 获取 DID 文档并验证签名
+当前 HTTP 请求认证使用 [ANP-02 HTTP 绑定](../chinese/02-ANP-基于DID的身份认证协议.md#http-binding)。签名由 `Signature-Input` 和 `Signature` 承载；存在消息体时，还要计算 `Content-Digest` 并将其纳入签名覆盖范围。
 
-3. **签名验证过程**：
-   - 服务端根据请求信息构建验证字符串
-   - 使用 JCS 规范化字符串
-   - 使用 SHA-256 算法生成哈希值
-   - 根据 DID 文档获取公钥
-   - 验证签名是否有效
+下面沿用规范的占位符风格说明请求形态，不是可直接发送的有效请求；时间须按实际请求生成，digest 和 signature 须根据真实请求计算：
 
-4. **认证成功返回 access_token**：
-   - 验证成功后返回 JWT 格式的 access_token
-   - 客户端后续请求使用此 token
+```text
+POST /orders HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Content-Digest: sha-256=:BASE64_SHA256_DIGEST:
+Signature-Input: sig1=("@method" "@target-uri" "@authority" "content-digest");created=1733402096;expires=1733402156;nonce="abc123";keyid="did:wba:example.com:user:alice:e1_<fingerprint>#key-1"
+Signature: sig1=:BASE64_SIGNATURE:
+```
+
+服务端验证步骤：
+
+1. 检查请求头、签名覆盖范围及消息体摘要；从完整 DID URL `keyid` 得到主体 DID 与验证方法。
+2. 按 WBA 方法解析、验证 DID Document，并确认所选密钥由 `authentication` 授权。
+3. 按实际 HTTP 请求重建 RFC 9421 签名基串，使用对应算法验签。不能用旧的自定义 JCS 请求字符串替代此签名基串。
+4. 执行时间窗口、挑战和重放保护，再独立检查业务权限。
+5. 服务可按 [ANP-02 可选 Token 流程](../chinese/02-ANP-基于DID的身份认证协议.md#access-tokens) 返回 Access Token；JWT 是建议格式，不是所有实现的强制要求。
+
+JSON 认证信息承载见 [ANP-02 第 4 章](../chinese/02-ANP-基于DID的身份认证协议.md#json-carriage)。消息原发者证明与 E2EE 对象证明仍由 P1 及所属消息 Profile 定义，不与普通 HTTP 签名混为一谈。
 
 ## 后续学习
 
-要深入了解 did:wba，建议查阅以下资源：
-
-1. [ANP 项目主页](https://github.com/agent-network-protocol/AgentNetworkProtocol)
-2. [did:wba 方法规范](https://agent-network-protocol.com/chinese/03-did:wba方法规范.html)
-3. [W3C DID 核心规范](https://www.w3.org/TR/did-core/)
-4. [ANP 智能体描述协议规范](https://agent-network-protocol.com/chinese/07-ANP-智能体描述协议规范.html)
+1. 先读 [ANP-02：基于 DID 的身份认证](../chinese/02-ANP-基于DID的身份认证协议.md)。
+2. 再读 [ANP-03：did:wba 方法规范](../chinese/03-did-wba方法规范.md)或[原生 did:web 集成附录](../chinese/附录B：与原生did-web-的兼容.md)。
+3. 需要命名时阅读 [ANP-04：WNS](../chinese/04-ANP-基于DID-WBA的命名空间规范.md)；发布能力时阅读 [ANP-07](../chinese/07-ANP-智能体描述协议规范.md)。
+4. 需要消息时从 [Messaging 1.2 索引](../chinese/message/README.md) 开始；完整概览见 [ANP 入门指南](chinese/ANP入门指南.md)。
 
 ## 小结
 
-did:wba 提供了一种基于 Web 的去中心化标识方案，特别适合智能体通信场景。它结合了中心化系统的便捷性和去中心化系统的互操作性，为智能体网络提供了可靠的身份标识和验证机制。通过 did:wba，不同平台的智能体可以安全地建立互信，实现跨平台通信和协作。
+WBA 方法验证、通用请求认证和业务授权是不同层次。以 ANP-03 验证身份材料，以 ANP-02 验证请求，再以相应业务策略决定操作权限；不要从文档路径、名称或一次认证成功推定额外授权。

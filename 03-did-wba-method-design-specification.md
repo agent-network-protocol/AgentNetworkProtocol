@@ -3,9 +3,11 @@
 - Document ID: ANP-03
 - Title: did:wba Method Specification
 - Status: Released
-- Version: 1.1
+- Version: 1.2
 - Language: English
 - Applicability: This specification applies to web-based decentralized identity, cross-platform authentication, and agent communication scenarios in ANP.
+
+> ANP 1.2 release note: common DID authentication is defined by ANP-02; DID method and naming rules remain in their owning specifications. The Chinese mirror is [did:wba方法规范](chinese/03-did-wba方法规范.md).
 
 ## Abstract
 
@@ -19,9 +21,7 @@ In order to be compatible with the wallet ecosystem and existing secp256k1 imple
 
 - `k1_`: Binds the secp256k1 public key, mainly used for compatibility with the wallet ecosystem and the existing Web3 key system.
 
-At the same time, we designed a process based on the did:wba method and the HTTP protocol: the request signature is based on the HTTP Message Signatures of [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), and the message body integrity is based on the `Content-Digest` field of [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530), so that the server can quickly verify the identity of clients on other platforms without increasing the number of interactions.
-
-This specification is also compatible with the native did:web method regarding cross-platform identity authentication, end-to-end encryption, handle and other functions. Please refer to Appendix B for the compatibility solution.
+Common HTTP/JSON authentication is now defined by [ANP-02](02-anp-did-authentication-protocol-specification.md); this specification supplies WBA method rules. Native Web binding, naming, and messaging composition are described in [Appendix B](appendix-b-compatibility-with-native-did-web.md).
 
 ## 1. Introduction
 
@@ -29,13 +29,13 @@ This specification is also compatible with the native did:web method regarding c
 
 The did:wba DID method specification complies with the requirements specified in Decentralized Identifiers V1.0 [[DID-CORE](https://www.w3.org/TR/did-core/)].
 
-Based on the did:web method specification, this specification adds specification descriptions such as DID document limitations, cross-platform identity authentication processes, and agent description services, and proposes a new method name did:wba (Web-Based Agent).
+This specification builds on did:web to define WBA document, binding, and lifecycle rules, and connects to common authentication through ANP-02.
 
 Considering that the did:web method is designed for native web-based DID use cases and may evolve in ways that do not fully fit agent communication scenarios, and that this specification introduces targeted modifications, reaching consensus with the original author on those modifications would be a long-term process. Therefore, we decided to use a new method name.
 
 In the future, we do not rule out the possibility of merging the did:wba specification into the did:web specification, and we will promote the realization of this goal.
 
-The did:web method specification referenced by did:wba is available at [https://w3c-ccg.github.io/did-method-web](https://w3c-ccg.github.io/did-method-web), version dated July 31, 2024. For ease of management, we have also archived the copy of the did:web method specification currently used by did:wba: [did:web Method Specification](/references/did_web-method-specification.html).
+The did:web method specification referenced by did:wba is available at [https://w3c-ccg.github.io/did-method-web](https://w3c-ccg.github.io/did-method-web), version dated July 31, 2024. For ease of management, we have also archived the copy of the did:web method specification currently used by did:wba: [did:web Method Specification](references/did_web-method-specification.html).
 
 ### 1.2 Design principles
 
@@ -50,8 +50,13 @@ In order to strike a balance between standard interoperability and ecological co
 
 A natural consequence of the public key fingerprint path scheme is that when the binding key changes, the path-type DID also changes. Therefore, did:wba does not press "stable user-readable identity" directly on the DID string, but solves the stable reference problem through a name service scheme (such as WNS/Handle): DID is responsible for "verifiable cryptographic identity", and the name service is responsible for "stable human-readable name".
 
+For path-type DIDs that need to preserve subject continuity after the binding key changes, the path before the final binding-fingerprint segment is called the **stable subject path**. For example, the stable subject path of `did:wba:example.com:user:alice:e1_<fingerprint>` is `example.com:user:alice`. A stable subject path is not another DID and cannot be resolved independently; once it is used to identify a continuing subject, it MUST remain permanently immutable, non-recyclable, and non-reassignable.
+
+Two complete DIDs with the same stable subject path are still two distinct DIDs. A matching path is only a necessary condition for determining subject continuity; a verifier may treat the DIDs as the same continuing subject only after validating the `successorDid` document chain and the corresponding DID Document `proof` according to this specification.
+
 In addition, various types of identifier systems can add support for DID, creating an interoperable bridge between centralized, federated, and decentralized identifier systems. This means that the existing centralized identifier system does not need to be completely reconstructed, and DID can only be created on its basis to achieve cross-system interoperability, thus greatly reducing the difficulty of technical implementation.
 
+<a id="wba-method-rules"></a>
 ## 2. did:wba DID method specification
 
 ### 2.1 Method name
@@ -96,7 +101,7 @@ The usage of `did:wba:{domain}` is similar to `did:web:{domain}`. The main rules
 2. Naked domain name DID is mainly used to express "the entire domain name subject" or "domain-level service identity", rather than a specific user or sub-identity;
 3. In ANP's cross-domain service-to-service calls, if an `ANPMessageService` needs to declare its own DID for outer HTTP identity authentication, it **SHOULD** prefer the naked domain name DID;
 4. The naked domain name DID does not carry the `e1_` path binding fingerprint, so the path binding verification rules of this specification for the `e1_` path type DID do not apply;
-5. Its HTTP Message Signatures verification method is consistent with the similar usage of did:web: the verifier parses the DID, checks whether the verification method pointed to by `keyid` exists and is authorized by the `authentication` relationship, and then uses the corresponding public key to verify the request signature.
+5. Request authentication follows [ANP-02 common HTTP authentication and the WBA binding](02-anp-did-authentication-protocol-specification.md#wba-binding). Bare-domain form does not waive its digest, signature-coverage, authentication-purpose, time, or replay requirements. Native Web uses the ANP-02 Web binding.
 
 See Appendix B for details on how native `did:web` participates in the above process in the same way in ANP.
 
@@ -162,6 +167,22 @@ Notes:
 1. The `e1_` prefix is not part of the hash output, but the profile prefix;
 2. It is recommended to use the thumbprint value without the `e1_` prefix as the `kid` or fragment of the verification method to facilitate the intuitive correspondence between the DID path and the verification method identification;
 3. New deployments SHOULD preferentially use the `e1_` profile.
+
+### 2.2.3 Stable Subject Path
+
+For a path-type DID using the binding-fingerprint path scheme, the stable subject path consists of the domain name and every path segment before the final binding-fingerprint segment:
+
+```text
+did:wba:example.com:user:alice:e1_<fingerprint>
+        └──── stable subject path: example.com:user:alice ────┘
+```
+
+The stable subject path MUST satisfy the following requirements:
+
+1. Once assigned to a continuing subject, it MUST NOT be modified, recycled, or reassigned to another subject;
+2. When a root binding-key change produces a new DID, the stable subject paths of the old and new DIDs MUST be identical;
+3. A verifier MUST NOT conclude that two DIDs belong to the same subject solely because they have the same stable subject path;
+4. Subject continuity MUST be verified according to Sections 2.5.2 through 2.5.5 by validating the old DID Document's `successorDid`, the document-wide `proof`, and the new DID's binding fingerprint.
 
 ### 2.4 Key material and document processing
 
@@ -252,6 +273,12 @@ Apart from DID Core, related specifications may evolve over time. This section s
 
 - **id**: required field, cannot carry IP, but can carry port. When carrying port, the colon needs to be encoded as `%3A`. Use a colon later to split the path. For newly created path DIDs, the last path segment MUST be `e1_<fingerprint>`.
 
+- **alsoKnownAs**: An optional field defined by DID Core. When a root binding-key change produces a new DID, the new DID Document MAY use this field to reference its direct predecessor DID. `alsoKnownAs` expresses only a reverse association claim and does not by itself constitute cryptographic proof of subject continuity.
+
+- **deactivated**: An optional did:wba extension field defined for direct DID Document retrieval. A value of `true` indicates that the complete DID is no longer used for new authentication or business routing, while its DID Document remains available for historical verification and successor lookup.
+
+- **successorDid**: An optional extension field defined by did:wba. Its value MUST be a complete DID string that points from a superseded DID to its direct successor DID. It MUST NOT skip an intermediate DID and be rewritten to point directly to a later successor.
+
 - **verificationMethod**: A required field, containing an array of verification methods, which defines the public key information used to verify the DID subject. For scenarios that need to support end-to-end encryption (E2EE) communication, `verificationMethod` should contain both the signature key and the key agreement key to achieve key separation. The signing key is used for identity authentication and document assertion; the key agreement key (such as `X25519KeyAgreementKey2019`) is used for key negotiation of upper-layer protocols or receipt of confidential information. Both types of keys perform their own duties, and the leakage of a single key will not affect identity authentication and communication confidentiality at the same time.
 
 For a path-type DID using the default path scheme, there MUST be at least one Ed25519 `Multikey` in `verificationMethod` as a binding key, and the RFC 7638 thumbprint of its equivalent public key JWK is exactly the same as the last `e1_` fingerprint segment of the DID path.
@@ -278,7 +305,7 @@ For a path-type DID using the default path scheme, there MUST be at least one Ed
 - **service**: Optional field that defines the list of services associated with the DID subject.
   - **id**: The unique identifier of the service.
   - **type**: Service type. Currently the following types are supported:
-    - `AgentDescription`: agent description service. `serviceEndpoint` points to documents that comply with the [ANP Agent Description Protocol Specification](/07-anp-agent-description-protocol-specification.md).
+    - `AgentDescription`: agent description service. `serviceEndpoint` points to documents that comply with the [ANP Agent Description Protocol Specification](07-anp-agent-description-protocol-specification.md).
     - `ANPHandleService`: Handle binding service, used for WNS (WBA Name Space) bidirectional binding verification. `serviceEndpoint` MUST be a dereferenceable absolute HTTPS URI under the Handle Provider's domain. For details, see the [ANP DID:WBA Namespace Specification](04-anp-did-wba-name-space-specification.md).
       - When the DID holder is willing to disclose its Handle, `serviceEndpoint` SHOULD directly use the standard Resolution Endpoint of that Handle (such as `https://example.com/.well-known/handle/alice`).
       - When the DID holder does not want to disclose its Handle in the DID Document, `serviceEndpoint` MAY point to a DID Confirmation Endpoint (such as `https://example.com/.well-known/handle/by-did?did=...`), which returns at least `did` and `confirmed = true`.
@@ -356,16 +383,22 @@ The following steps must be performed to parse a DID Document from a `did:wba` D
 - Append `/did.json` to complete the URL.
 - Perform HTTP GET requests to the URL using a proxy capable of successfully negotiating a secure HTTPS connection that enforces the security requirements described in [Section 2.6 Security and Privacy Considerations](https://w3c-ccg.github.io/did-method-web/#security-and-privacy-considerations).
 - Verify that the `id` of the parsed DID Document matches the `did:wba` DID being parsed.
-- For the `e1_` path type DID defined by the main specification, it must be verified according to the following strict binding relationship:
+- For an `e1_` path-type DID defined by the main specification that does not set `deactivated = true`, the following strict binding relationship MUST be verified:
   - DID Document top-level `proof` must exist;
   - `proof` must pass `DataIntegrityProof` + `eddsa-jcs-2022` verification;
   - The verification method pointed to by `proof.verificationMethod` MUST be Ed25519 `Multikey` (or a semantically equivalent Ed25519 verification method representation);
   - Calculate the RFC 7638 thumbprint with the Ed25519 public key corresponding to `proof.verificationMethod`, and the result must be completely consistent with the last `e1_` fingerprint segment of the DID path.
+- For an `e1_` DID that sets `deactivated = true`:
+  - The verifier MUST still find in the document the original binding key whose fingerprint matches the DID path's `e1_` fingerprint;
+  - If the document also contains `successorDid`, the verifier MUST verify that the old and new DIDs have the same stable subject path;
+  - If the document-wide `proof` was signed by the original binding key, the migration may be treated as verified;
+  - If the document-wide `proof` was signed by a pre-authorized recovery key, the migration may be treated as recovery-verified only if the verifier already holds a trusted DID Document from before deactivation and can confirm that the trusted document pre-authorized the recovery key in `assertionMethod`;
+  - If no top-level `proof` is present, a standalone hop verifier MAY read `successorDid` as an `unverified` migration hint. A resolver that obtained every document through authenticated same-origin HTTPS, verified every direct hop, and reached a final active `e1_` DID with a valid binding proof MAY report the unsigned hop as `provider_asserted`. An isolated `successorDid` or document supplied without that authenticated complete-chain context remains `unverified`.
 - When performing DNS resolution during an HTTP GET request, clients should use [[RFC8484](https://w3c-ccg.github.io/did-method-web/#bib-rfc8484)] to prevent tracking of the identity being resolved.
-- For `e1_` DID, the above proof verification is not affected by the local policy switch, but is a necessary condition for successful parsing.
+- For an active `e1_` DID, the above proof verification is not affected by a local policy switch and is a necessary condition for successful parsing.
 - For other profiles, if the local policy enables DID Document proof verification and the document contains `proof`, it should be verified according to the corresponding profile rules.
 
-For naked domain name DIDs, the parsing and verification process follows the same basic pattern as did:web naked domain name DIDs: parse `/.well-known/did.json`, check `id` consistency, and verify the verification method in the `authentication` relationship according to DID Core / HTTP Message Signatures rules; `e1_` path binding verification does not apply.
+For bare-domain DIDs, method resolution uses `/.well-known/did.json` and checks `id` consistency; E1 path-binding verification does not apply. Requests are separately authenticated under [ANP-02 common authentication and the WBA binding](02-anp-did-authentication-protocol-specification.md#wba-binding); this paragraph does not define a reduced verification flow.
 
 > Description:
 > If an implementation also supports the `k1_` compatible extensions of Appendix A, parsing and binding verification of `k1_` DIDs shall be performed as per Appendix A.
@@ -376,7 +409,16 @@ To update the DID document, you need to update the `did.json` file corresponding
 
 For path type did:wba with the default path scheme, as long as the last bound key fingerprint of the DID path does not change, the DID itself will remain unchanged, but other contents of the DID document can change, for example, adding new verification keys, revoking old keys, or updating service endpoints.
 
-If the binding key changes, the path DID MUST be changed to the new DID. At this time, a new DID document should be created, and the upper-layer name service (such as WNS/Handle) is responsible for stable reference and migration.
+If the binding key changes, the path-type DID MUST change to a new DID. The old and new DIDs are two distinct DIDs, but they can establish a migration relationship for the same continuing subject under the following rules:
+
+1. The new DID MUST have exactly the same stable subject path as the old DID;
+2. A new DID Document MUST be created and published. The new document MAY reference the direct predecessor DID in `alsoKnownAs`;
+3. The old DID Document MUST remain retrievable and set `deactivated = true` and `successorDid = <new DID>`;
+4. `successorDid` MUST point only to the direct next-generation DID. On subsequent rotations, the `successorDid` of an earlier DID MUST NOT be rewritten;
+5. The old DID Document's document-wide `proof` should cover `deactivated`, `successorDid`, and all other document properties; the new DID Document has its document-wide `proof` generated by the new binding key;
+6. An upper-layer name service such as WNS/Handle should be updated to the new DID at the same time, but the name-service mapping does not replace the migration proof above.
+
+This specification does not define a programmatic management interface. To prevent concurrent rotations from producing multiple successors, an implementation SHOULD perform an atomic compare-and-swap against the current complete DID (for example, `expected_current_did`) rather than submit an update based only on the stable subject path.
 
 > Note:
 >
@@ -385,13 +427,13 @@ If the binding key changes, the path DID MUST be changed to the new DID. At this
 
 #### 2.5.4 Deactivation (withdrawal)
 
-To delete a DID document, the `did.json` file must be removed or otherwise no longer publicly available.
+For an identity that is permanently deactivated and has no successor DID, the `did.json` file may be removed or otherwise made no longer publicly available.
 
-For path type did:wba using the default path scheme, if the binding key is permanently discarded, the rotation can also be completed by deactivating the old DID and creating a new DID; the stable reference relationship is maintained by the upper-layer name service.
+For a path-type did:wba that has been superseded by a new DID because of binding-key rotation, the old DID Document MUST NOT be removed. It MUST remain retrievable and set `deactivated = true` and `successorDid` to support historical signature verification and successor lookup. Here, `deactivated` means only that this complete DID is no longer used for new authentication and routing; it does not mean that the continuing subject has ceased to exist.
 
 #### 2.5.5 DID Document proof
 
-Whether the top-level `proof` field appears in a `did:wba` DID Document depends on the profile in use. For the default `e1_` profile, `proof` is a required field; for other profiles, the DID Document MAY contain a top-level `proof` field to provide proof of document integrity. This field is used to prove that the DID Document has not been tampered with after the proof was generated and indicates that the signer controlled the corresponding private key when the proof was created. Proof itself does not replace DID method parsing, nor does it replace the `id` consistency check on its own.
+Whether the top-level `proof` field appears in a `did:wba` DID Document depends on the profile and document state. For an active document using the default `e1_` profile, `proof` is required. A deactivated `e1_` transition document with `successorDid` follows the binding, recovery, authenticated-Provider, and unverified branches defined below, so its top-level `proof` MAY be absent. For other profiles, the DID Document MAY contain a top-level `proof` field to provide proof of document integrity. This field is used to prove that the DID Document has not been tampered with after the proof was generated and indicates that the signer controlled the corresponding private key when the proof was created. Proof itself does not replace DID method parsing, nor does it replace the `id` consistency check on its own.
 
 For the default `e1_` profile, the `proof` profile defined by the master specification MUST conform to:
 
@@ -411,13 +453,27 @@ The `proof` object contains the following fields:
 
 Additional constraints:
 
-1. `proof.verificationMethod` MUST use `e1_` to bind the key to unify DID path binding, public key binding and document integrity certification;
-2. The parser MUST recalculate the RFC 7638 thumbprint with the Ed25519 public key corresponding to `proof.verificationMethod` and verify that it is completely consistent with the last `e1_` fingerprint segment of the DID path;
+1. For an active `e1_` document, `proof.verificationMethod` MUST use the `e1_` binding key, unifying DID path binding, public-key binding, and document-integrity proof. For a deactivated document with `successorDid`, it may instead use a recovery key that was pre-authorized by `assertionMethod` in a trusted pre-deactivation document, but it MUST NOT use a key introduced only at deactivation;
+2. For an active `e1_` document, and for a deactivated transition that claims continuity through the old binding key, the parser MUST recalculate the RFC 7638 thumbprint with the Ed25519 public key corresponding to `proof.verificationMethod` and verify that it is completely consistent with the last `e1_` fingerprint segment of the DID path. A recovery proof instead MUST be verified with the key material and `assertionMethod` authorization from a trusted pre-deactivation document; the recovery key is not required to match the `e1_` binding fingerprint;
 3. The generation and verification of `proof` must (MUST) follow the standard algorithm process of `eddsa-jcs-2022`, and the algorithm details will no longer be rewritten by this specification.
 
-When parsing an `e1_` `did:wba` DID Document, proof verification is not an optional enhanced check, but part of the path-binding semantics. If `proof` is missing, proof verification fails, or `proof.verificationMethod` is inconsistent with the `e1_` binding fingerprint, parsing MUST fail.
+When parsing an active `e1_` `did:wba` DID Document, proof verification is not an optional enhanced check, but part of the path-binding semantics. If `proof` is missing, proof verification fails, or `proof.verificationMethod` is inconsistent with the `e1_` binding fingerprint, parsing MUST fail.
 
-For `e1_` DIDs, there is no relaxed mode of "DID Document does not contain `proof` and can still be parsed".
+For `e1_` DIDs, there is no relaxed mode in which an active DID Document can still be parsed without a `proof`.
+
+For an old DID Document that sets `deactivated = true` and `successorDid`, the top-level `proof` remains a document-wide proof over the complete document after removing `proof`:
+
+- When signed by the old DID's binding key, the result provides strong cryptographic continuity;
+- When signed by a recovery key that the old DID authorized through `assertionMethod` before deactivation, the verifier MUST confirm that prior authorization from a previously trusted state;
+- If a top-level `proof` is present, it MUST verify as either an old-binding proof or a pre-authorized recovery proof. A malformed, unauthorized, or cryptographically invalid proof MUST invalidate the transition and MUST NOT be downgraded to a provider assertion or an unverified hint;
+- When neither the old private key nor a pre-authorized recovery key is available, the top-level `proof` MAY be absent. A standalone hop verifier MUST report that hop as `unverified`. A complete-chain resolver MAY report it as `provider_asserted` only after obtaining the predecessor and every successor through authenticated same-origin HTTPS, verifying the stable subject path and direct-successor relationship at every hop, and reaching a final active `e1_` DID whose binding proof verifies. A failed or incomplete chain MUST NOT produce `provider_asserted`.
+
+Transition assurance has exactly the following meanings:
+
+- `verified`: the predecessor's original binding key signs the document-wide deactivation and direct-successor relationship;
+- `recovery_verified`: a recovery key pre-authorized by `assertionMethod` in a trusted pre-deactivation document signs that relationship;
+- `provider_asserted`: either an authenticated same-origin HTTPS Provider resolution completes the entire structurally valid chain to a proof-valid active DID, or the identity Provider supplies the same predecessor-to-successor fact through a separately authenticated recovery/transition authority channel. This assurance is not a DID Document property and MUST NOT be promoted to `verified` or `recovery_verified`;
+- `unverified`: only an isolated `successorDid`, `alsoKnownAs`, Handle/WNS mapping, HTTP 409 hint, standalone unsigned hop, incomplete chain, or document without authenticated Provider provenance is available.
 
 For non-`e1_` profiles, implementations MAY choose one of the following two modes according to the corresponding profile rules or local policy:
 
@@ -431,433 +487,86 @@ For DIDs using the `e1_` profile, this specification requires that the top-level
 
 For security and privacy considerations, please refer to [[did:web method specification section 2.6](https://w3c-ccg.github.io/did-method-web/#security-and-privacy-considerations)]. Implementers should also pay additional attention to DID rotation caused by binding key changes under the default path scheme, and name service synchronization issues.
 
+This version does not require an independently verifiable log. After a complete resolution succeeds, clients SHOULD cache only successor edges whose hop assurance is `verified` or `recovery_verified`. `provider_asserted` and `unverified` edges MUST NOT enter that verified-edge cache. Validation failures before the cache-commit step, including invalid final proof, cycle, and hop-limit failures, MUST NOT leave prefix edges from the failed chain in it. If a cached verified edge and a newly observed `successorDid` disagree for the same old DID, the migration chain contains a cycle, or a successor DID has a different stable subject path, the client MUST reject the migration and report the conflict to the upper layer.
+
 New deployments SHOULD prefer the `e1_` profile for better standard proof interoperability. If the implementation needs to be compatible with the wallet ecosystem and existing secp256k1 implementation, please see the `k1_` compatible extension in Appendix A.
 
 ## 3. Cross-platform identity authentication based on did:wba method and HTTP protocol
 
-When a client initiates a request to a server on a different platform, the client can use the domain name combined with TLS to authenticate the server, and the server verifies the client's identity based on the verification method in the client's DID document.
+Common authentication is defined in [ANP-02 Chapter 3](02-anp-did-authentication-protocol-specification.md#http-binding). WBA method rules remain in Chapter 2; request format, verification flow, and implementation policies are preserved from the pre-release authentication design.
 
-When the client makes the first HTTP request, it uses the `Signature-Input` and `Signature` headers defined by [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) for signature; if the request carries a message body, it uses the `Content-Digest` header defined by [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) to bind the integrity of the message body. After the first verification is passed, the server can return the access token, and the client will carry the access token in subsequent requests. The server does not need to verify the client's identity every time, but only needs to verify the access token.
+<a id="wba-auth-binding"></a>
+### 3.1 WBA method constraints for request authentication
 
-```mermaid
-sequenceDiagram
-    participant Agent A Client
-    participant Agent B Server
-    participant Agent A DID Server
+ANP-02 defines the common request format and signature verification. This section supplies WBA method requirements without applying them to other DID methods.
 
-    Note over Agent A Client,Agent B Server: First Request
-    Agent A Client->>Agent B Server: HTTP Request: Signature-Input, Signature, Content-Digest
-    Agent B Server->>Agent A DID Server: Get DID Document
-    Agent A DID Server->>Agent B Server: DID Document
+#### 3.1.1 Authentication-key selection
 
-    Note over Agent B Server: Authentication
-
-    Agent B Server->>Agent A Client: HTTP Response: Authentication-Info(access token)
-
-    Note over Agent A Client, Agent B Server: Subsequent Requests
-    Agent A Client->>Agent B Server: HTTP Request: Authorization(access token)
-    Agent B Server->>Agent A Client: HTTP Response
-```
-
-### 3.1 Initial request
-
-When the current client initiates an HTTP request to the server for the first time, it needs to perform identity authentication according to the following method.
-
-#### 3.1.1 Request header format
-
-Clients MUST send authentication information using the `Signature-Input` and `Signature` header fields defined in [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421). When a request includes a message body, the client MUST also send the `Content-Digest` header field defined in [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530).
-
-The minimum signature coverage set is as follows:
-
-- `@method`
-- `@target-uri`
-- `content-digest` (when the request contains a message body)
-
-Recommended additional components for coverage are as follows:
-
-- `@authority`
-- `content-type`
-- `content-length`
-
-The key parameter requirements in `Signature-Input` are as follows:
-
-- `keyid`: MUST be a complete DID URL, pointing to a verification method in the DID document, for example:
-  `did:wba:example.com:user:alice:e1_<fingerprint>#key-1`
-- `created`: MUST, indicating the signature creation time
-- `expires`: SHOULD, indicating the signature expiration time
-- `nonce`: MAY be carried; if `nonce` is given in the server challenge, the client MUST use that `nonce`
-- `alg`: Non-required field. This specification does not mandate the use of the `alg` parameter, the verifier can determine the algorithm based on the DID verification method type pointed to by `keyid`
-
-By default, the client SHOULD sign using the binding key corresponding to the last `e1_` fingerprint segment of the DID path. If the server allows other `authentication` verification methods, it belongs to the local authorization policy and does not change the binding semantics of DID.
-
-Client request example:
-
-```plaintext
-POST /orders HTTP/1.1
-Host: api.example.com
-Content-Type: application/json
-Content-Digest: sha-256=:BASE64_SHA256_DIGEST:
-Signature-Input: sig1=("@method" "@target-uri" "@authority" "content-digest");created=1733402096;expires=1733402156;nonce="abc123";keyid="did:wba:example.com:user:alice:e1_<fingerprint>#key-1"
-Signature: sig1=:BASE64_SIGNATURE:
-```
+For `did:wba` using the E1 profile, the client SHOULD by default sign using the binding key corresponding to the last `e1_` fingerprint segment of the DID path. If the server allows other `authentication` verification methods, it belongs to the local authorization policy and does not change the binding semantics of DID.
 
 > Description:
-> If the implementation also supports the `k1_` compatible extension of Appendix A, then the authentication signature for the `k1_` DID may be performed as in Appendix A.
+> If the implementation also supports the `k1_` compatible extension of [Appendix A](appendix-a-did-wba-k1-compatibility-extension.md), then the authentication signature for the `k1_` DID may be performed as in [Appendix A](appendix-a-did-wba-k1-compatibility-extension.md).
 
-#### 3.1.2 Signature generation process
+#### 3.1.2 Method state and identity binding
 
-1. If the HTTP request contains a message body, the client first calculates the `Content-Digest` value of the message body according to [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530).
+**Read DID document**: Parse the DID document based on the DID. If the document sets `deactivated = true`, the server MUST NOT continue to use that DID for new authentication. When the document contains `successorDid`, the server should return the DID-superseded error defined in [this chapter's 409 response](#http-superseded).
 
-2. Select the verification method to use for the signature. By default, binding keys for path-type DIDs should be used in preference.
-   - If the DID uses the Ed25519 binding key represented by `Multikey` (corresponding to the `e1_` profile), it should be signed using the Ed25519 algorithm;
-   - Other algorithms are defined by corresponding verification method types.
-
-3. Construct `Signature-Input`, covering at least `@method` and `@target-uri`; if a message body exists, `content-digest` must also be covered.
-
-4. Generate a signature base string (signature base) according to the rules defined in [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421).
-
-5. Use the client private key to sign the signature base, obtain the signature byte string, and write it into the `Signature` header field.
-
-6. Send `Signature-Input`, `Signature`, and (if applicable) `Content-Digest` to the server.
-
-### 3.2 Server-side verification
-
-#### 3.2.1 Verification request header
-
-After receiving the client request, the server performs the following verification:
-
-1. **Verify request format**: Check whether `Signature-Input` and `Signature` exist; when the request contains a message body, check whether `Content-Digest` exists.
-
-2. **Verify message body integrity**: When the request contains a message body, verify whether `Content-Digest` is consistent with the actual message body according to [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530).
-
-3. **Extract `keyid` and parse DID**: Extract `keyid` from `Signature-Input` to obtain the corresponding DID and verification method.
-
-4. **Read DID document**: Parse the DID document based on DID.
-
-5. **Verify DID binding relationship**:
-   - Verify that the verification method pointed to by `keyid` exists;
-   - Verify that the verification method is authorized by the `authentication` relationship of the DID document;
-   - For `e1_` DID, the DID binding relationship must be verified based on the Ed25519 public key corresponding to `proof.verificationMethod` instead of randomly selecting an Ed25519 key in `authentication`:
+   - For a `did:wba` E1 DID, the DID binding relationship must be verified based on the Ed25519 public key corresponding to `proof.verificationMethod` instead of randomly selecting an Ed25519 key in `authentication`:
      - `proof` must exist and pass `eddsa-jcs-2022` verification;
      - Recalculate the RFC 7638 thumbprint using this public key, and the result MUST be exactly the same as the last `e1_` fingerprint segment of the DID path.
 
-6. **Verify signature coverage**: Rebuild the signature base based on `Signature-Input`, and verify that the HTTP components covered by the signature are consistent with the actual request.
-
-7. **Verification time window**: Check whether `created` / `expires` is within a reasonable time range. The recommended time window is 1 minute to 5 minutes, which is configurable by the implementer.
-
-8. **Verification Replay Protection**:
-   - For direct connection proof profile, the server should establish a short-term replay cache for `(keyid, nonce)` or equivalent keys;
-   - For challenge profile, if `nonce` comes from a server challenge, then `nonce` MUST be used one at a time.
-
-9. **Verify DID permission**: After successful authentication, independently verify whether the DID in the request has the permission to access server resources. If there is no permission, `403 Forbidden` is returned.
-
-10. **Verification result**: If the signature verification is successful, the request passes the authentication; otherwise, `401 Unauthorized` is returned with challenge information attached.
-
 > Description:
-> If an implementation also supports the `k1_` compatible extension of Appendix A, then binding verification and authentication verification of the `k1_` DID shall be performed as per Appendix A.
+> If an implementation also supports the `k1_` compatible extension of [Appendix A](appendix-a-did-wba-k1-compatibility-extension.md), then binding verification and authentication verification of the `k1_` DID shall be performed as per [Appendix A](appendix-a-did-wba-k1-compatibility-extension.md).
 
-#### 3.2.2 Signature verification process
+<a id="http-superseded"></a>
+### 3.2 WBA HTTP 409 DID Superseded response
 
-1. Parse the signature tag, coverage component, `created`, `expires`, `nonce`, `keyid` and other parameters from `Signature-Input`, and extract the corresponding signature value from `Signature`.
+When the DID targeted by a request or used for authentication sets `deactivated = true` and has a successor DID, the server may return `409 Conflict`:
 
-2. According to [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) rules, the signature base is reconstructed based on the actual HTTP request.
-
-3. Obtain the corresponding verification method and public key from the DID document according to `keyid`.
-
-4. Select the verification algorithm based on the verification method type:
-   - For the Ed25519 verification method represented by `Multikey`, verify according to the 64-byte signature format of Ed25519;
-   - Other algorithms are defined according to the corresponding verification method type.
-
-5. Use the obtained public key to verify the signature to ensure that the signature is generated by the corresponding private key.
-
-6. If the request contains a message body, the `Content-Digest` verification results should also be included in the overall certification conclusion.
-
-#### 3.2.3 Successful authentication returns access_token
-
-After the server-side verification is successful, the access token can be returned in the response. The access token is recommended to use JWT (JSON Web Token) format. The client's subsequent requests carry the access token. The server does not need to verify the client's DID identity every time, but only needs to verify the access token. The following generation process is not required by the specification and is for reference only. Implementers can define and implement it as needed.
-
-JWT generation method reference [RFC7519](https://www.rfc-editor.org/rfc/rfc7519).
-
-1. **Generate Access Token**
-
-Assuming that the server uses **JWT (JSON Web Token)** as the Access Token format, JWT usually contains the following fields:
-
-- **header**: Specify signature algorithm
-- **payload**: stores user related information
-- **signature**: Sign `header` and `payload` to ensure their integrity
-
-The payload can contain the following fields (other fields are added as needed):
-
-```json
-{
-  "sub": "did:wba:example.com:user:alice:e1_<fingerprint>",
-  "iat": "2024-12-05T12:34:56Z",
-  "exp": "2024-12-06T12:34:56Z",
-  "scope": "orders.read orders.write"
-}
-```
-
-2. **Return Access Token**
-
-The server MUST return the access token via the `Authentication-Info` response header, not the `Authorization` response header.
-
-Example:
-
-```plaintext
-Authentication-Info: access_token="eyJhbGciOi...", token_type="Bearer", expires_in=3600, scope="orders.read orders.write"
-```
-
-3. **Suggestions on sender-constrained token**
-
-In order to reduce the risk of the token being directly reused after being leaked, it is recommended to use **sender-constrained** access token to bind the token to the key held by the client.
-
-This version of the specification retains this extension capability, but does not yet fully define the specific profile of sender-constrained token. Implementers can reserve the following capabilities for future expansion:
-
-- Add a statement bound to the client's public key in the token (such as `cnf` or equivalent field);
-- Require the client to continue to provide proof bound to the token in subsequent requests;
-- Differentiate different token profiles through the `token_type` field.
-
-Before the sender-constrained profile is unified, for the sake of compatibility, you can use `Bearer` as the default `token_type`.
-
-4. **Client sends Access Token**
-
-The client usually sends the Access Token via the `Authorization` header field in subsequent requests:
-
-```plaintext
-Authorization: Bearer <access_token>
-```
-
-If the `token_type` returned by the server is not `Bearer`, the client MUST send the token according to the corresponding extension specification.
-
-5. **Server-side verification Access Token**
-
-After receiving the client's request, the server extracts the Access Token from the `Authorization` header and performs verification, including verifying the signature, verifying the expiration time, verifying the fields in the payload, etc. The verification method refers to [RFC7519](https://www.rfc-editor.org/rfc/rfc7519).
-
-#### 3.2.4 Error handling
-
-##### 3.2.4.1 401 response
-
-When the server fails to verify the signature, `Content-Digest` fails to verify, the signature expires, there is a risk of replay, or the server requires the client to re-sign according to the challenge information, it can return a `401 Unauthorized` response.
-
-If the server requires that the client must use the `nonce` issued by the server for signature, it can return `401` when the client makes the first request and append the challenge information to the response. This adds an interaction that implementers can choose to use or not if needed.
-
-Error information is returned through the `WWW-Authenticate` header field, and the server can also indicate the components it expects to cover in the next request through `Accept-Signature`. Examples are as follows:
-
-```plaintext
-WWW-Authenticate: DIDWba realm="api.example.com", error="invalid_signature", error_description="Signature verification failed.", nonce="xyz987"
-Accept-Signature: sig1=("@method" "@target-uri" "@authority" "content-digest");created;expires;nonce;keyid
+```http
+HTTP/1.1 409 Conflict
+Content-Type: application/json
 Cache-Control: no-store
 ```
 
-Contains the following fields:
+```json
+{
+  "code": "did_superseded",
+  "requestedDid": "did:wba:example.com:user:alice:e1_<old-fingerprint>",
+  "currentDid": "did:wba:example.com:user:alice:e1_<current-fingerprint>",
+  "stableSubjectId": "example.com:user:alice"
+}
+```
 
-- **realm**: optional field, indicating the domain to which the protected resource belongs
-- **error**: required field, error type, containing the following string values:
-  - `invalid_request`: The request is malformed, missing required fields, or contains unsupported parameters
-  - `invalid_nonce`: Nonce is used, is invalid, or does not match the server challenge
-  - `invalid_timestamp`: timestamp out of range
-  - `invalid_did`: The DID format is wrong, or the corresponding DID document cannot be found based on the DID.
-  - `invalid_signature`: Signature verification failed
-  - `invalid_verification_method`: Unable to find the corresponding public key based on `keyid`
-  - `invalid_content_digest`: `Content-Digest` does not match the message body
-  - `invalid_access_token`: access token verification failed
-  - `forbidden_did`: DID does not have permission to access server resources
-- **error_description**: optional field, error description
-- **nonce**: Optional field, a random string generated by the server. If carried, the client needs to use the `nonce` to regenerate the signature and reinitiate the request
-
-After the client receives the `401` response, if the response carries `nonce`, it needs to use the server's `nonce` to regenerate the signature and reinitiate the request. If the response does not carry `nonce`, the client can regenerate the local `nonce` and try again.
-
-It should be noted that the client and server need to limit the number of retries in their respective implementations to prevent an infinite loop.
-
-##### 3.2.4.2 403 response
-
-When server-side authentication is successful, but the DID does not have the permission to access server-side resources, a `403 Forbidden` response can be returned.
+The response's `currentDid` is only an unverified hint. A client MUST NOT retry directly based on this field. Instead, it must retrieve the old DID Document; verify `deactivated`, `successorDid`, and the document-wide `proof`; and then resolve each successor DID in turn until it finds the current active DID. The client should generate a new signature with the current DID before sending the request again. A transparent `301` / `302` redirect should not replace this verification process.
 
 ## 4. Cross-platform identity authentication process based on did:wba method and JSON-formatted data carriage
 
-In the previous chapter, we introduced the cross-platform identity authentication process based on the did:wba method and HTTP protocol. However, authentication using the did:wba method is transport protocol independent. This section only defines the method for carrying the authentication information in Section 3 as JSON metadata, and does not redefine the new set of fields to be signed.
-
-This section applies to scenarios where request metadata and business payload can be separated at the application layer, for example:
-
-- HTTP body encapsulation
-- WebSocket first package
-- Message bus envelope
-- Custom RPC request wrapping layer
-
-For pure JSON-only transmission that cannot separate the "authentication metadata" and "business payload" boundaries, this section is not directly applicable, and subsequent versions can define specialized transport profiles.
-
-In theory, protocols based on other data formats could also add support for the did:wba method.
-
-The overall process is as follows:
-
-```mermaid
-sequenceDiagram
-    participant Agent A Client
-    participant Agent B Server
-    participant Agent A DID Server
-
-    Note over Agent A Client,Agent B Server: Initial Request
-    Agent A Client->>Agent B Server: Authentication Metadata(JSON) + Payload
-    Agent B Server->>Agent A DID Server: Get DID Document
-    Agent A DID Server->>Agent B Server: DID Document
-
-    Note over Agent B Server: Authentication
-
-    Agent B Server->>Agent A Client: Response (+ optional Authentication-Info)
-
-    Note over Agent A Client, Agent B Server: Subsequent Requests
-    Agent A Client->>Agent B Server: Request + access token
-    Agent B Server->>Agent A Client: Response
-```
-
-### 4.1 Initial request
-
-When the current client initiates a request to the server for the first time, it needs to perform identity authentication according to the following method.
-
-#### 4.1.1 Authentication information data format
-
-When authentication information cannot be placed in an HTTP header, the authentication fields from Section 3 can be put into a separate JSON metadata object, such as the `auth` field.
-
-The recommended format is as follows:
-
-```json
-{
-  "auth": {
-    "contentDigest": "sha-256=:BASE64_SHA256_DIGEST:",
-    "signatureInput": "sig1=(\"@method\" \"@target-uri\" \"@authority\" \"content-digest\");created=1733402096;expires=1733402156;nonce=\"abc123\";keyid=\"did:wba:example.com:user:alice:e1_<fingerprint>#key-1\"",
-    "signature": "sig1=:BASE64_SIGNATURE:"
-  },
-  "payload": {
-    "orderId": "12345",
-    "action": "create"
-  }
-}
-```
-
-Field description:
-
-- **auth.contentDigest**: Corresponds to `Content-Digest` in the HTTP header. If there is a business load, it is used to bind `payload`
-- **auth.signatureInput**: corresponds to `Signature-Input` in the HTTP header
-- **auth.signature**: corresponds to `Signature` in the HTTP header
-- **payload**: business data ontology
-
-In JSON bearer mode, `contentDigest` binds the **payload part** instead of the entire encapsulated object including `auth`. `auth` is outer authentication metadata and does not participate in the business load summary.
-
-If `payload` is a JSON object rather than a raw byte sequence, the implementer should fix its serialization rules locally; it is recommended to use the JCS (JSON Canonicalization Scheme) of [RFC8785](https://www.rfc-editor.org/rfc/rfc8785) to stably serialize `payload` before calculating `contentDigest`.
-
-Authentication information can be sent in a separate request or together with business request data.
-
-#### 4.1.2 Signature generation process
-
-The signature generation process is the same as 3.1.2 Signature generation process. The difference is:
-
-1. `Content-Digest`, `Signature-Input` and `Signature` are no longer sent through HTTP headers, but through JSON metadata objects (such as `auth`);
-2. `contentDigest` is bound by default to the byte representation of `payload`, not the entire encapsulated object;
-3. If the underlying protocol is still HTTP, the meaning of `@method` and `@target-uri` remains unchanged; if the underlying protocol is not HTTP, the equivalent components of the target message should be clearly defined by the corresponding application layer protocol.
-
-### 4.2 Server-side verification
-
-#### 4.2.1 Identity verification request
-
-The verification process is the same as 3.2.1 Verification request header. The difference is that the `contentDigest`, `signatureInput`, and `signature` fields need to be extracted from the `auth` object in the request data.
-
-At the same time, when verifying `contentDigest`, the server should only perform digest verification on the `payload` part.
-
-After passing the verification, if the underlying transmission is still HTTP, the server returns the access token in the same way as 3.2.3, that is, through the `Authentication-Info` response header.
-
-If the underlying transport does not support the response header, this specification does not standardize the alternative return method of the access token, which is defined by the upper layer protocol.
-
-#### 4.2.2 Error handling
-
-Error handling is the same as 3.2.4 Error handling.
-
-If the underlying transport is HTTP, the `WWW-Authenticate` and `Accept-Signature` headers are still the source of authority challenge information. The application layer can also mirror these error fields in the JSON response body to facilitate caller processing.
-
-Example of returning a 401 response using JSON format:
-
-```json
-{
-  "code": 401,
-  "error": "invalid_nonce",
-  "error_description": "Nonce has already been used. Please provide a new nonce.",
-  "nonce": "1234567890"
-}
-```
-
-Example of returning a 403 response using JSON format:
-
-```json
-{
-  "code": 403,
-  "error": "forbidden_did",
-  "error_description": "did not have permission to access the resource."
-}
-```
+Authentication metadata carriage is defined in [ANP-02 Chapter 4](02-anp-did-authentication-protocol-specification.md#json-carriage), retaining its fields, serialization conventions, component mappings, and verification flow.
 
 ## 5 Distinguish between human authorization and intelligent agent automatic authorization
 
-For requests that are not very important, the user agent can automatically authorize, such as accessing a hotel's agent and reading hotel information. At this time, manual confirmation by humans is not required. The user agent can initiate the request on its own behalf.
-
-For important requests, such as booking a hotel room, the hotel agent may require manual confirmation from a human. However, the semantics of "whether human confirmation is required" belong to an upper-layer authorization policy, not to an independent field in the DID Document. The `did:wba` DID Document only declares the verification methods that can be used for `authentication` and no longer defines the `humanAuthorization` field.
-
-An Agent Description can declare that an interface requires human authorization, while the applicable business protocol can define the requirement for a specific operation. The vocabulary used to express this requirement is defined at those upper layers. The following labels are non-normative examples of an application-defined policy vocabulary:
-
-- `authorizationLevel: normal`
-- `authorizationLevel: user-presence-required`
-
-ANP-03 defines neither the `authorizationLevel` field nor these values. The current [ANP-07 Agent Description Protocol](/07-anp-agent-description-protocol-specification.md) declares the interface-level requirement with `humanAuthorization: true`. The draft [ANP-06 meta-protocol](/06-anp-agent-communication-meta-protocol-specification.md) can carry `requiresHumanAuthorization: true` as a negotiation constraint, but this does not prove that authorization has been completed.
-
-When a request requires manual human authorization, the user agent should first complete the corresponding confirmation process locally (such as click confirmation, biometrics, secure hardware approval, etc.), and then use the `authentication` key allowed by the policy to sign and initiate the request.
-
-What the server verifies is: whether the request meets the agreed high-level authorization policy; rather than simply inferring from the DID document that "this signature must have been completed by a human being".
-
-Agent developers need to securely keep private keys used for high-level operations and isolate permissions. For example, relevant keys can only be called after passing the local security confirmation process.
+See [ANP-02 Chapter 5](02-anp-did-authentication-protocol-specification.md#5-authentication-and-application-authorization).
 
 ## 6 Privacy Protection Policy
 
-Privacy protection is very important in a decentralized network. For example, illegal software may record and track the user's behavior through the user's DID, causing the leakage of user privacy.
-
-In this regard, we suggest that DID providers can adopt a multi-DID strategy, that is, generate multiple DIDs for one user, each DID has different roles and permissions, and uses different key pairs to achieve privacy protection and fine-grained permission control.
-
-For example, a master DID is generated for the user. This DID generally does not change and is used in scenarios such as maintaining social relationships. Then a series of sub-DIDs are generated for the user, which can be used for shopping, ordering takeout, booking tickets and other scenarios. These sub-DIDs are subordinate to the main DID, and expired DIDs can be periodically deactivated and new DIDs applied to improve privacy and security protection.
+See [ANP-02 Chapter 6](02-anp-did-authentication-protocol-specification.md#6-privacy-considerations).
 
 For scenarios that require stable external references but also want the underlying DID to be rotated, it is recommended to use it in conjunction with a name service (such as WNS/Handle): Handle remains stable and human-readable, and the underlying did:wba can rotate as the binding key changes.
 
 ## 7 Security Tips
 
-Implementers need to consider the following security issues when implementing:
+See [ANP-02 Chapter 7](02-anp-did-authentication-protocol-specification.md#security-privacy). Method-specific rules continue to reference Chapter 2 here; this extraction adds no security-policy requirements.
 
-1. **Key Management**
+WBA-specific security requirements:
 
-- The private key corresponding to DID must be kept properly and must not be leaked. In addition, a mechanism for regularly refreshing the private key should be established.
-   - For path-based DIDs with the default path scheme, the binding key is best kept using hardware isolation, HSM, or the system enclave.
-   - By default, cross-platform authentication should prefer signing with a bound key.
-   - New deployments SHOULD prefer the `e1_` profile.
-   - Users should generate multiple DIDs, each with different roles and permissions, and use different key pairs to achieve fine-grained permission control.
+   - For `did:wba` using the default path scheme, the binding key is best kept using hardware isolation, HSM, or the system enclave.
+   - For `did:wba` using a binding key, cross-platform authentication should prefer that key by default.
+   - New WBA deployments SHOULD prefer the `e1_` profile.
    - When the binding key changes, the path-type DID will change with it, so upper-level name service mappings should be updated synchronously.
-
-2. **Anti-attack measures**
-
-- The server **must** implement replay protection. For direct connection proof profile, a short-term replay cache should be established for `(keyid, nonce)`, `(keyid, jti)` or equivalent keys; for challenge profile, `nonce` issued by the server must be used one at a time.
-   - The server must determine the `created` / `expires` time window in the request to prevent time rollback attacks. Generally speaking, the cache time of the server's replay cache should be longer than the signature expiration time.
-   - When generating `nonce`, you **must** use a secure random number generator provided by the operating system, complying with modern cryptographic security specifications and standards. For example, you can use a module like Python's `secrets` to generate secure random numbers.
-   - When the request contains a message body, the server must verify `Content-Digest` to prevent the message body from being tampered with.
-   - Successful authentication does not equal successful authorization. The server must handle authorization judgment and identity authentication separately.
-   - For `e1_` DID, the parser MUST verify `DataIntegrityProof`; for other profiles, if the implementation enables DID Document proof verification, it SHOULD verify `proof` according to the corresponding profile rules.
-
-3. **Transmission Security**
-
-- When obtaining DID documents, the server should use the DNS-over-HTTPS (DoH) protocol to improve security.
-   - The transmission protocol **must** use HTTPS, and the client **must** strictly determine whether the other party's CA certificate is trustworthy.
-   - When performing TLS service identity verification, the client **must** match according to `dNSName` in `subjectAltName` and should not rely on Common Name.
-   - Unconditional following of untrusted cross-origin redirects should be avoided during DID resolution.
-
-4. **Token Security**
-
-- The client and server **must** properly keep the Access Token, and **must** set a reasonable expiration time.
-   - **should** be preferred over sender-constrained access tokens. This specification has reserved expansion capabilities, but the specific profile has not yet been fully defined.
-   - IP address, User-Agent and other information can only be used as auxiliary risk signals and should not be used as the only binding mechanism for Access Token.
-   - The access token **SHOULD** only be returned on HTTPS connections and sent via the `Authentication-Info` response header.
+   - For an active `did:wba` E1 DID, the parser MUST verify `DataIntegrityProof`. A deactivated `e1_` transition document follows the binding, recovery, provider-asserted, and unverified rules in [Section 2.5.5](03-did-wba-method-design-specification.md#wba-method-rules). For other profiles, if the implementation enables DID Document proof verification, it SHOULD verify `proof` according to the corresponding profile rules.
+   - A WBA stable subject path MUST NOT be recycled or reassigned. A verifier MUST NOT merge two DIDs merely by removing the final binding-fingerprint segment.
+   - When following `successorDid` under the WBA method, a verifier MUST limit the chain length, detect cycles, and reject a chain whose stable subject paths differ or in which the same old DID has multiple successors.
 
 ## 8. Use cases
 
@@ -873,7 +582,7 @@ Alice wants to call a third-party service API named example through the smart as
 
 ## 9. Summary
 
-Based on the did:web method specification, this specification adds specification descriptions such as DID document limitations, cross-platform identity authentication processes, and agent description services, and proposes a new method name did:wba (Web-Based Agent).
+This specification builds on did:web to define WBA document, binding, and lifecycle rules, and connects to common authentication through ANP-02.
 
 This version further defines the default scheme for path-type DID as "carrying the bound public key fingerprint in the DID path", and the main specification uses the `e1_` profile by default:
 
@@ -881,9 +590,11 @@ This version further defines the default scheme for path-type DID as "carrying t
 
 In order to be compatible with the wallet ecosystem and existing secp256k1 implementation, this specification additionally defines the `k1_` compatible extension in Appendix A.
 
-At the same time, the cross-platform HTTP identity authentication process adopts a standardized solution based on HTTP Message Signatures and `Content-Digest`, and puts additional authentication information after successful authentication into the `Authentication-Info` response header.
+When a binding-key change produces a new DID, this specification uses the permanently stable subject path as the continuity anchor and proves forward migration through the old DID Document's `successorDid` and document-wide `proof`; the new DID Document may make a reverse claim about the old DID through `alsoKnownAs`. A shared stable subject path alone does not prove DID equivalence.
 
-The did:wba method will be further improved later, adding agent capabilities and protocol description service endpoints, agent two-way authentication processes, and a unified profile for sender-constrained tokens.
+The sole normative definition of common HTTP/JSON request authentication and optional tokens is ANP-02.
+
+Future WBA revisions may evolve method capabilities and document service declarations. Common authentication and token extensions evolve through ANP-02.
 
 ---
 
@@ -950,4 +661,4 @@ Reference document [Appendix B: Compatibility with Native `did:web`](appendix-b-
 ## Copyright Notice
 
 Copyright (c) 2024 GaoWei Chang
-This file is released under the [MIT License](/LICENSE), which you may freely use and modify, provided you retain this copyright notice.
+This file is released under the [Apache License 2.0](LICENSE), which you may freely use and modify, provided you retain this copyright notice.

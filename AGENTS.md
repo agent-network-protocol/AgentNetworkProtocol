@@ -10,7 +10,8 @@ If Harness is absent, use local docs/tests/CI and disclose missing acceptance ev
 ## Project Structure & Module Organization
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
-- `vnext/` and `chinese/vnext/` hold candidate drafts for core protocols 01–09.
+- Root and `chinese/` hold the current ANP 1.2 core documents; `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
+- The four `vnext/` directories preserve historical pre-release snapshots; their indexes point to current documents.
 - `docs/` and `docs/chinese/` hold guides, links, and community operations.
 - `chinese/` mirrors core documents in Chinese plus research notes and process docs.
 - `blogs/` and `blogs/cn/` store long-form articles; `blogs/images/` holds blog assets.
@@ -31,6 +32,8 @@ This repository is documentation-first and has focused tests for maintenance aut
   - `uv run python scripts/add_copyright.py`
   - `uv run python scripts/rename_images.py`
   - `uv run python scripts/replace_spaces_with_hyphens.py`
+- Check ANP 1.2 document promotion with `node scripts/check-release-docs.mjs`, then run `node scripts/generate-anp02-vectors.mjs` and `node scripts/check-anp02-vectors.mjs` for offline fixture checks. The historical `check-anp02-draft.mjs` protects the earlier extraction baseline and is not a release-promotion validator.
+- Check onboarding and payment-status regressions with `node --test tests/release-doc-entrypoints.test.mjs`. The release checker includes the three current onboarding guides; AP2 checks cover status/version only, not payment conformance.
 - Test contributor avatar automation with `node --test tests/update_contributors.test.js`.
 
 ## Coding Style & Naming Conventions

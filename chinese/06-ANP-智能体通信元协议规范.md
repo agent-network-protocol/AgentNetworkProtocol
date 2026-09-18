@@ -3,7 +3,7 @@
 - 文档编号：ANP-06
 - 标题：ANP-智能体通信元协议规范
 - 状态：Draft
-- 版本：2.0-draft
+- 版本：1.2
 - 语言：中文
 - 适用范围：本规范适用于 ANP 智能体之间的语义元协议协商、接口选择、Profile 选择、安全模式选择、Schema 选择与协商结果复用。
 
@@ -128,7 +128,7 @@ Agent Description 中的 `MetaProtocolInterface.url` 是静态声明和可用入
 
 ### 3.5 与 DID:WBA 和安全机制的关系
 
-本规范不重新定义 DID:WBA。涉及身份认证、HTTP Message Signatures、`auth.origin_proof`、access token 或服务间身份校验时，应遵循 ANP-03 DID:WBA 方法规范以及相关消息 Profile 的安全要求。
+本规范不重新定义 DID 方法或身份认证。通用请求认证、HTTP Message Signatures 与 access token 遵循 [ANP-02](02-ANP-基于DID的身份认证协议.md)；WBA 方法验证遵循 [ANP-03](03-did-wba方法规范.md)，其他 DID 按各自方法验证。`auth.origin_proof` 与消息服务间校验遵循相关消息 P1/P2 及所属 Profile 的安全要求。文档版本 1.2 不改变本规范的草案状态或 `anp.meta.negotiation.v1` wire 标识。
 
 `anp.negotiate` 的协商结果不是身份凭证、授权凭证、access token、Verifiable Credential 或人类授权结果。
 

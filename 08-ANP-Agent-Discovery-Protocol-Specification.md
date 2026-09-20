@@ -3,7 +3,7 @@
 - Document ID: ANP-08
 - Title: ANP-Agent Discovery Protocol Specification
 - Status: Released
-- Version: 1.1
+- Version: 1.2
 - Language: English
 - Applicability: This specification applies to active and passive discovery of agents and Agent Description documents in ANP.
 
@@ -128,7 +128,7 @@ sequenceDiagram
 To ensure the security of agent discovery, the following measures are recommended:
 
 1. **Content Validation**: Search services should verify the validity and integrity of agent description documents
-2. **DID Authentication**: Use the did:wba method for identity authentication, ensuring the authenticity of agent identities
+2. **DID Authentication**: Use [ANP-02](02-anp-did-authentication-protocol-specification.md) for common authentication and validate identity material under the supported method, including `did:wba` and native `did:web`
 3. **Rate Limiting**: Implement appropriate rate limiting measures to prevent malicious requests and DoS attacks
 4. **Permission Control**: Distinguish between public and private agents, only including public agents in discovery documents
 
@@ -137,9 +137,9 @@ To ensure the security of agent discovery, the following measures are recommende
 The Agent Discovery Protocol is closely related to the following protocols:
 
 1. **Agent Description Protocol**: The discovery protocol provides indexing and access mechanisms for description documents
-2. **DID:WBA Method**: Provides identity authentication and security guarantees
+2. **ANP-02 and DID Method Specifications**: ANP-02 defines common request authentication; ANP-03 and other method specifications define identity-material validation
 3. **Meta-Protocol**: In agent communication, protocol negotiation can be based on discovery results
 
 ## Copyright Notice
 Copyright (c) 2024 GaoWei Chang  
-This document is released under the [MIT License](./LICENSE), you are free to use and modify it, but you must retain this copyright notice.
+This document is released under the [Apache License 2.0](./LICENSE), you are free to use and modify it, but you must retain this copyright notice.

@@ -1,51 +1,34 @@
+# Appendix B: Native did:web Integration
 
-## Appendix B: Compatibility with native `did:web`
+- Status: Released
+- Version: 1.2
+- Chinese mirror: [原生 did:web 集成](chinese/附录B：与原生did-web-的兼容.md)
 
-### B.1 Objectives and Scope
+## B.1 Scope and ownership
 
-This appendix defines the did:wba network compatibility mode for native `did:web`.
+This appendix is the integration entry point for native Web identities in the DID-method-independent ANP contracts. It does not define another authentication or messaging protocol. A subject retains its `did:web` identity; conversion to WBA is unnecessary.
 
-The goal of the compatibility mode is to enable the native `did:web` to still access the capabilities defined in this specification without requiring the other party to migrate the DID to `did:wba`, including but not limited to:
+| Contract | Normative owner |
+|---|---|
+| Web identity inputs and request authentication | [ANP-02 Web binding](02-anp-did-authentication-protocol-specification.md#web-binding) and common authentication |
+| WBA-specific Document validation | [ANP-03 method rules](03-did-wba-method-design-specification.md) |
+| Handle forward/reverse binding and status | [ANP-04 WNS](04-anp-did-wba-name-space-specification.md#binding-verification) |
+| Message identity, devices, and services | [Messaging P2](message/02-identity-and-discovery.md) |
+| Origin and object proof bindings | [Messaging P1](message/01-core-binding.md) |
+| Direct/Group E2EE and extensions | The selected P5/P6/P7/P9 Profile and its dependencies |
 
-- Cross-platform identity authentication (Chapter 3, Chapter 4)
-- Handle / WNS integration
-- end-to-end encryption Communication (E2EE)
-- ANP service discovery (including `AgentDescription` and `ANPMessageService`)
+## B.2 Method validation
 
-In compatibility mode, `did:web` continues to be created, parsed, and updated according to the `did:web` method specification; this appendix only defines how the did:wba network accepts and verifies native `did:web`.
+Verifiers MUST apply ANP-02's Web binding before consuming Web identity material. WBA E1/K1 fingerprints and WBA-specific Document proof requirements do not apply to native Web. This method difference does not waive any purpose authorization, object signature, device-eligibility, or message-authentication requirement imposed by a selected ANP Profile.
 
-### B.2 Parsing and verification rules
+## B.3 Authentication integration
 
-When an implementation receives a native `did:web`, it MUST perform parsing according to the `did:web` method specification and complete at least the following checks:
+Web and WBA callers use ANP-02's same HTTP component, digest, signature, challenge, replay, and optional-token rules. An ordinary API does not require a Handle or `deviceManifest`. Messaging P1 adds its application-origin context; P8 uses actual HTTP service-hop authentication. A successful hop signature does not establish the business sender's origin proof.
 
-1. Parse DID Document according to `did:web` rules;
-2. Check whether the `id` of the DID Document is completely consistent with the requested `did:web`;
-3. Check according to DID Core rules whether the relevant verification method exists and is in the correct verification relationship.
+<a id="legacy-web-handle"></a>
+## B.4 Handle / WNS integration (existing model)
 
-In compatibility mode, implementations MUST NOT enforce the following did:wba-specific checks on native `did:web`:
-
-- `e1_` / `k1_` path binding public key fingerprint check;
-- Path binding profile semantic check in did:wba main specification;
-- did:wba's unique path-type DID rotation semantic check;
-- Use did:wba-specific proof rules as a prerequisite for successful `did:web` parsing.
-
-If the native `did:web` DID Document itself carries a standard proof (such as Data Integrity proof), the implementation MAY perform verification according to the proof's declaration profile and local policy; however, the success of `did:web` parsing itself is not predicated on the `proof` rules of did:wba.
-
-### B.3 Compatibility with cross-platform authentication
-
-Native `did:web` is compatible with the cross-platform identity authentication process defined in Chapters 3 and 4 of this specification.
-
-When the client uses `did:web` to participate in cross-platform authentication:
-
-1. `keyid` still MUST be a complete DID URL;
-2. The server must still parse the DID Document;
-3. The server must still verify that the verification method pointed to by `keyid` exists;
-4. The server must still (MUST) verify that the verification method is located in the `authentication` relationship of the DID Document;
-5. The subsequent HTTP Message Signatures / `Content-Digest` verification logic is the same as did:wba.
-
-In compatibility mode, the identity binding semantics of `did:web` comes from the parsing result of `did:web` itself, rather than the path binding public key fingerprint of did:wba.
-
-### B.4 Compatibility with Handle / WNS
+The original Appendix B.4 body is retained below. This model confirms the forward Handle-to-DID mapping and the DID's Provider-domain declaration; it does not require dereferencing an exact endpoint or automatically produce the WBA mainline `exact-handle` or private-endpoint `provider-confirmed` result. This revision adds no Web weak-binding migration, cross-domain WBA Handle, or Provider-management requirements.
 
 Native `did:web` is compatible with did:wba's Handle / WNS system.
 
@@ -73,74 +56,25 @@ For native `did:web`, two-way binding verification only relies on:
 
 There is no need to perform did:wba's `e1_` / `k1_` fingerprint binding check.
 
-### B.5 Compatibility with end-to-end encryption communication (E2EE)
+## B.5 E2EE integration
 
-Native `did:web` is compatible with end-to-end encryption communication in did:wba network.
+Web devices use the method-validated Document and current P2 Manifest, then the same P5/P6 validation rules as WBA devices. A `keyAgreement` entry alone does not establish multi-device E2EE support. The selected suite, complete Profile dependency set, exact device/key references, and current eligibility MUST be present.
 
-When a `did:web` DID Document contains identifiable `keyAgreement` entries, implementations MAY use these keys for key negotiation and encrypted communications per the upper-level instant messaging or E2EE protocols.
+P5 Bundle Object Proof, X3DH-like inputs, Session/AAD/AEAD authentication and replay checks remain required as specified by P5. P5 MTI ciphertexts do not acquire an extra origin-signature requirement. P6 `did_wba_binding` remains the existing wire field name for the method-independent DID/device-to-MLS binding: its Object Proof, embedded extension, KeyPackage/Leaf signatures, credential identity, suite and group-state checks all remain necessary. Missing a WBA-specific Document proof is never a reason to omit those object or MLS checks.
 
-If the upper layer protocol adopts ANP instant messaging related Profile, the discovery and access of public materials can also be completed through `ANPMessageService` declared in the DID Document; `did:web` is handled in the same way as `did:wba` at this point.
+## B.6 Services, attachments, and mentions
 
-For example:
+Service selection follows P2's validated `ANPMessageService`, advertised Profiles and security capabilities. Where federation authenticates a service, it resolves and verifies the declared `serviceDid` independently of the Agent DID, under that service DID's method. A subject cannot acquire hosting authority or local account permissions by naming somebody else's endpoint.
 
-- `X25519KeyAgreementKey2019`
-- or other key agreement types explicitly supported by the upper-layer protocol
+P7 ordinary and encrypted attachments and P9 Mention payloads use the same composition rules for WBA and Web. Whole-payload signature/AEAD coverage, object authorization, unknown-extension handling, and no-downgrade rules remain owned by the selected Profile. No Web-specific attachment or mention wire format is introduced.
 
-In compatibility mode, the prerequisites for E2EE capabilities are:
+## B.7 Continuity and evidence
 
-1. DID Document can be parsed successfully;
-2. The required `keyAgreement` verification method exists;
-3. If the ANP Profile used relies on Unified Messaging entry, there is available `ANPMessageService` in the DID Document;
-4. The upper layer protocol supports corresponding algorithms and public key representation methods.
+Current Handle resolution and current DID authentication do not establish cross-DID authority migration. P2 registers no automatic Web transition-verification Profile in this specification. Same-DID key updates and cross-DID changes MUST remain distinct; group roles, attachment authorization, and E2EE state require their own valid continuity and migration contracts.
 
-### B.6 Compatibility with ANP service discovery and `ANPMessageService`
+[Mixed-method vectors](examples/did-authentication-vnext/README.md) cover the contract boundaries and identify which cases remain design inputs for SDK/product execution. Specification publication is not implementation conformance or a production rollout.
 
-The native `did:web` DID Document can also (MAY) declare the service type in the did:wba network, for example:
+## Copyright Notice
 
-- `AgentDescription`
-- `ANPHandleService`
-- `ANPMessageService`
-
-Specifically:
-
-- `AgentDescription` is used to discover agent description documents that follow the [ANP Agent Description Protocol Specification](07-anp-agent-description-protocol-specification.md);
-- `ANPHandleService` is used to express, in compatibility mode, that the DID holder accepts the name binding relationship of a certain Handle Provider domain;
-- `ANPMessageService` is used to express the Unified Messaging and Interaction Portal for ANP's public discovery in DID documents.
-
-If the `ANPMessageService` entry declares `serviceDid`, this field is used to express "which DID this service uses for signing in cross-domain service-to-service HTTP authentication." For native `did:web` deployment:
-
-- `serviceDid` **SHOULD** gives priority to naked domain name DID, such as `did:web:example.com`;
-- The `keyid` in the outer HTTP `Signature-Input` belongs to a DID **MUST** consistent with the `serviceDid`;
-- The verifier **MUST** parses the `serviceDid`, checks that the verification method pointed to by `keyid` is authorized by the `authentication` relationship, and verifies the request signature using its public key.
-
-If the native `did:web` subject participates in the ANP instant messaging protocol, then:
-
-1. The Agent DID document SHOULD contain at least one `ANPMessageService`;
-2. The Group DID document MUST contain at least one `ANPMessageService`;
-3. The same `ANPMessageService` can (MAY) simultaneously carry capabilities such as direct messaging, group messages, capability negotiation, security overlay public material access, and object control;
-4. Home Role, Key Role, Group Role, Join Role, Capability Role, and Object Role are the logical roles behind `ANPMessageService`, rather than additional independent standards `service.type` in the DID Document;
-5. If the service will participate in cross-domain service-to-service calls, its `ANPMessageService` entry SHOULD declare `serviceDid`;
-6. If multiple `ANPMessageService` exist, the caller SHOULD choose based on `profiles`, `securityProfiles`, `priority` or local policy.
-
-As long as these service entries are correctly declared in the DID Document, implementations can use these services per the application layer or message layer protocols of did:wba/ANP without requiring that the DID method be `did:wba`.
-
-### B.7 Implementation Recommendations
-
-Implementers SHOULD distinguish between two parsing modes:
-
-1. **did:wba mode**
-   - Enforce full path binding, public key fingerprinting, and proof rules as per the master specification (and Appendix A, if enabled).
-
-2. **did:web compatibility mode**
-   - Parsed according to `did:web` specification;
-   - Do not implement did:wba's unique path binding, public key fingerprint and proof enforcement rules;
-   - If `ANPHandleService` exists, perform the legacy domain-based name binding verification used by the `did:web` compatibility mode;
-   - If `ANPMessageService` exists, perform service discovery and capability selection according to the unified message entry semantics of ANP Profile 2;
-   - If `ANPMessageService` declares `serviceDid`, use this DID to complete cross-domain service-to-service identity authentication according to the rules of P8;
-   - You can still access did:wba's cross-platform identity authentication, Handle, ANP service discovery, E2EE and other upper-layer capabilities.
-
-Application implementations SHOULD NOT deny participation in cross-domain authentication, Handle integration, `ANPMessageService` service discovery, or end-to-end encryption communication simply because it is native `did:web` and does not contain did:wba-specific `e1_` / `k1_` path bindings or proofs.
-
-Application implementations SHOULD NOT require native `did:web` to expose independent DID service types for logical roles such as Home / Key / Group / Join / Capability / Object; if it exposes these capabilities through a single `ANPMessageService`, it should be regarded as compliant with the current service discovery model of ANP.
-
-At the same time, if new deployments want stronger "path binding public key verifiability" and a unified standard proof experience, they should still (SHOULD) give priority to the `e1_` profile of the did:wba main specification.
+Copyright (c) 2024 ANP Open Source Community
+This file is released under the [Apache License 2.0](LICENSE). You are free to use and modify it, but you must retain this copyright notice.

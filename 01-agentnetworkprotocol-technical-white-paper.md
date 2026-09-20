@@ -1,5 +1,12 @@
 # Agent Network Protocol Technical White Paper:
 
+- Document ID: ANP-01
+- Status: Informative white paper
+- Version: 1.2
+- Language: English
+
+> This white paper describes the conceptual architecture and vision. Normative ANP 1.2 requirements are defined by each specification: [ANP-02](02-anp-did-authentication-protocol-specification.md) owns common authentication and ANP-03 owns WBA method rules; native `did:web` uses the same authentication flow. ANP-06 remains a draft, and stable P6 release remains subject to its MLS registration gate.
+
 ## Abstract
 
 With the development of large models and autonomous decision-making AI, agents are rapidly becoming the new entities of the internet following mobile apps. However, existing internet infrastructure is primarily designed for human interaction, creating data silos, unfriendly interfaces, and high collaboration costs among agents, making it difficult to support the needs for large-scale agent interconnection and collaboration. The internet is undergoing profound transformation, showing four core trends: agents replacing traditional software, universal agent interconnection, native protocol-based connections, and autonomous agent organization and collaboration.
@@ -260,7 +267,7 @@ This section systematically explains ANP's security and privacy design from thre
 
 ### 4.1 Distinction Between Human Authorization and Agent Authorization
 
-To keep sensitive operations under human control, ANP separates identity authentication from operation authorization. As specified by [ANP-03 v1.1](/03-did-wba-method-design-specification.md), a `did:wba` DID Document declares verification methods that can be used for `authentication`; it does not define a dedicated `humanAuthorization` verification relationship.
+To keep sensitive operations under human control, ANP separates identity authentication from operation authorization. As specified by [ANP-02 v1.2](02-anp-did-authentication-protocol-specification.md), a `did:wba` DID Document declares verification methods that can be used for `authentication`; it does not define a dedicated `humanAuthorization` verification relationship.
 
 - **Low-risk operations** (such as querying public information or browsing data) may be initiated automatically by agents when permitted by the local authorization policy.
 - **High-risk operations** (such as fund transfers, important data submissions, or private information disclosure) may require explicit human authorization before the operation proceeds.
@@ -272,7 +279,7 @@ The human-authorization requirement is expressed above the DID layer:
 
 When human authorization is required, the user agent should first complete the confirmation process defined by the applicable authorization policy, and then sign and initiate the request with an `authentication` key allowed by that policy. The server verifies whether the request satisfies the agreed higher-level authorization policy. A request signature produced with an `authentication` verification method does not, by itself, prove that a human authorized the operation.
 
-This separation keeps identity proof distinct from operation authorization and allows higher-layer policies to require human control for sensitive actions. ANP-03 does not define how human authorization is obtained or evidenced; those details are defined by the applicable business protocol and authorization policies.
+This separation keeps identity proof distinct from operation authorization and allows higher-layer policies to require human control for sensitive actions. ANP-02 does not define how human authorization is obtained or evidenced; those details are defined by the applicable business protocol and authorization policies.
 
 ### 4.2 Private Key Management and Permission Isolation
 
@@ -333,4 +340,4 @@ Building the agent internet network is a grand undertaking that requires extensi
 
 ## Copyright Notice  
 Copyright (c) 2024 GaoWei Chang  
-This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.  
+This file is released under the [Apache License 2.0](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

@@ -3,13 +3,15 @@
 - Document ID: ANP-P9
 - Title: Message Mentions Extension
 - Status: Released
-- Version: 1.1
+- Version: 1.2
+- Specification Set: ANP Messaging 1.2
 - Language: English
-- Applicability: This Profile defines an application-payload extension for expressing human-readable and machine-readable mentions in ANP group messages. It applies to `anp.group.base.v1` and `anp.group.e2ee.v1` when the carried application payload is structured JSON.
+- Binding Version: v1 extension; it does not define an independent `meta.profile`
+- Applicability: This Profile defines an application-payload extension for expressing human-readable and machine-readable mentions in ANP group messages. In this Messaging 1.2 set it composes with `anp.group.base.v2` and `anp.group.e2ee.v2` when the carried application payload is structured JSON.
 - Dependencies:
   - `anp.core.binding.v1`
-  - `anp.group.base.v1` when used with group non-E2EE messages
-  - `anp.group.e2ee.v1` when used with group E2EE messages
+  - `anp.group.base.v2` when used with group non-E2EE messages
+  - `anp.group.e2ee.v2` when used with group E2EE messages
 
 ---
 
@@ -55,6 +57,8 @@ This Profile does not define:
 
 ---
 
+This Profile applies to `did:wba`, `did:web`, and other supported DID methods; identity resolution and validation follow [P2](02-identity-and-discovery.md#method-validation).
+
 ## 2. Terminology and Normative Conventions
 
 ### 2.1 Normative Keywords
@@ -69,7 +73,7 @@ In this article, **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
 - **Mention Target**: The machine-readable target of a mention. It may be a human DID, an agent DID, or a group selector.
 - **Group Selector Mention**: A mention whose target is a group-scoped selector, such as `all`, `agents`, or `humans`.
 - **Terminal-side Validation**: Local validation and processing performed by the receiving client, user agent, or Agent runtime after it receives or decrypts the application payload. This term does not introduce a device-level or terminal-level protocol identity.
-- **Group Host Service**: The group service defined by `anp.group.base.v1`. In this Profile, it does not validate mention semantics.
+- **Group Host Service**: The group service defined by `anp.group.base.v2`. In this Profile, it does not validate mention semantics.
 
 ---
 
@@ -148,6 +152,18 @@ member
 
 This Profile’s group selectors are mention targets, not authorization roles.
 
+### 3.6 Mention targets are not device targets
+
+A single-target Mention identifies a human or Agent DID, and a group-selector Mention identifies a set of P4 business members. Neither form identifies a device or MLS Leaf. Multiple devices or Leaves belonging to one DID remain one Mention subject.
+
+P6 exclusively owns any sender- or recipient-device binding in the enclosing Group E2EE message. Mention objects **MUST NOT** copy, infer, or override those outer device selectors.
+
+### 3.7 Historical Mentions and DID transitions
+
+A historical Mention target remains the exact DID carried by the accepted message. A Group Host, relay, or client **MUST NOT** rewrite a signed or encrypted historical Mention payload after that DID changes.
+
+A receiving product **MAY** verify the P2 transition from the historical DID to a current DID and, after its business policy accepts the returned assurance, associate the historical surface or notification behavior with the current identity. This association is local and does not change the payload. Newly created Mentions **MUST** use the current complete target DID.
+
 ---
 
 ## 4. Profile Binding Model
@@ -168,8 +184,8 @@ This Profile **MUST NOT** replace the outer `params.meta.profile` of the enclosi
 
 The enclosing group message operation keeps its original Profile name, for example:
 
-- `anp.group.base.v1` for `group.send` without Group E2EE;
-- `anp.group.e2ee.v1` for `group.e2ee.send`.
+- `anp.group.base.v2` for `group.send` without Group E2EE;
+- `anp.group.e2ee.v2` for `group.e2ee.send`.
 
 ### 4.3 Content type
 
@@ -177,7 +193,7 @@ Mention-bearing structured payloads **MUST** use ordinary JSON payload carriage.
 
 For non-E2EE Group Base:
 
-```json
+```text
 "meta": {
   "content_type": "application/json"
 }
@@ -284,7 +300,10 @@ A mention object **MUST NOT** contain:
 - `auth`;
 - `origin_proof`;
 - `proof`;
-- `signature`.
+- `signature`;
+- `sender_device_id`;
+- `recipient_device_id`;
+- `device_id` or an MLS Leaf identifier.
 
 ---
 
@@ -477,11 +496,12 @@ Implementations **MUST NOT** infer `human` or `agent` solely from a P4 governanc
 
 ### 7.1 Group Base without E2EE
 
-For `group.send` under `anp.group.base.v1`:
+For `group.send` under `anp.group.base.v2`:
 
 - `params.meta.content_type` **MUST** be `application/json`;
 - `params.body.payload` **MUST** carry the mention-bearing message object;
 - `params.auth.origin_proof` is the sender proof required by Group Base;
+- `params.meta.sender_device_id` and `params.meta.recipient_device_id` **MUST NOT** appear;
 - the Group Host applies the existing Group Base checks;
 - the Group Host **MUST NOT** perform mention-specific authorization or selector expansion.
 
@@ -494,7 +514,7 @@ Example:
   "method": "group.send",
   "params": {
     "meta": {
-      "profile": "anp.group.base.v1",
+      "profile": "anp.group.base.v2",
       "security_profile": "transport-protected",
       "sender_did": "did:wba:example.com:user:alice",
       "target": {
@@ -540,12 +560,14 @@ Example:
 
 ### 7.2 Group E2EE
 
-For `group.e2ee.send` under `anp.group.e2ee.v1`:
+For `group.e2ee.send` under `anp.group.e2ee.v2`:
 
 - the outer `params.meta.content_type` remains `application/anp-group-cipher+json`;
 - the outer `params.body` carries `group_cipher_object`;
 - the mention-bearing object **MUST** be placed inside the inner `Group Application Plaintext.payload` before MLS `PrivateMessage` encryption;
 - the inner `application_content_type` **MUST** be `application/json`.
+
+Any sender- or recipient-device fields required for this encrypted delivery remain in the P6 outer envelope and are not part of the Mention payload.
 
 Example inner plaintext before encryption:
 
@@ -582,6 +604,7 @@ When an ANP service pushes a mention-bearing group message using `group.incoming
 - the pushed payload **MUST** remain semantically equivalent to the accepted original message;
 - if the enclosing Profile allows the original `auth.origin_proof` to be copied into the notification, the service **SHOULD** include a lossless copy so that terminal-side verification can bind the mention-bearing payload to the original sender;
 - intermediate services **MUST NOT** rewrite `mentions` when forwarding or pushing the message.
+- Group Base delivery remains DID-addressed, while Group E2EE device delivery follows only the enclosing P6 selector fields.
 
 ---
 
@@ -804,7 +827,9 @@ An implementation conforming to this Profile MUST support at least:
 9. placement of mention-bearing payloads inside `params.body.payload` for non-E2EE `application/json` group messages;
 10. placement of mention-bearing payloads inside inner `Group Application Plaintext.payload` for Group E2EE messages;
 11. preservation of existing sender-proof and send-permission semantics from the enclosing ANP Message Profile;
-12. no server-side mention authorization or selector expansion in v1.
+12. no server-side mention authorization or selector expansion in v1;
+13. DID and group-selector Mention targets with device binding left to the enclosing P6 message.
+14. historical Mention DIDs remain unchanged, while any association with a current DID requires P2 transition verification and local business-policy acceptance.
 
 ---
 

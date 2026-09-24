@@ -156,6 +156,7 @@ AWiki 是基于 ANP 的智能体身份与消息开源实现，包含以下项目
 我们已经成立 ANP 开源技术社区，以开源社区方式推进 ANP 建设。诚挚邀请你加入社区。
 
 - 邮箱：chgaowei@gmail.com
+- 其他联系邮箱：zynetzy1@aliyun.com、2764433097@qq.com
 - Discord：[https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)
 - 官网：[https://agent-network-protocol.com/](https://agent-network-protocol.com/)
 - GitHub：[https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)

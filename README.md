@@ -156,6 +156,7 @@ AWiki is an open-source implementation of agent identity and messaging based on 
 We have established an ANP open-source technical community to advance ANP development through an open-source community approach. We sincerely invite you to join our community.
 
 - Email: chgaowei@gmail.com
+- Additional contact emails: zynetzy1@aliyun.com, 2764433097@qq.com
 - Discord: [https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)
 - Official website: [https://agent-network-protocol.com/](https://agent-network-protocol.com/)
 - GitHub: [https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)

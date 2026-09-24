@@ -30,6 +30,16 @@ function read(name, old) {
   return result;
 }
 
+function stripHtmlTagsRepeatedly(input) {
+  let previous;
+  let output = input;
+  do {
+    previous = output;
+    output = output.replace(/<[^>]*>/g, '');
+  } while (output !== previous);
+  return output;
+}
+
 function parseMarkdown(text) {
   const lines = text.split('\n');
   const prose = [];
@@ -61,7 +71,7 @@ function parseMarkdown(text) {
   const duplicates = explicit.filter((id, index) => explicit.indexOf(id) !== index);
   const slugCounts = new Map();
   for (const heading of headings) {
-    const label = heading.replace(/!?(?:\[([^\]]*)\])\([^)]*\)/g, '$1').replace(/<[^>]*>/g, '').replace(/[`*]/g, '');
+    const label = stripHtmlTagsRepeatedly(heading.replace(/!?(?:\[([^\]]*)\])\([^)]*\)/g, '$1')).replace(/[`*]/g, '');
     const slug = label.toLowerCase().replace(/[^\p{L}\p{N}\p{M}\p{Pc}\-\s]/gu, '').replace(/\s/g, '-');
     const count = slugCounts.get(slug) ?? 0;
     slugCounts.set(slug, count + 1);

@@ -151,5 +151,5 @@ did:wba身份验证方案的优点：
 
 当然，OpenID Connect和API keys仍然有他们自己的作用。比如，智能体在和原有互联网系统对接的时候，可能仍然需要使用OpenID Connect和API keys。
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  

@@ -141,5 +141,5 @@ The Agent Discovery Protocol is closely related to the following protocols:
 3. **Meta-Protocol**: In agent communication, protocol negotiation can be based on discovery results
 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This document is released under the [Apache License 2.0](./LICENSE), you are free to use and modify it, but you must retain this copyright notice.

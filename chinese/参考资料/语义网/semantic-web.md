@@ -169,5 +169,5 @@ TIM BERNERS-LEE、JAMES HENDLER 和 ORA LASSILA 都痴迷于语义网技术的�
 
 由于难以构建代理和自动执行网络上的任务，他与人合着了 W3C 的 RDF 规范，该规范是许多当前语义网工作的基础。
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  

@@ -660,5 +660,5 @@ Reference document [Appendix B: Compatibility with Native `did:web`](appendix-b-
 
 ## Copyright Notice
 
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 This file is released under the [MIT License](/LICENSE), which you may freely use and modify, provided you retain this copyright notice.

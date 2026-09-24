@@ -197,11 +197,11 @@ We extend our sincere gratitude to all contributors for their outstanding work a
 
 ## License
 
-The root project license is [Apache License 2.0 (Apache-2.0)](LICENSE). Retain the applicable license, copyright, and attribution notices. Existing copyright-holder statements remain unchanged.
+The root project license is [Apache License 2.0 (Apache-2.0)](LICENSE). Retain the applicable license, copyright, and attribution notices. Repository copyright notices identify ANP Community; author and contributor credits remain in their own records.
 
-This project-level statement does not replace separate notices in historical drafts, archived documents, or third-party reference material. Review those materials individually before redistribution or a project donation; updating a license label does not establish ownership or clear third-party rights.
+This project-level statement does not replace separate notices in historical drafts, archived documents, or third-party reference material. Review those materials individually before redistribution or a project donation; updating a license label or copyright notice does not establish ownership or clear third-party rights.
 
 ## Copyright Notice
 
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 This file is released under the [Apache License 2.0](./LICENSE). You are free to use and modify it, but must retain this copyright notice.

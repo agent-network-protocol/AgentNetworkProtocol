@@ -343,5 +343,5 @@ DID 方法定义了如何创建、解析、更新和停用 DID 与 DID 文档，
 
 
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

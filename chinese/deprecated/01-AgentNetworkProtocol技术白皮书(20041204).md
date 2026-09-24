@@ -285,5 +285,5 @@ Client (A)                                          Server (B)
 [5] 基于DID的端到端加密通信技术，[03-基于did:all方法的端到端加密通信技术协议](03-基于did的端到端加密通信技术协议.md)
 
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  

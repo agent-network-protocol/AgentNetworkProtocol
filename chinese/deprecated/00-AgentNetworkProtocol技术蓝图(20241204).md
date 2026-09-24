@@ -125,5 +125,5 @@ LLM加持的智能体结合元协议是解决这一问题的良方：
 - 官网：[https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
 - GitHub：[https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  

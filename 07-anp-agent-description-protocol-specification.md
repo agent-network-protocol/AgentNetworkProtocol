@@ -666,5 +666,5 @@ A similar approach can be used for interfaces. For example, for a product purcha
 
 
 ## Copyright Notice  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This document is released under the [Apache License 2.0](./LICENSE). You are free to use and modify it under the terms of that license, but you must retain this copyright notice.

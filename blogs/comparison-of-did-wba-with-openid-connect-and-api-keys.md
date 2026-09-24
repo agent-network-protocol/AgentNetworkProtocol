@@ -150,5 +150,5 @@ From the above comparison, we can see that did:wba not only supports interconnec
 Of course, OpenID Connect and API keys still have their roles. For instance, when agents interface with existing internet systems, they may still need to use OpenID Connect and API keys.
 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

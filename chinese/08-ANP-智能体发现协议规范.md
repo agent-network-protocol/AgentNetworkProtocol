@@ -141,5 +141,5 @@ sequenceDiagram
 3. **元协议**: 在智能体通信中可基于发现结果进行协议协商
 
 ## 版权声明
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

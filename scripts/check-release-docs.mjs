@@ -10,7 +10,9 @@ const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const list = dir => fs.readdirSync(path.join(root, dir)).filter(name => name.endsWith('.md')).map(name => path.posix.join(dir, name));
 const core = [...list('.'), ...list('chinese')].filter(name => /^(?:chinese\/)?(?:0[1-9]-|appendix-|附录)/.test(name));
 const messages = [...list('message'), ...list('chinese/message')];
-const archiveIndexes = ['vnext/README.md', 'chinese/vnext/README.md', 'message/vnext/README.md', 'chinese/message/vnext/README.md'];
+const archiveIndexes = ['vnext/README.md', 'vnext/chinese/README.md', 'vnext/message/README.md', 'vnext/chinese/message/README.md', 'chinese/vnext/README.md', 'message/vnext/README.md', 'chinese/message/vnext/README.md'];
+const unifiedArchiveDirectories = [['vnext', 'vnext'], ['chinese/vnext', 'vnext/chinese'], ['message/vnext', 'vnext/message'], ['chinese/message/vnext', 'vnext/chinese/message']];
+const unifiedArchive = [...list('vnext'), ...list('vnext/chinese'), ...list('vnext/message'), ...list('vnext/chinese/message')].filter(name => !name.endsWith('/README.md'));
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
 const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...archiveIndexes, ...exampleIndexes, ...readerGuides.map(guide => guide.file)])].sort();
 const errors = [];
@@ -81,6 +83,16 @@ for (const file of documents) {
     } else if (block.language === 'text' || block.language === 'jsonc') schematicExamples.push({file, line: block.line});
   }
 }
+for (const file of unifiedArchive) {
+  for (const target of targets(parsed(file).prose)) checkLink(file, target);
+}
+for (const [original, consolidated] of unifiedArchiveDirectories) {
+  for (const source of list(original).filter(name => !name.endsWith('/README.md'))) {
+    const destination = path.posix.join(consolidated, path.posix.basename(source));
+    check(fs.existsSync(path.join(root, destination)), {source, destination, reason: 'missing-unified-archive-document'});
+  }
+}
+check(unifiedArchive.length === 26, {reason: 'unexpected-unified-archive-coverage', count: unifiedArchive.length});
 
 for (const guide of readerGuides) errors.push(...checkReaderGuide(guide, read(guide.file)));
 for (const document of paymentDocuments) errors.push(...checkPaymentMetadata(document, read(document.file)));
@@ -136,5 +148,5 @@ for (const scenario of scenarios.scenarios) {
     checkLink(scenariosFile, target);
   }
 }
-console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-1.2-documentation-promotion', documents: documents.length, promoted_specifications: promotedPairs.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
+console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-1.2-documentation-promotion', documents: documents.length, unified_archive_specifications_checked: unifiedArchive.length, promoted_specifications: promotedPairs.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
 process.exitCode = errors.length ? 1 : 0;

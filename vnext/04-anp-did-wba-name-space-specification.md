@@ -7,7 +7,7 @@
 - Language: English
 - Applicability: This specification applies to human-readable Handle naming, WNS resolution, and did:wba name mapping in ANP.
 
-> Draft notice: this is an initial vNext working copy of the released ANP 1.1 specification. It MUST NOT be treated as the published protocol until this draft is released. The Chinese mirror is [ANP-基于DID:WBA的命名空间规范](../chinese/vnext/04-ANP-基于DID-WBA的命名空间规范.md).
+> Draft notice: this is an initial vNext working copy of the released ANP 1.1 specification. It MUST NOT be treated as the published protocol until this draft is released. The Chinese mirror is [ANP-基于DID:WBA的命名空间规范](chinese/04-ANP-基于DID-WBA的命名空间规范.md).
 
 Abbreviation: WNS (WBA Name Space)
 

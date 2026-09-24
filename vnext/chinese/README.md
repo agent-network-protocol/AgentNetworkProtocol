@@ -1,6 +1,6 @@
 # ANP 1.2 核心协议发布前草案归档
 
-- 统一入口：[vNext 协议集](../../vnext/README.md)
+- 统一入口：[vNext 协议集](../README.md)
 - 状态：历史草案快照；不是当前规范入口
 - 当前文档：[ANP 1.2 规范集](../../README.cn.md)
 
@@ -10,10 +10,10 @@ ANP-02、ANP-03、ANP-04 和原生 did:web 附录已合入当前文档；ANP-06 
 
 | 历史快照 | 当前 1.2 文档 |
 | --- | --- |
-| [02-ANP-基于DID的身份认证协议.md](02-ANP-基于DID的身份认证协议.md) | [ANP 1.2](../02-ANP-基于DID的身份认证协议.md) |
-| [03-did-wba方法规范.md](03-did-wba方法规范.md) | [ANP 1.2](../03-did-wba方法规范.md) |
-| [04-ANP-基于DID-WBA的命名空间规范.md](04-ANP-基于DID-WBA的命名空间规范.md) | [ANP 1.2](../04-ANP-基于DID-WBA的命名空间规范.md) |
-| [附录B：与原生did-web-的兼容.md](附录B：与原生did-web-的兼容.md) | [ANP 1.2](../附录B：与原生did-web-的兼容.md) |
+| [02-ANP-基于DID的身份认证协议.md](02-ANP-基于DID的身份认证协议.md) | [ANP 1.2](../../chinese/02-ANP-基于DID的身份认证协议.md) |
+| [03-did-wba方法规范.md](03-did-wba方法规范.md) | [ANP 1.2](../../chinese/03-did-wba方法规范.md) |
+| [04-ANP-基于DID-WBA的命名空间规范.md](04-ANP-基于DID-WBA的命名空间规范.md) | [ANP 1.2](../../chinese/04-ANP-基于DID-WBA的命名空间规范.md) |
+| [附录B：与原生did-web-的兼容.md](附录B：与原生did-web-的兼容.md) | [ANP 1.2](../../chinese/附录B：与原生did-web-的兼容.md) |
 
 ## 版权声明
 

@@ -3,7 +3,7 @@
 - Document ID: ANP-02-vNext
 - Status: Draft / not released
 - Language: English
-- Chinese mirror: [ANP 基于 DID 的身份认证协议](../chinese/vnext/02-ANP-基于DID的身份认证协议.md)
+- Chinese mirror: [ANP 基于 DID 的身份认证协议](chinese/02-ANP-基于DID的身份认证协议.md)
 
 <a id="scope"></a>
 ## 1. Scope

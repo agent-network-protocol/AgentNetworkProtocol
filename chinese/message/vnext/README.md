@@ -1,5 +1,6 @@
 # ANP Messaging 1.2 发布前草案归档
 
+- 统一入口：[vNext 协议集](../../../vnext/README.md)
 - 状态：历史草案快照；不是当前规范入口
 - 当前文档：[ANP 1.2 规范集](../README.md)
 

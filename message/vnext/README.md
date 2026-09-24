@@ -1,5 +1,6 @@
 # ANP Messaging 1.2 Pre-release Draft Archive
 
+- Unified entry: [vNext protocol collection](../../vnext/README.md)
 - Status: Historical draft snapshots; not the current specification entry point
 - Current documents: [ANP 1.2 specification set](../README.md)
 

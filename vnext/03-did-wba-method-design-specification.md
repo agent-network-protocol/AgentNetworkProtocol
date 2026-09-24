@@ -7,7 +7,7 @@
 - Language: English
 - Applicability: This specification applies to web-based decentralized identity, cross-platform authentication, and agent communication scenarios in ANP.
 
-> Draft notice: this is a candidate method revision of ANP 1.1; common authentication is now owned by ANP-02. It MUST NOT be treated as the published protocol until this draft is released. The Chinese mirror is [did:wba方法规范](../chinese/vnext/03-did-wba方法规范.md).
+> Draft notice: this is a candidate method revision of ANP 1.1; common authentication is now owned by ANP-02. It MUST NOT be treated as the published protocol until this draft is released. The Chinese mirror is [did:wba方法规范](chinese/03-did-wba方法规范.md).
 
 ## Abstract
 

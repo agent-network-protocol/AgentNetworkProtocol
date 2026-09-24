@@ -1,7 +1,7 @@
 # Appendix B: Native did:web Integration
 
 - Status: Draft / not released
-- Chinese mirror: [原生 did:web 集成](../chinese/vnext/附录B：与原生did-web-的兼容.md)
+- Chinese mirror: [原生 did:web 集成](chinese/附录B：与原生did-web-的兼容.md)
 - Historical baseline: [released compatibility appendix](../appendix-b-compatibility-with-native-did-web.md), retained unchanged
 
 ## B.1 Scope and ownership
@@ -13,8 +13,8 @@ This candidate is the integration entry point for native Web identities in the D
 | Web identity inputs and request authentication | [ANP-02 Web binding](02-anp-did-authentication-protocol-specification.md#web-binding) and common authentication |
 | WBA-specific Document validation | [ANP-03 method rules](03-did-wba-method-design-specification.md) |
 | Handle forward/reverse binding and status | [ANP-04 WNS](04-anp-did-wba-name-space-specification.md#binding-verification) |
-| Message identity, devices, and services | [Messaging P2](../message/vnext/02-identity-and-discovery.md) |
-| Origin and object proof bindings | [Messaging P1](../message/vnext/01-core-binding.md) |
+| Message identity, devices, and services | [Messaging P2](message/02-identity-and-discovery.md) |
+| Origin and object proof bindings | [Messaging P1](message/01-core-binding.md) |
 | Direct/Group E2EE and extensions | The selected P5/P6/P7/P9 Profile and its dependencies |
 
 ## B.2 Method validation

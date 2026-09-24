@@ -67,7 +67,7 @@ ANP is built on existing Internet infrastructure and organizes the released prot
 | Messaging | [ANP-09: End-to-End Instant Messaging Overview](09-ANP-end-to-end-instant-messaging-protocol-specification.md) | Published v1.2 catalog; P6 candidate | Direct and group messaging, device-bound E2EE, attachments, federation, and mentions |
 | Payments | [ANP-10: AP2 Payment Adaptation Draft](application/10-anp-agent-payment-protocol-specification.md) | Draft / not released; EN document v1.1, CN document v0.1 | Proposed ANP payment adaptation, mandates, receipts, and transaction flows; not a stable payment interoperability standard |
 
-The [core pre-release archive](vnext/README.md) and its [Chinese mirror](chinese/vnext/README.md) preserve historical drafts for comparison. Current normative references use the release paths above, not the archived drafts. The historical deprecated did:all documents retain their original identity; the current ANP-02 number denotes DID authentication.
+The [unified vNext workspace](vnext/README.md) contains the English and Chinese core and messaging snapshots as the starting point for the next iteration. No post-1.2 protocol changes are defined there yet. Current normative references use the release paths above. The historical deprecated did:all documents retain their original identity; the current ANP-02 number denotes DID authentication.
 
 ### Instant Messaging Profiles
 
@@ -123,7 +123,7 @@ AWiki is an open-source implementation of agent identity and messaging based on 
 - `01-*.md`, `02-*.md`, `03-*.md`, `04-*.md`, `06-*.md`, `07-*.md`, `08-*.md`, `09-*.md`: English core documents, with document version 1.2 and individual status markers.
 - `message/`: the ANP Messaging 1.2 Profile suite and index; P6 retains candidate status.
 - `chinese/`: Chinese mirrors of core and messaging specifications, plus related research notes.
-- `vnext/`, `chinese/vnext/`, `message/vnext/`, `chinese/message/vnext/`: historical pre-release snapshots, with indexes pointing to current documents.
+- `vnext/`: unified next-version workspace, including `vnext/chinese/`, `vnext/message/`, and `vnext/chinese/message/`. Its initial contents are historical pre-release snapshots; the earlier scattered paths remain frozen copies for existing links.
 - `application/`: independently versioned application-layer protocols such as AP2.
 - `docs/`: guides, extended reading, and community operations documents.
 - `blogs/`: articles and historical protocol analysis.

@@ -3,9 +3,10 @@
 - Document ID: ANP-P7
 - Title: Attachments and Object Transfer
 - Status: Released
-- Version: 1.1
+- Version: 1.2
+- Specification Set: ANP Messaging 1.2
 - Language: English
-- Applicability: This Profile is applicable to the interoperability semantics of attachments, large objects and media objects in ANP, and supports direct messaging, group messaging, unencrypted message bearers and end-to-end encryption message bearers.
+- Applicability: This specification preserves the v1.1 attachment and object lifecycle while defining its multi-device boundary: ordinary attachment operations remain DID-scoped, and device-bound encrypted delivery belongs to P5 or P6.
 
 ---
 
@@ -19,7 +20,8 @@ This Profile defines the Attachments and Object Transfer semantics of ANP, stipu
 4. How to upload and download object content through independent HTTPS channels;
 5. How to reduce the risk of link leakage through object location URI, short-term Download Ticket and Object-Level Encryption;
 6. How to perform integrity verification, access control and Object-Level Encryption on the object content;
-7. How to keep the v1 solution clear, simple, and implementable.
+7. How attachment objects and Download Tickets remain DID-scoped while P5 and P6 own device-bound encrypted delivery;
+8. How to keep the v1 solution clear, simple, and implementable.
 
 This Profile does not define:
 
@@ -30,8 +32,11 @@ This Profile does not define:
 - `service-managed` object encryption mode;
 - `wrapped_object_key`, file-level key agreement protocol, direct link download, mirror URI, inline Download Ticket and other forked paths;
 - Dedicated thumbnail sub-objects and dedicated chunked list objects.
+- Device-specific attachment fields, per-device Download Tickets, or a per-device object lifecycle.
 
 ---
+
+This Profile applies to `did:wba`, `did:web`, and other supported DID methods; identity resolution and validation follow [P2](02-identity-and-discovery.md#method-validation).
 
 ## 2. Terminology and Normative Keywords
 
@@ -46,7 +51,7 @@ Definition of terms:
 - **Object Service**: Responsible for the service of attachment control plane and object data plane.
 - **Control Plane**: The plane where `attachment.create_slot`, `attachment.commit_object`, `attachment.abort_object`, `attachment.get_download_ticket` and other protocol methods are located.
 - **Data Plane**: The plane on which object bytes are transferred via independent HTTPS PUT/GET.
-- **Message Plane**: `direct.send`, `group.send` carry `attachment_manifest` plane.
+- **Message Plane**: `direct.send`, `group.send`, or `group.e2ee.send` carry the `attachment_manifest` plane.
 - **Upload Slot**: The temporary upload capability and metadata place applied by the sender for uploading objects.
 - **Committed Object**: An object that has been uploaded and can be referenced by messages.
 - **Object URI**: Object location URI. In v1, it is a locator-style HTTPS resource address, which is not equivalent to a public direct link.
@@ -82,7 +87,7 @@ The standard mainline path **MUST** for v1 is:
 2. If Object-Level Encryption is enabled, the sender first encrypts the file locally;
 3. The sender uploads the object bytes through independent HTTPS `PUT`;
 4. The sender calls `attachment.commit_object`;
-5. The sender sends the attachment list through `direct.send` or `group.send`;
+5. The sender sends the attachment list through `direct.send`, `group.send`, or `group.e2ee.send`, as defined by the enclosing Profile;
 6. The receiver parses the public `ANPMessageService` based on the original message sender's DID carrying the attachment list, and obtains Download Ticket through `attachment.get_download_ticket`;
 7. The receiver downloads the object through independent HTTPS `GET object_uri` and carries ticket in the `Authorization` header;
 8. The receiver verifies the digest; if the object has `object-e2ee` enabled, then perform decryption and post-decryption verification.
@@ -95,7 +100,7 @@ C[Sender client]
 SLOT[attachment.create_slot]
 PUT[HTTPS PUT object bytes]
 COMMIT[attachment.commit_object]
-SEND[Send attachment manifest<br/>direct.send / group.send]
+SEND[Send attachment manifest<br/>direct.send / group.send / group.e2ee.send]
 GRANT[Create Access Grant after message accepted]
 
 R[Receiver]
@@ -166,6 +171,15 @@ In order to keep v1 clear, simple, and implementable, the following paths are **
 | Direct E2EE | `direct-e2ee` | `none` / `object-e2ee` | Yes |
 | Group E2EE | `group-e2ee` | `none` / `object-e2ee` | Yes |
 
+### 3.8 Multi-device boundary
+
+P7 retains the existing object and Ticket state machines and adds no device-addressing layer:
+
+1. Ordinary attachment messages, control-plane requests, Access Grants, and Download Tickets are scoped by sender/requester DID plus the existing message, attachment, object, and Direct or Group context. They **MUST NOT** contain `sender_device_id`, `recipient_device_id`, `requester_device_id`, or another device selector.
+2. One attachment object is uploaded once. Domain-local multi-device fan-out **MUST NOT** create a standard P7 object or Ticket per device.
+3. P5 exclusively defines Direct E2EE device selection and per-device ciphertext delivery; P6 exclusively defines MLS device leaves and encrypted delivery. P7 defines only the inner attachment manifest and object-key fields, and devices **MUST NOT** share Ratchet or MLS private state to deliver them.
+4. A deployment may use device context internally for authentication, routing, or authorization, but that context **MUST NOT** be serialized as a P7 wire field.
+
 ---
 
 ## 4. Profile identification and dependencies
@@ -186,9 +200,11 @@ This Profile **MUST** depend on:
 This Profile **MAY** be used in combination with the following Profiles:
 
 - `anp.direct.base.v1`
-- `anp.group.base.v1`
+- `anp.group.base.v2`
 - `anp.direct.e2ee.v1`
+- `anp.direct.e2ee.v2`
 - `anp.group.e2ee.v1`
+- `anp.group.e2ee.v2`
 
 ### 4.3 Security Profile
 
@@ -208,7 +224,7 @@ This Profile itself does not define new security profile, but reuses the busines
 flowchart TD
     A[Sender Client] -->|attachment.create_slot| S[Control Service]
     A -->|HTTPS PUT object bytes| O[Object Data Plane]
-    A -->|direct.send / group.send\nattachment_manifest| M[Recipient or Group Host]
+    A -->|direct.send / group.send / group.e2ee.send\nattachment_manifest| M[Recipient or Group Host]
     M -->|Resolve using sender_did from the original message\nattachment.get_download_ticket| S
     M -->|HTTPS GET object_uri\nAuthorization: Bearer ticket| O
 ```
@@ -308,7 +324,7 @@ sequenceDiagram
     A->>OS: HTTPS PUT ciphertext bytes
     A->>AS: attachment.commit_object
     AS-->>A: committed = true
-    A->>GH: group.send (group-e2ee, inner manifest carries object_key)
+    A->>GH: group.e2ee.send (group-e2ee, inner manifest carries object_key)
     GH-->>A: accepted + group_receipt
     GH-->>M: group.incoming
     M->>M: Decrypt the inner manifest\nObtain object_key + nonce
@@ -336,9 +352,9 @@ When the attachment list is sent in `anp.direct.base.v1` via `direct.send`:
 
 ### 6.2 Carried in Group Base
 
-When the attachment list is sent in `anp.group.base.v1` via `group.send`:
+When the attachment list is sent in `anp.group.base.v2` via `group.send`:
 
-- `meta.profile` **MUST** equal `anp.group.base.v1`
+- `meta.profile` **MUST** equal `anp.group.base.v2`
 - `meta.security_profile` **MUST** equal `transport-protected`
 - `meta.content_type` **MUST** equal `application/anp-attachment-manifest+json`
 - `body.payload` **MUST** be the Attachment Message object
@@ -348,7 +364,7 @@ When the attachment list is sent in `anp.group.base.v1` via `group.send`:
 
 ### 6.3 Carried in Direct E2EE
 
-When the attachment list is sent via `anp.direct.e2ee.v1`:
+When the attachment list is sent via `anp.direct.e2ee.v1` or `anp.direct.e2ee.v2`:
 
 - Under the normal path after session establishment, the outer `meta.content_type` **MUST** be `application/anp-direct-cipher+json`
 - If the first init carrying application message path allowed by P5 is used, the outer `meta.content_type` **MAY** be `application/anp-direct-init+json`
@@ -357,12 +373,19 @@ When the attachment list is sent via `anp.direct.e2ee.v1`:
 
 ### 6.4 Carried in Group E2EE
 
-When the attachment list is sent via `anp.group.e2ee.v1`:
+When the attachment list is sent via `group.e2ee.send` under `anp.group.e2ee.v1` or `anp.group.e2ee.v2`:
 
 - Outer layer `meta.content_type` **MUST** fixed to `application/anp-group-cipher+json`
 - Outer layer `body` **MUST NOT** directly appears the clear text attachment list
 - Attachment list **MUST** appear as the inner business object of `Group Application Plaintext` before encryption
 - Inner layer `application_content_type` **MUST** equal `application/anp-attachment-manifest+json`
+
+### 6.5 Field ownership
+
+- Direct Base and Group Base attachment messages use only the enclosing Profile's DID or Group DID addressing. P7 does not add a device selector.
+- `attachment_message` and `attachment_manifest` contain no device identifier.
+- A P5 v2 Direct E2EE envelope carries its required sender and recipient device fields; a P6 v2 MLS envelope carries its required device binding. Those outer fields are interpreted only by P5 or P6. A v1 E2EE envelope does not acquire device selectors through P7.
+- `object_key_b64u` and `nonce_b64u` remain inside the encrypted attachment manifest. P7 does not introduce a separate per-device key-distribution request.
 
 ---
 
@@ -629,7 +652,7 @@ The goal of Download Ticket is not to absolutely prevent legitimate recipients f
 
 When an object is available for download by the recipient of a message, **MUST** be determined by the Access Grant.
 
-When the `direct.send` or `group.send` carrying the attachment is accepted by the sender service or Group Host, the sender-side system **MUST** create an Access Grant for each attachment.
+When the `direct.send`, `group.send`, or `group.e2ee.send` carrying the attachment is accepted by the sender service or Group Host, the sender-side system **MUST** create an Access Grant for each attachment.
 
 Access Grant At least **MUST** bind:
 
@@ -638,6 +661,8 @@ Access Grant At least **MUST** bind:
 - `object_uri`
 - `message_security_profile`
 - `message_target_did` in the context of direct messaging; or `group_did` in the context of group messaging
+
+An Access Grant authorizes the target DID or Group context, not one local device. Domain-local device delivery remains an implementation detail.
 
 ### 9.3 Boundaries of `intended_target`
 
@@ -661,6 +686,8 @@ In v1, Download Ticket **MUST** bind at least the following context:
 - `message_security_profile`
 - `message_target_did` in the context of direct messaging; or `group_did` in the context of group messaging
 - `expires_at`
+
+The standard Ticket binding **MUST NOT** contain `requester_device_id` or another device selector. A deployment may use local device state before issuing a Ticket, but that state does not become a P7 wire or Ticket-binding field.
 
 ### 9.5 Ticket Lifetime and Usage
 
@@ -689,6 +716,8 @@ When the Object control service handles `attachment.get_download_ticket`, **MUST
 6. When direct messaging context is used, `message_target_did` exists and complies with the policy
 7. When group messaging context is entered, `group_did` exists and `requester_did` currently still complies with the group access policy
 
+P7 does not require a requester device selector for this validation. Any local device authentication remains outside the interoperable request.
+
 ### 9.7 Cross-service synchronization
 
 v1 **Not separately standardized** Access Grant synchronization protocol between multiple internal services.
@@ -716,7 +745,7 @@ participant R as Receiver
 S->>O: create_slot / commit_object
 Note over S,O: Only creates the object; does not create download authorization
 
-S->>M: direct.send / group.send attachment manifest
+S->>M: direct.send / group.send / group.e2ee.send attachment manifest
 M-->>S: message accepted
 S->>S: Create Access Grant for each attachment
 
@@ -731,13 +760,21 @@ R->>O: GET object_uri + Authorization
 
 Therefore, authorization for `attachment.get_download_ticket` should depend on message context and Access Grants, rather than only on `object_uri` or only on `intended_target` left during the upload stage.
 
+### 9.9 Historical Access Grants after an Agent DID transition
+
+Historical `attachment_manifest` objects and Access Grants **MUST NOT** be rewritten when an Agent DID changes.
+
+If a direct-message Access Grant names an earlier recipient DID and the current requester presents its successor DID, the Object Service **MAY** map the request to the same internal grant only after it verifies the P2 transition from the grant's DID to `requester_did` and the owning business policy accepts the returned assurance. Whether `provider_asserted` is sufficient to inherit historical attachment access is a business decision; P7 does not force acceptance or rejection.
+
+The mapping is internal. P7 **MUST NOT** add a stable-subject field, name, transition chain, or device selector to the historical manifest, Access Grant, Ticket, or control-plane request. For a group attachment, authorization remains based on the current P4 v2 roster, group policy, and original message context.
+
 ---
 
 ## 10. Control-Plane Methods
 
 ### 10.1 General
 
-The method in this section is used for object control plane. They **not** change `direct.send`, send `group.send` to Success Semantics.
+The method in this section is used for object control plane. They **not** change `direct.send`, `group.send`, or `group.e2ee.send` Success Semantics.
 
 These methods run by default on:
 
@@ -759,6 +796,8 @@ Therefore:
 - `meta.target.did` **MUST** equal target public `ANPMessageService.serviceDid`
 - Cross-domain outer-layer authentication is provided by P8 through `serviceDid + HTTP Message Signatures`
 - v1 does **not** require the Object Service to re-verify the end recipient's `origin_proof`
+
+These methods **MUST NOT** add `sender_device_id`, `recipient_device_id`, or `requester_device_id` to the P7 wire model. Internal device authentication and routing context remain private to the deployment.
 
 A control-plane detail that implementers easily overlook is that Upload Slot and Committed Object are not the same state. The following diagram places creation, upload, commit, abort, and expiration on one lifecycle.
 
@@ -959,6 +998,8 @@ And add one according to the context:
 
 - `one_time`
 
+This method defines no `requester_device_id` or equivalent device selector.
+
 Field rules:
 
 - `requester_did` **MUST** equal `meta.sender_did`
@@ -988,6 +1029,8 @@ And add one according to the context:
 - `message_target_did`
 - `group_did`
 
+`ticket_binding` **MUST NOT** add a device identifier.
+
 ---
 
 ## 11. Data-Plane Rules
@@ -1015,6 +1058,8 @@ Authorization: Bearer {download_ticket}
 ```
 
 Object bytes **MUST NOT** be forwarded through ANP's cross-domain service invocation path as a regular forwarding channel.
+
+The standard Bearer download request has no P7 device selector or device proof. Device-constrained ticket schemes, if any, require a separate Profile.
 
 ### 11.3 Verification after downloading
 
@@ -1052,6 +1097,8 @@ This Profile fixedly allocates the `6000-6013` code segment for the Attachments 
 | 6012 | `anp.attachment.object_unavailable` | The object has not been submitted, has been abandoned, has been cleaned, or is temporarily unavailable |
 | 6013 | `anp.attachment.encryption_policy_violation` | The combination of object encryption mode and message security profile is illegal, or violates the constraints of this Profile |
 
+Device-binding errors belong to P5 or P6 and **MUST NOT** be used to require a device selector on an ordinary P7 request.
+
 Error response **SHOULD** be provided in `error.data`:
 
 - `attachment_id`
@@ -1080,14 +1127,16 @@ An implementation conforming to this Profile MUST support at least:
 14. All `attachment.*` Control-Plane Methods uses `target.kind = "service"`
 15. Object bytes are not forwarded through ANP business messages or cross-domain service invocation paths
 16. `mode = "none"` under `transport-protected`
+17. Ordinary P7 manifests, control-plane requests, Access Grants, and Download Tickets do not require or expose a device selector
+18. Historical Access Grants may be mapped to a successor DID only after P2 transition verification and business-policy acceptance, without rewriting historical wire objects
 
 If an implementation claims to support E2EE attachments, it MUST also:
 
-17. Support `mode = "object-e2ee"`
-18. Support the `chacha20-poly1305` object encryption process specified in this Profile
-19. Distribute `object_key_b64u` and `nonce_b64u` directly in the E2EE attachment list
-20. Perform ciphertext digest verification and local decryption after object download
-21. Clearly comply with the access boundaries of "v1 does not guarantee retroactive withdrawal of rights"
+19. Support `mode = "object-e2ee"`
+20. Support the `chacha20-poly1305` object encryption process specified in this Profile
+21. Distribute `object_key_b64u` and `nonce_b64u` inside the E2EE attachment manifest protected by P5 or P6; device selection remains owned by that overlay
+22. Perform ciphertext digest verification and local decryption after object download
+23. Clearly comply with the access boundaries of "v1 does not guarantee retroactive withdrawal of rights"
 
 ---
 
@@ -1102,7 +1151,6 @@ If an implementation claims to support E2EE attachments, it MUST also:
   "method": "attachment.create_slot",
   "params": {
     "meta": {
-      "anp_version": "1.0",
       "profile": "anp.attachment.v1",
       "security_profile": "transport-protected",
       "sender_did": "did:example:agent-a",
@@ -1158,7 +1206,6 @@ If an implementation claims to support E2EE attachments, it MUST also:
   "method": "attachment.commit_object",
   "params": {
     "meta": {
-      "anp_version": "1.0",
       "profile": "anp.attachment.v1",
       "security_profile": "transport-protected",
       "sender_did": "did:example:agent-a",
@@ -1209,7 +1256,6 @@ If an implementation claims to support E2EE attachments, it MUST also:
   "method": "attachment.abort_object",
   "params": {
     "meta": {
-      "anp_version": "1.0",
       "profile": "anp.attachment.v1",
       "security_profile": "transport-protected",
       "sender_did": "did:example:agent-a",
@@ -1251,7 +1297,6 @@ If an implementation claims to support E2EE attachments, it MUST also:
   "method": "attachment.get_download_ticket",
   "params": {
     "meta": {
-      "anp_version": "1.0",
       "profile": "anp.attachment.v1",
       "security_profile": "transport-protected",
       "sender_did": "did:example:agent-b",
@@ -1373,7 +1418,7 @@ Content-Length: 1048592
   "method": "group.send",
   "params": {
     "meta": {
-      "profile": "anp.group.base.v1",
+      "profile": "anp.group.base.v2",
       "security_profile": "transport-protected",
       "sender_did": "did:example:agent-a",
       "target": {
@@ -1430,10 +1475,11 @@ Content-Length: 1048592
   "method": "direct.send",
   "params": {
     "meta": {
-      "anp_version": "1.0",
-      "profile": "anp.direct.e2ee.v1",
+      "profile": "anp.direct.e2ee.v2",
       "security_profile": "direct-e2ee",
       "sender_did": "did:example:agent-a",
+      "sender_device_id": "dev-a-7N3KQ2",
+      "recipient_device_id": "dev-b-4M8P1X",
       "target": {
         "kind": "agent",
         "did": "did:example:agent-b"
@@ -1490,19 +1536,19 @@ Content-Length: 1048592
 }
 ```
 
-### 14.14 `group.send` outer ciphertext example (Group E2EE)
+### 14.14 `group.e2ee.send` outer ciphertext example (Group E2EE)
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": "req-70009",
-  "method": "group.send",
+  "method": "group.e2ee.send",
   "params": {
     "meta": {
-      "anp_version": "1.0",
-      "profile": "anp.group.e2ee.v1",
+      "profile": "anp.group.e2ee.v2",
       "security_profile": "group-e2ee",
       "sender_did": "did:example:agent-a",
+      "sender_device_id": "dev-a-7N3KQ2",
       "target": {
         "kind": "group",
         "did": "did:example:group-123"
@@ -1516,7 +1562,7 @@ Content-Length: 1048592
       "scheme": "anp-rfc9421-origin-proof-v1",
       "origin_proof": {
         "contentDigest": "sha-256=:BASE64_SHA256_OF_SIGNED_GROUP_PAYLOAD:",
-        "signatureInput": "sig1=(\"@method\" \"@target-uri\" \"content-digest\");created=1774794900;expires=1774794960;nonce=\"n-70009\";keyid=\"did:example:agent-a#key-1\"",
+        "signatureInput": "sig1=(\"@method\" \"@target-uri\" \"content-digest\");created=1774794900;expires=1774794960;nonce=\"n-70009\";keyid=\"did:example:agent-a#dev-a-sign\"",
         "signature": "sig1=:BASE64_SIGNATURE:"
       }
     },

@@ -1,17 +1,19 @@
-# ANP Agent Payment Protocol Specification (AP2)（draft）
+# ANP Agent Payment Protocol Specification (AP2) (Draft)
 
-备注：当前此规范仍是草案版本，会有进一步的优化与迭代。
+> Status: This document describes an ANP adaptation of AP2. It remains a draft, not a released stable payment standard. The version below identifies this document revision, independently of the ANP core specification-set version. The English and Chinese drafts have different revision histories and are not yet synchronized normative translations.
+
+> Editorial correction: the earlier English title and opening described a draft while its metadata said `Released`. The metadata now matches the draft status. This corrects a contradictory label; it does not revise the payment flows, credentials, or document version, and is separate from the core/messaging 1.2 promotion.
 
 - Document ID: ANP-10
 - Title: ANP Agent Payment Protocol Specification
-- Status: Released
+- Status: Draft / not released
 - Version: 1.1
 - Language: English
 - Applicability: This specification applies to payment and transaction interactions between agents in the ANP application layer.
 
 ## Abstract
 
-This specification defines the Agent Payment Protocol (AP2), a standardized protocol for payment and transaction interactions between intelligent agents. AP2 is an application layer protocol based on ANP (Agent Network Protocol) that enables secure, efficient peer-to-peer payment transactions between agents.
+This draft describes an ANP application-layer adaptation of the Agent Payment Protocol (AP2) for payment and transaction interactions between agents. It documents proposed payment flows and credential formats; its presence does not establish stable interoperability, implementation conformance, or production readiness.
 
 **Original AP2 Protocol**: An open protocol released by Google in September 2025, designed to enable AI agents to safely complete payments on behalf of users. Official website: [https://ap2-protocol.org/](https://ap2-protocol.org/)
 
@@ -861,4 +863,4 @@ Complete implementation should additionally include:
 ## Copyright Notice
 
 Copyright (c) 2024 GaoWei Chang
-This file is released under the [MIT License](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.
+This file is released under the [Apache License 2.0](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.

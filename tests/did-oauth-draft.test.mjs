@@ -9,8 +9,8 @@ import {spawnSync} from 'node:child_process';
 import test from 'node:test';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const enFile = 'vnext/11-anp-did-authorization-protocol-specification.md';
-const cnFile = 'vnext/chinese/11-ANP-基于DID的授权协议.md';
+const enFile = 'vnext/05-anp-did-authorization-protocol-specification.md';
+const cnFile = 'vnext/chinese/05-ANP-基于DID的授权协议.md';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const en = read(enFile);
 const cn = read(cnFile);
@@ -27,7 +27,7 @@ const samples = text => {
 
 for (const [file, text] of [[enFile, en], [cnFile, cn]]) {
   test('authorization document is an unreleased independent draft: ' + file, () => {
-    assert.match(text, /^- (?:Document ID: |文档编号：)ANP-11$/m);
+    assert.match(text, /^- (?:Document ID: |文档编号：)ANP-05$/m);
     assert.match(text, /^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m);
     assert.match(text, /^- (?:Version: |版本：)0\.5$/m);
     assert(text.includes(profile));
@@ -158,10 +158,10 @@ test('identity references use the current ANP-02 bindings', () => {
 test('root and vNext indexes expose only the current native draft scope', () => {
   assert(read('README.md').includes('(' + enFile + ')'));
   assert(read('README.cn.md').includes('(' + cnFile + ')'));
-  assert(read('vnext/README.md').includes('(11-anp-did-authorization-protocol-specification.md)'));
-  assert(read('vnext/chinese/README.md').includes('(11-ANP-基于DID的授权协议.md)'));
+  assert(read('vnext/README.md').includes('(05-anp-did-authorization-protocol-specification.md)'));
+  assert(read('vnext/chinese/README.md').includes('(05-ANP-基于DID的授权协议.md)'));
   for (const file of ['README.md', 'README.cn.md', 'vnext/README.md', 'vnext/chinese/README.md']) {
-    const draftLines = read(file).split('\n').filter(line => /ANP-11/.test(line));
+    const draftLines = read(file).split('\n').filter(line => /ANP-05/.test(line));
     assert.doesNotMatch(draftLines.join('\n'), /CIMD|MCP|A2A|mapped|projection|投影|映射/i);
   }
   for (const file of ['vnext/README.md', 'vnext/chinese/README.md']) {
@@ -170,7 +170,7 @@ test('root and vNext indexes expose only the current native draft scope', () => 
   }
 });
 
-test('release checker validates the ANP-11 draft inventory without redundant snapshots', () => {
+test('release checker validates the ANP-05 draft inventory without redundant snapshots', () => {
   const result = spawnSync(process.execPath, ['scripts/check-release-docs.mjs'], {
     cwd: root, encoding: 'utf8', timeout: 15000, maxBuffer: 2 * 1024 * 1024,
   });
@@ -179,8 +179,8 @@ test('release checker validates the ANP-11 draft inventory without redundant sna
   const report = JSON.parse(result.stdout);
   assert.equal(report.result, 'PASS');
   assert.equal(report.vnext_drafts_checked, 2);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['11-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['11-ANP-基于DID的授权协议.md', 'README.md']);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['05-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['05-ANP-基于DID的授权协议.md', 'README.md']);
   assert.equal(report.sdk_or_product_tests_run, false);
   assert.deepEqual(report.errors, []);
 });

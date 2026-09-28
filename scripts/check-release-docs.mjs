@@ -13,8 +13,8 @@ const messages = [...list('message'), ...list('chinese/message')];
 const draftIndexes = ['vnext/README.md', 'vnext/chinese/README.md'];
 const obsoleteArchiveDirectories = ['chinese/vnext', 'message/vnext', 'chinese/message/vnext', 'deprecated/vnext', 'chinese/deprecated/vnext', 'vnext/message', 'vnext/chinese/message', 'vnext/deprecated'];
 const nextVersionDrafts = [
-  'vnext/11-anp-did-authorization-protocol-specification.md',
-  'vnext/chinese/11-ANP-基于DID的授权协议.md',
+  'vnext/05-anp-did-authorization-protocol-specification.md',
+  'vnext/chinese/05-ANP-基于DID的授权协议.md',
 ];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
 const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...readerGuides.map(guide => guide.file)])].sort();

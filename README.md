@@ -67,7 +67,7 @@ ANP is built on existing Internet infrastructure and organizes the released prot
 | Messaging | [ANP-09: End-to-End Instant Messaging Overview](09-ANP-end-to-end-instant-messaging-protocol-specification.md) | Published v1.2 catalog; P6 candidate | Direct and group messaging, device-bound E2EE, attachments, federation, and mentions |
 | Payments | [ANP-10: AP2 Payment Adaptation Draft](application/10-anp-agent-payment-protocol-specification.md) | Draft / not released; EN document v1.1, CN document v0.1 | Proposed ANP payment adaptation, mandates, receipts, and transaction flows; not a stable payment interoperability standard |
 
-The [vNext workspace](vnext/README.md) contains protocols with new draft content. [ANP-11: DID-Based Authorization](vnext/11-anp-did-authorization-protocol-specification.md) is an unreleased OAuth and VC authorization draft; it is not part of ANP 1.2. Current 1.2 normative references use the release paths above. The historical deprecated did:all documents retain their original identity; the current ANP-02 number denotes DID authentication.
+The [vNext workspace](vnext/README.md) contains protocols with new draft content. [ANP-05: DID-Based Authorization](vnext/05-anp-did-authorization-protocol-specification.md) is an unreleased OAuth and VC authorization draft; it is not part of ANP 1.2. Current 1.2 normative references use the release paths above. The historical deprecated did:all documents retain their original identity; the current ANP-02 number denotes DID authentication.
 
 ### Instant Messaging Profiles
 
@@ -95,7 +95,7 @@ Ordinary Direct, Group, Mention, and Attachment operations remain addressed by b
 ## Quick Start
 
 - For method-independent ordinary API authentication, read [ANP-02](02-anp-did-authentication-protocol-specification.md). It does not require Messaging, Handles, or device Manifests.
-- For proposed DID-based agent authorization, read [ANP-11 (draft)](vnext/11-anp-did-authorization-protocol-specification.md). It explains when to use OAuth and when to use VC, defines the agent-authorization roadmap and v1 identity/basic-delegation scope, with integrity-bound metadata, first-contact admission, hosted/local OAuth flows, and VC delegation credentials by direct presentation or token exchange; implementation support is not implied.
+- For proposed DID-based agent authorization, read [ANP-05 (draft)](vnext/05-anp-did-authorization-protocol-specification.md). It explains when to use OAuth and when to use VC, defines the agent-authorization roadmap and v1 identity/basic-delegation scope, with integrity-bound metadata, first-contact admission, hosted/local OAuth flows, and VC delegation credentials by direct presentation or token exchange; implementation support is not implied.
 
 - To understand ANP concepts and usage, read the [ANP Getting Started Guide](docs/anp-getting-started-guide.md) or the [Chinese guide](docs/chinese/ANP入门指南.md).
 - To implement ANP 1.2 identity, start with ANP-02, then [ANP-03: did:wba](03-did-wba-method-design-specification.md) for WBA method validation or [Appendix B](appendix-b-compatibility-with-native-did-web.md) for native `did:web` integration.
@@ -124,7 +124,7 @@ AWiki is an open-source implementation of agent identity and messaging based on 
 - `01-*.md`, `02-*.md`, `03-*.md`, `04-*.md`, `06-*.md`, `07-*.md`, `08-*.md`, `09-*.md`: English core documents, with document version 1.2 and individual status markers.
 - `message/`: the ANP Messaging 1.2 Profile suite and index; P6 retains candidate status.
 - `chinese/`: Chinese mirrors of core and messaging specifications, plus related research notes.
-- `vnext/`: next-version drafts with protocol changes, currently the English and Chinese ANP-11 draft. Current 1.2 specifications remain in their release paths.
+- `vnext/`: next-version drafts with protocol changes, currently the English and Chinese ANP-05 draft. Current 1.2 specifications remain in their release paths.
 - `application/`: independently versioned application-layer protocols such as AP2.
 - `docs/`: guides, extended reading, and community operations documents.
 - `blogs/`: articles and historical protocol analysis.

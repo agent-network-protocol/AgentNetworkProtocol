@@ -1,17 +1,17 @@
 # ANP DID-Based Authorization Protocol
 
-- Document ID: ANP-11
+- Document ID: ANP-05
 - Status: Draft / not released
 - Version: 0.5
 - Specification set: ANP vNext; not part of the ANP 1.2 release
 - Draft Profile identifiers: OAuth Profile `anp.authorization.oauth2.did.v1-draft4`; VC Profile `anp.authorization.vc.v1-draft1`
 - Language: English
-- Chinese mirror: [ANP 基于 DID 的授权协议](chinese/11-ANP-基于DID的授权协议.md)
+- Chinese mirror: [ANP 基于 DID 的授权协议](chinese/05-ANP-基于DID的授权协议.md)
 
 <a id="scope"></a>
 ## 1. Scope, authorization problem, and roadmap
 
-ANP-11 defines the DID-based agent authorization workstream with two complementary mechanisms: the **OAuth Profile**, in which an authorization server trusted by the resource side issues access tokens, and the **VC Profile**, in which a user or organization that holds the authority issues a W3C Verifiable Credential (VC) that the Agent holds and presents. Both identify the authorizing party and the authorized Agent by DID. **The first release (v1) is a DID–OAuth client identity and basic delegated-access Profile, plus single-level VC delegation credentials, not a complete agent delegation system.** The current document is its unreleased v0.5 draft. In this document, “v1” names that first-release scope; it does not mean that v1 has shipped or that all later roadmap capabilities are implemented.
+ANP-05 defines the DID-based agent authorization workstream with two complementary mechanisms: the **OAuth Profile**, in which an authorization server trusted by the resource side issues access tokens, and the **VC Profile**, in which a user or organization that holds the authority issues a W3C Verifiable Credential (VC) that the Agent holds and presents. Both identify the authorizing party and the authorized Agent by DID. **The first release (v1) is a DID–OAuth client identity and basic delegated-access Profile, plus single-level VC delegation credentials, not a complete agent delegation system.** The current document is its unreleased v0.5 draft. In this document, “v1” names that first-release scope; it does not mean that v1 has shipped or that all later roadmap capabilities are implemented.
 
 In the OAuth Profile, an Agent uses its own DID-backed key to authenticate as an OAuth client; the resource owner authorizes access, the authorization server (AS) issues a restricted token, and the resource server (RS) enforces it. That path does not require VC, VP, an OIDC login bridge, or a blockchain. In the VC Profile, a user or organization with authority over a resource issues a delegation credential under its own DID, and the Agent signs a Verifiable Presentation (VP) under its DID; the verifier decides under its own policy whether to accept it, and either performs the operation directly or has the resource's AS exchange it for an ordinary OAuth token.
 
@@ -79,19 +79,19 @@ Publication of this draft does not establish SDK, AS or product support. The OAu
 
 Use the current [ANP-02 identity-material rules](../02-anp-did-authentication-protocol-specification.md#identity-input), [ANP-03 WBA binding](../03-did-wba-method-design-specification.md#wba-auth-binding), and [ANP-02 native Web binding](../02-anp-did-authentication-protocol-specification.md#web-binding). The historical ANP-02 snapshot beside this file is not this draft's normative baseline.
 
-ANP-02 defines HTTP/JSON request authentication. ANP-11 reuses the DID validation and authentication-key authorization model, **not** its HTTP signature serialization, challenges, or optional token response headers. The OAuth token endpoint uses `client_assertion` and the standard OAuth JSON token response. It MUST NOT require a second ANP-02 HTTP signature to satisfy this Profile. A deployment needing HTTP Message Signatures as a distinct OAuth authentication method needs another explicit binding.
+ANP-02 defines HTTP/JSON request authentication. ANP-05 reuses the DID validation and authentication-key authorization model, **not** its HTTP signature serialization, challenges, or optional token response headers. The OAuth token endpoint uses `client_assertion` and the standard OAuth JSON token response. It MUST NOT require a second ANP-02 HTTP signature to satisfy this Profile. A deployment needing HTTP Message Signatures as a distinct OAuth authentication method needs another explicit binding.
 
-An ANP-02 authentication-cache token is not automatically an ANP-11 OAuth authorization token. Implementations MUST separate their acceptance rules. Messaging, WNS, Device Manifests, E2EE, and human-presence UI are not dependencies of this Profile; VC direct presentation may be carried by an ANP-02-authenticated HTTP interface or an authenticated messaging session without changing those protocols' rules. A DID's `authentication` relationship authorizes a key for authentication; it does not grant access to application resources.
+An ANP-02 authentication-cache token is not automatically an ANP-05 OAuth authorization token. Implementations MUST separate their acceptance rules. Messaging, WNS, Device Manifests, E2EE, and human-presence UI are not dependencies of this Profile; VC direct presentation may be carried by an ANP-02-authenticated HTTP interface or an authenticated messaging session without changing those protocols' rules. A DID's `authentication` relationship authorizes a key for authentication; it does not grant access to application resources.
 
 ### 2.1 Selecting ANP-02, OAuth or VC (informative)
 
 | Need | Select | Credential meaning |
 | --- | --- | --- |
 | Authenticate a direct API request or communication peer; receiver applies its existing local policy | ANP-02 | Its optional token reuses the receiver's authenticated context under that API's policy; it does not establish a standardized user-delegation grant. |
-| Obtain restricted access on behalf of a user, or use an AS-managed client grant, resource audience, consent, expiry and revocation | ANP-11 OAuth Profile | The AS issues an OAuth access token for a specific grant and resource. |
-| Present authority that originates outside the resource side, such as an organizational appointment, a user mandate or a qualification, for the verifier or its AS to accept | ANP-11 VC Profile | A statement signed by the issuer; the verifier decides under its own policy whether to accept it, and the credential itself is not an access token. |
+| Obtain restricted access on behalf of a user, or use an AS-managed client grant, resource audience, consent, expiry and revocation | ANP-05 OAuth Profile | The AS issues an OAuth access token for a specific grant and resource. |
+| Present authority that originates outside the resource side, such as an organizational appointment, a user mandate or a qualification, for the verifier or its AS to accept | ANP-05 VC Profile | A statement signed by the issuer; the verifier decides under its own policy whether to accept it, and the credential itself is not an access token. |
 
-A service may offer several mechanisms on clearly separated routes or declared policies. The presence of a JWT, signed JSON or the word “token” does not make them interchangeable. ANP-11 does not require an ANP-02 token first, and ANP-02 clients are not required to adopt an AS for every ordinary authenticated message. An RS MUST NOT accept a raw VC or VP as a Bearer access credential.
+A service may offer several mechanisms on clearly separated routes or declared policies. The presence of a JWT, signed JSON or the word “token” does not make them interchangeable. ANP-05 does not require an ANP-02 token first, and ANP-02 clients are not required to adopt an AS for every ordinary authenticated message. An RS MUST NOT accept a raw VC or VP as a Bearer access credential.
 
 <a id="mechanism-selection"></a>
 ### 2.2 Division of roles between OAuth and VC (informative)
@@ -478,7 +478,7 @@ The AS MUST enforce expiration and revocation and implement refresh-token rotati
 
 The token endpoint MUST return the standard OAuth JSON response, with `access_token`, `token_type`, `expires_in`, `scope` identifying the actual grant, `Cache-Control: no-store`, and `Pragma: no-cache`. An error MUST NOT also return a token. The token MUST have a finite, policy-defined lifetime. The 300-second assertion limit is not the access-token lifetime.
 
-Tokens MAY be opaque or JWT. The RS MUST validate the trusted AS, validity, revocation/status where applicable, intended resource audience, scope, and local business policy. Opaque tokens need a trusted validation path, such as RFC 7662 introspection; JWT access tokens issued by an ANP-11 AS under this Profile MUST follow RFC 9068, including required claims and token-type separation. The AS signs such a token; the Agent's DID key does not make the Agent a trusted access-token issuer.
+Tokens MAY be opaque or JWT. The RS MUST validate the trusted AS, validity, revocation/status where applicable, intended resource audience, scope, and local business policy. Opaque tokens need a trusted validation path, such as RFC 7662 introspection; JWT access tokens issued by an ANP-05 AS under this Profile MUST follow RFC 9068, including required claims and token-type separation. The AS signs such a token; the Agent's DID key does not make the Agent a trusted access-token issuer.
 
 The client assertion MUST NOT be accepted as an access token, ID Token, refresh token, or authorization grant. `Bearer` access uses RFC 6750. DPoP is RECOMMENDED when both AS and RS support it; it remains optional in this initial Profile. Where used, RFC 9449 applies, including `token_type=DPoP`, `Authorization: DPoP`, proof validation, `ath` at the RS, and `cnf.jkt` for JWT key binding. DPoP does not replace client authentication and its key need not be the long-lived DID key. Policy requiring DPoP MUST NOT silently fall back to Bearer.
 

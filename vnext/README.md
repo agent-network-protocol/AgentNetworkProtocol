@@ -7,9 +7,9 @@ This directory contains drafts with protocol content beyond the current release.
 
 | Draft | Status | Scope |
 | --- | --- | --- |
-| [ANP-11: DID-Based Authorization](11-anp-did-authorization-protocol-specification.md) / [中文](chinese/11-ANP-基于DID的授权协议.md) | Draft / not released; v0.5 | Agent-authorization roadmap; division of roles between OAuth and VC; v1 DID identity/basic delegation, integrity-bound metadata, local callbacks, and lifecycle rules; VC delegation credentials by direct presentation or token exchange. |
+| [ANP-05: DID-Based Authorization](05-anp-did-authorization-protocol-specification.md) / [中文](chinese/05-ANP-基于DID的授权协议.md) | Draft / not released; v0.5 | Agent-authorization roadmap; division of roles between OAuth and VC; v1 DID identity/basic delegation, integrity-bound metadata, local callbacks, and lifecycle rules; VC delegation credentials by direct presentation or token exchange. |
 
-ANP-11 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
+ANP-05 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
 
 ## Copyright Notice
 

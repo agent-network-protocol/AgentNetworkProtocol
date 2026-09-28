@@ -8,9 +8,9 @@
 
 | 草案 | 状态 | 定义内容 |
 | --- | --- | --- |
-| [ANP-11：基于 DID 的授权协议](11-ANP-基于DID的授权协议.md) / [English](../11-anp-did-authorization-protocol-specification.md) | 草案 / 未发布；v0.5 | 智能体授权路线图；OAuth 与 VC 的分工；v1 DID 身份/基础委托、元数据完整性、本机回调及生命周期规则；VC 委托凭证的直接出示与令牌换发。 |
+| [ANP-05：基于 DID 的授权协议](05-ANP-基于DID的授权协议.md) / [English](../05-anp-did-authorization-protocol-specification.md) | 草案 / 未发布；v0.5 | 智能体授权路线图；OAuth 与 VC 的分工；v1 DID 身份/基础委托、元数据完整性、本机回调及生命周期规则；VC 委托凭证的直接出示与令牌换发。 |
 
-ANP-11 引用当前 ANP 1.2 身份材料绑定。正式发布或公开启用前，必须完成评审与客户端/AS/RS 互操作验证。
+ANP-05 引用当前 ANP 1.2 身份材料绑定。正式发布或公开启用前，必须完成评审与客户端/AS/RS 互操作验证。
 
 ## 版权声明
 

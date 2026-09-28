@@ -11,7 +11,7 @@ If Harness is absent, use local docs/tests/CI and disclose missing acceptance ev
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
 - Root and `chinese/` hold the current ANP 1.2 core documents; `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
-- Root `vnext/` holds next-version drafts in both languages. It currently contains only the bilingual ANP-11 DID-based OAuth and VC authorization draft, which is not part of ANP 1.2. Add a vNext copy of an existing protocol only when its protocol content changes; current 1.2 specifications stay in their release paths.
+- Root `vnext/` holds next-version drafts in both languages. It currently contains only the bilingual ANP-05 DID-based OAuth and VC authorization draft, which is not part of ANP 1.2. Add a vNext copy of an existing protocol only when its protocol content changes; current 1.2 specifications stay in their release paths.
 - `docs/` and `docs/chinese/` hold guides, links, and community operations.
 - `chinese/` mirrors core documents in Chinese plus research notes and process docs.
 - `blogs/` and `blogs/cn/` store long-form articles; `blogs/images/` holds blog assets.
@@ -34,7 +34,7 @@ This repository is documentation-first and has focused tests for maintenance aut
   - `uv run python scripts/replace_spaces_with_hyphens.py`
 - Check ANP 1.2 documentation and vNext draft boundaries with `node scripts/check-release-docs.mjs`, then run `node scripts/generate-anp02-vectors.mjs` and `node scripts/check-anp02-vectors.mjs` for offline fixture checks. Earlier extraction baselines remain available in Git history.
 - Check onboarding and payment-status regressions with `node --test tests/release-doc-entrypoints.test.mjs`. The release checker includes the three current onboarding guides; AP2 checks cover status/version only, not payment conformance.
-- Check ANP-11 draft metadata, bilingual wire examples, and draft/release separation with `node --test tests/did-oauth-draft.test.mjs`. These are documentation checks, not OAuth runtime or cryptographic conformance tests.
+- Check ANP-05 draft metadata, bilingual wire examples, and draft/release separation with `node --test tests/did-oauth-draft.test.mjs`. These are documentation checks, not OAuth runtime or cryptographic conformance tests.
 - Test contributor avatar automation with `node --test tests/update_contributors.test.js`.
 
 ## Coding Style & Naming Conventions

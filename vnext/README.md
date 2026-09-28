@@ -1,27 +1,15 @@
 # ANP vNext Protocol Collection
 
-- Status: Next-version workspace seeded with historical ANP 1.2 pre-release snapshots; no post-1.2 protocol changes yet
+- Status: Next-version drafts; not part of ANP 1.2
 - Current specifications: [ANP 1.2](../README.md) and [Chinese index](../README.cn.md)
 
-This directory is the single entry for the next protocol iteration. It currently contains the vNext snapshots that preceded ANP 1.2, with their protocol text preserved and links adjusted for the consolidated tree. Versions, statuses, and draft notices in those documents still describe their pre-release state; they do not assert a post-1.2 release. For the current contract, use the ANP 1.2 links in the last column below. Make future vNext protocol edits in this tree.
+This directory contains drafts with protocol content beyond the current release. Add a vNext copy of an existing protocol when its protocol rules change. The current ANP 1.2 specifications remain at their release paths; earlier pre-release snapshots are available in Git history.
 
-| Protocol area | vNext snapshots | Current ANP 1.2 |
+| Draft | Status | Scope |
 | --- | --- | --- |
-| Core, English | Documents below | [English specification index](../README.md) |
-| Core, Chinese | [Chinese core index](chinese/README.md) | [Chinese specification index](../README.cn.md) |
-| Messaging, English | [Messaging index](message/README.md) | [Messaging 1.2 index](../message/README.md) |
-| Messaging, Chinese | [Chinese messaging index](chinese/message/README.md) | [Chinese Messaging 1.2 index](../chinese/message/README.md) |
+| [ANP-11: DID-Based Authorization](11-anp-did-authorization-protocol-specification.md) / [中文](chinese/11-ANP-基于DID的授权协议.md) | Draft / not released; v0.5 | Agent-authorization roadmap; division of roles between OAuth and VC; v1 DID identity/basic delegation, integrity-bound metadata, local callbacks, and lifecycle rules; VC delegation credentials by direct presentation or token exchange. |
 
-## English core snapshots
-
-| Historical snapshot | Current 1.2 document |
-| --- | --- |
-| [ANP-02 DID authentication](02-anp-did-authentication-protocol-specification.md) | [ANP-02](../02-anp-did-authentication-protocol-specification.md) |
-| [ANP-03 did:wba method](03-did-wba-method-design-specification.md) | [ANP-03](../03-did-wba-method-design-specification.md) |
-| [ANP-04 WBA namespace](04-anp-did-wba-name-space-specification.md) | [ANP-04](../04-anp-did-wba-name-space-specification.md) |
-| [Appendix B: native did:web](appendix-b-compatibility-with-native-did-web.md) | [Appendix B](../appendix-b-compatibility-with-native-did-web.md) |
-
-The earlier `chinese/vnext/`, `message/vnext/`, and `chinese/message/vnext/` paths remain frozen historical copies for existing links and the original extraction checks. New vNext navigation and edits start here.
+ANP-11 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
 
 ## Copyright Notice
 

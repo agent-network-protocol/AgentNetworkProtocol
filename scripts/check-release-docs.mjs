@@ -12,10 +12,15 @@ const core = [...list('.'), ...list('chinese')].filter(name => /^(?:chinese\/)?(
 const messages = [...list('message'), ...list('chinese/message')];
 const draftIndexes = ['vnext/README.md', 'vnext/chinese/README.md'];
 const obsoleteArchiveDirectories = ['chinese/vnext', 'message/vnext', 'chinese/message/vnext', 'deprecated/vnext', 'chinese/deprecated/vnext', 'vnext/message', 'vnext/chinese/message', 'vnext/deprecated'];
-const nextVersionDrafts = [
+const authorizationDrafts = [
   'vnext/05-anp-did-authorization-protocol-specification.md',
   'vnext/chinese/05-ANP-基于DID的授权协议.md',
 ];
+const whitePaperDrafts = [
+  'vnext/01-agentnetworkprotocol-technical-white-paper.md',
+  'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md',
+];
+const nextVersionDrafts = [...authorizationDrafts, ...whitePaperDrafts];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
 const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...readerGuides.map(guide => guide.file)])].sort();
 const errors = [];
@@ -92,7 +97,8 @@ check(JSON.stringify(actualDrafts) === JSON.stringify([...nextVersionDrafts].sor
 for (const file of nextVersionDrafts) {
   const text = read(file);
   check(/^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m.test(text), {file, reason: 'new-draft-status-lost'});
-  check(/^- (?:Version: |版本：)0\.5$/m.test(text), {file, reason: 'new-draft-version-changed'});
+  const version = authorizationDrafts.includes(file) ? '0\\.5' : '1\\.2';
+  check(new RegExp('^- (?:Version: |版本：)' + version + '$', 'm').test(text), {file, reason: 'new-draft-version-changed'});
 }
 
 for (const guide of readerGuides) errors.push(...checkReaderGuide(guide, read(guide.file)));
@@ -132,5 +138,5 @@ for (const scenario of scenarios.scenarios) {
     checkLink(scenariosFile, target);
   }
 }
-console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-documentation', documents: documents.length, vnext_drafts_checked: nextVersionDrafts.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
+console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-documentation', documents: documents.length, vnext_drafts_checked: nextVersionDrafts.length, authorization_drafts_checked: authorizationDrafts.length, white_paper_drafts_checked: whitePaperDrafts.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
 process.exitCode = errors.length ? 1 : 0;

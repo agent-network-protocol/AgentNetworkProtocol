@@ -3,10 +3,11 @@
 - Status: Next-version drafts; not part of ANP 1.2
 - Current specifications: [ANP 1.2](../README.md) and [Chinese index](../README.cn.md)
 
-This directory contains drafts with protocol content beyond the current release. Add a vNext copy of an existing protocol when its protocol rules change. The current ANP 1.2 specifications remain at their release paths; earlier pre-release snapshots are available in Git history.
+This directory contains protocol drafts and white paper revisions with substantive changes from the current release. Add a vNext copy when an existing specification or white paper needs revision. The current ANP 1.2 documents remain at their release paths; earlier pre-release snapshots are available in Git history.
 
 | Draft | Status | Scope |
 | --- | --- | --- |
+| [ANP-01: Technical White Paper](01-agentnetworkprotocol-technical-white-paper.md) / [中文](chinese/01-AgentNetworkProtocol技术白皮书.md) | Informative working draft / not released; based on v1.2 | Revised vision, architecture, identity, messaging, discovery, description, and application-protocol discussion. |
 | [ANP-05: DID-Based Authorization](05-anp-did-authorization-protocol-specification.md) / [中文](chinese/05-ANP-基于DID的授权协议.md) | Draft / not released; v0.5 | Agent-authorization roadmap; division of roles between OAuth and VC; v1 DID identity/basic delegation, integrity-bound metadata, local callbacks, and lifecycle rules; VC delegation credentials by direct presentation or token exchange. |
 
 ANP-05 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.

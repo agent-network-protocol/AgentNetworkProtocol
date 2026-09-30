@@ -170,7 +170,7 @@ test('root and vNext indexes expose only the current native draft scope', () => 
   }
 });
 
-test('release checker validates the ANP-05 draft inventory without redundant snapshots', () => {
+test('release checker validates authorization and white paper drafts without redundant snapshots', () => {
   const result = spawnSync(process.execPath, ['scripts/check-release-docs.mjs'], {
     cwd: root, encoding: 'utf8', timeout: 15000, maxBuffer: 2 * 1024 * 1024,
   });
@@ -178,9 +178,11 @@ test('release checker validates the ANP-05 draft inventory without redundant sna
   assert.equal(result.status, 0, result.stdout + result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.result, 'PASS');
-  assert.equal(report.vnext_drafts_checked, 2);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['05-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['05-ANP-基于DID的授权协议.md', 'README.md']);
+  assert.equal(report.vnext_drafts_checked, 4);
+  assert.equal(report.authorization_drafts_checked, 2);
+  assert.equal(report.white_paper_drafts_checked, 2);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['01-agentnetworkprotocol-technical-white-paper.md', '05-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['01-AgentNetworkProtocol技术白皮书.md', '05-ANP-基于DID的授权协议.md', 'README.md']);
   assert.equal(report.sdk_or_product_tests_run, false);
   assert.deepEqual(report.errors, []);
 });

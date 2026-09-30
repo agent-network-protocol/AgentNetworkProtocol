@@ -11,7 +11,7 @@ If Harness is absent, use local docs/tests/CI and disclose missing acceptance ev
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
 - Root and `chinese/` hold the current ANP 1.2 core documents; `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
-- Root `vnext/` holds next-version drafts in both languages. It currently contains only the bilingual ANP-05 DID-based OAuth and VC authorization draft, which is not part of ANP 1.2. Add a vNext copy of an existing protocol only when its protocol content changes; current 1.2 specifications stay in their release paths.
+- Root `vnext/` holds next-version drafts in both languages: the ANP-01 white paper revisions and the ANP-05 DID-based OAuth and VC authorization draft. These revisions are not part of ANP 1.2. Add a vNext copy of an existing specification or white paper only when its content changes; keep the original white papers aligned with `origin/main` and edit their revisions in `vnext/`.
 - `docs/` and `docs/chinese/` hold guides, links, and community operations.
 - `chinese/` mirrors core documents in Chinese plus research notes and process docs.
 - `blogs/` and `blogs/cn/` store long-form articles; `blogs/images/` holds blog assets.

@@ -568,6 +568,7 @@ test('VC direct presentation request carries a fresh challenge and a covered per
   assert(Number.isInteger(presentationRequest.expires_at));
   assert(presentationRequest.expires_at > claims.iat && presentationRequest.expires_at - claims.iat <= 300);
   assert.deepEqual(presentationRequest.credential_types, ['ANPAgentDelegationCredential']);
+  assert.equal(presentationRequest.mode, 'operation');
   assert.equal(presentationRequest.resource, permission.resource);
   for (const action of presentationRequest.actions) assert(permission.actions.includes(action), action);
 });
@@ -637,6 +638,42 @@ const vcGuards = [
   ['revocation latency is documented rather than claimed instantaneous',
     /Deployments MUST document the upper bound on revocation latency/,
     /部署必须（MUST）记录撤销延迟的上界/],
+  ['the revocation bound includes status-list validity, not only cache time',
+    /bounded by the sum of the status list credential's maximum validity, the status cache time, the token lifetime and the allowed clock skew/,
+    /撤销延迟的上界为状态列表凭证的最长有效期、状态缓存时间、令牌有效期与允许时钟偏差之和/],
+  ['status lists must carry and satisfy validUntil',
+    /the status list credential MUST carry `validUntil` and be within its validity under the step 5 rule/,
+    /状态列表凭证必须带有 `validUntil`，并按第 5 步规则处于有效期内/],
+  ['issuing authority cannot be derived from credentials the issuer holds',
+    /Issuing authority MUST come from the verifier's local principal binding or trust policy and MUST NOT be derived from a delegation credential, role credential, access token or execution permission the issuer itself holds/,
+    /签发资格必须（MUST）来自验证方本地的主体绑定或信任策略，不得从签发方自己持有的委托凭证、角色凭证、访问令牌或执行权限推导/],
+  ['the exchange challenge is consumed once, through the assertion jti',
+    /the atomic reservation of that `jti` under Section 6\.4 is this consumption and MUST NOT be repeated as a separate value/,
+    /第 6\.4 节对该 `jti` 的原子占用即是本次消费，不得（MUST NOT）作为另一个值重复占用/],
+  ['the exchange replay record covers the whole VP acceptance window',
+    /the AS MUST retain that replay record until the later of `exp \+ s` and the VP's `created` plus 300 seconds plus `s`/,
+    /AS 必须（MUST）把该防重放记录保留到 `exp \+ s` 与“VP 的 `created` 加 300 秒再加 `s`”两者中较晚的时刻/],
+  ['challenges are consumed only after holder binding',
+    /For direct presentation, only after this check does the verifier consume the presentation transaction/,
+    /直接出示时，验证方通过这项检查后才按第 11\.3 节消费出示事务/],
+  ['the Agent signs only for the verifier it is dealing with',
+    /Before signing, the Agent MUST confirm that `domain` identifies the verifier it is actually dealing with/,
+    /Agent 签署前必须（MUST）确认 `domain` 就是它实际交互的验证方/],
+  ['direct presentation is bound to the stored transaction',
+    /The verifier MUST store the challenge together with the requester DID[\s\S]*performs or rejects only the operation in that transaction/,
+    /验证方必须（MUST）把 challenge 与请求方 DID[\s\S]*然后只执行或拒绝该事务中的操作/],
+  ['a single-operation presentation cannot become a session',
+    /MUST NOT widen a single-operation presentation into a session after receiving the VP/,
+    /不得（MUST NOT）在收到 VP 后把单次操作扩大为会话/],
+  ['amount limits never guess the amount or convert currency',
+    /the verifier MUST reject the operation and MUST NOT convert currencies or guess the amount/,
+    /验证方必须（MUST）拒绝该操作，不得（MUST NOT）自行换算汇率或猜测金额/],
+  ['attached credentials are not holder-bound and grant no authority',
+    /Attached credentials are not subject to the holder-binding rule[\s\S]{0,120}they grant no authority by themselves/,
+    /附加凭证不适用持有者绑定规则[\s\S]{0,40}它们本身不授予权限/],
+  ['VC conformance applies by role rather than to all of Section 11',
+    /Section 11\.5 applies only to an AS that supports token exchange, and Section 11\.6 only to a verifier that accepts direct presentation/,
+    /第 11\.5 节只适用于声明支持令牌换发的 AS，第 11\.6 节只适用于接受直接出示的验证方/],
 ];
 for (const [name, enPattern, cnPattern] of vcGuards) {
   test('VC requirement and deletion regression: ' + name, () => {

@@ -10,8 +10,8 @@ import test from 'node:test';
 import {checkWhitePaperAuthorizationScope} from '../scripts/release-entrypoint-checks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const enFile = 'vnext/05-anp-did-authorization-protocol-specification.md';
-const cnFile = 'vnext/chinese/05-ANP-基于DID的授权协议.md';
+const enFile = '05-anp-did-authorization-protocol-specification.md';
+const cnFile = 'chinese/05-ANP-基于DID的授权协议.md';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const en = read(enFile);
 const cn = read(cnFile);
@@ -155,8 +155,8 @@ test('mirrors retain applicable security scenarios without reusing removed scena
   assert.match(cnValidation, /不是宣称某个实现已经通过/);
   assert.doesNotMatch(en, /^\| AUTHZ-\d+/m);
   assert.doesNotMatch(cn, /^\| AUTHZ-\d+/m);
-  assert(en.includes('(../' + enValidationFile + ')'));
-  assert(cn.includes('(../../' + cnValidationFile + ')'));
+  assert(en.includes('(' + enValidationFile + ')'));
+  assert(cn.includes('(../' + cnValidationFile + ')'));
   assert(enValidation.includes('(../' + enFile + '#conformance)'));
   assert(cnValidation.includes('(../../' + cnFile + '#conformance)'));
   for (const guide of [enValidation, cnValidation]) {
@@ -167,10 +167,10 @@ test('mirrors retain applicable security scenarios without reusing removed scena
 });
 
 test('identity references use the current ANP-02 bindings', () => {
-  assert(en.includes('../02-anp-did-authentication-protocol-specification.md#identity-input'));
-  assert(cn.includes('../../chinese/02-ANP-基于DID的身份认证协议.md#identity-input'));
-  assert(en.includes('../03-did-wba-method-design-specification.md#wba-auth-binding'));
-  assert(cn.includes('../../chinese/03-did-wba方法规范.md#wba-auth-binding'));
+  assert(en.includes('(02-anp-did-authentication-protocol-specification.md#identity-input)'));
+  assert(cn.includes('(02-ANP-基于DID的身份认证协议.md#identity-input)'));
+  assert(en.includes('(03-did-wba-method-design-specification.md#wba-auth-binding)'));
+  assert(cn.includes('(03-did-wba方法规范.md#wba-auth-binding)'));
   assert(en.includes('**not** its HTTP signature serialization'));
   assert(cn.includes('**不复用**其 HTTP 签名序列化'));
 });
@@ -178,8 +178,10 @@ test('identity references use the current ANP-02 bindings', () => {
 test('root and vNext indexes expose only the current native draft scope', () => {
   assert(read('README.md').includes('(' + enFile + ')'));
   assert(read('README.cn.md').includes('(' + cnFile + ')'));
-  assert(read('vnext/README.md').includes('(05-anp-did-authorization-protocol-specification.md)'));
-  assert(read('vnext/chinese/README.md').includes('(05-ANP-基于DID的授权协议.md)'));
+  assert(read('vnext/README.md').includes('(../' + enFile + ')'));
+  assert(read('vnext/chinese/README.md').includes('(../../' + cnFile + ')'));
+  assert.match(read('README.md'), /^\| Authorization \| \[ANP-05:[^\n]+\| Draft \/ not released; v0\.6 \|/m);
+  assert.match(read('README.cn.md'), /^\| 授权 \| \[ANP-05：[^\n]+\| 草案 \/ 未发布；v0\.6 \|/m);
   for (const file of ['README.md', 'README.cn.md', 'vnext/README.md', 'vnext/chinese/README.md']) {
     const draftLines = read(file).split('\n').filter(line => /ANP-05/.test(line));
     assert.doesNotMatch(draftLines.join('\n'), /CIMD|MCP|A2A|mapped|projection|投影|映射/i);
@@ -198,12 +200,12 @@ test('release checker validates authorization and white paper drafts without red
   assert.equal(result.status, 0, result.stdout + result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.result, 'PASS');
-  assert.equal(report.vnext_drafts_checked, 4);
+  assert.equal(report.vnext_drafts_checked, 2);
   assert.equal(report.authorization_drafts_checked, 2);
   assert.equal(report.white_paper_drafts_checked, 2);
   assert.equal(report.authorization_validation_guides_checked, 2);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['01-agentnetworkprotocol-technical-white-paper.md', '05-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
-  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['01-AgentNetworkProtocol技术白皮书.md', '05-ANP-基于DID的授权协议.md', 'README.md']);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['01-agentnetworkprotocol-technical-white-paper.md', 'README.md', 'chinese']);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['01-AgentNetworkProtocol技术白皮书.md', 'README.md']);
   assert.equal(report.sdk_or_product_tests_run, false);
   assert.deepEqual(report.errors, []);
 });

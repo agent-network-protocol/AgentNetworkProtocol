@@ -10,8 +10,8 @@ If Harness is absent, use local docs/tests/CI and disclose missing acceptance ev
 ## Project Structure & Module Organization
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
-- Root and `chinese/` hold the current ANP 1.2 core documents; `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
-- Root `vnext/` holds next-version drafts in both languages: the ANP-01 white paper revisions and the ANP-05 DID-based OAuth and VC authorization draft. These revisions are not part of ANP 1.2. Add a vNext copy of an existing specification or white paper only when its content changes; keep the original white papers aligned with `origin/main` and edit their revisions in `vnext/`.
+- Root and `chinese/` hold the current ANP 1.2 core documents and the ANP-05 DID-based OAuth and VC authorization draft. ANP-05 remains v0.6 / Draft / not released and is outside ANP 1.2. `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
+- Root `vnext/` holds the ANP-01 white paper revisions in both languages. These revisions are not part of ANP 1.2. Add a vNext copy of an existing specification or white paper only when its content changes; keep the original white papers aligned with `origin/main` and edit their revisions in `vnext/`.
 - `docs/` and `docs/chinese/` hold guides, links, and community operations.
 - ANP-05's detailed validation scenarios and stable `AUTHZ-*` identifiers live in `docs/anp-05-validation-guide.md` and `docs/chinese/anp-05-validation-guide.md`; the protocol's Section 14 retains conformance requirements and links to these guides.
 - `chinese/` mirrors core documents in Chinese plus research notes and process docs.

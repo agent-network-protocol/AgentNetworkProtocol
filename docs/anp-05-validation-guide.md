@@ -1,11 +1,11 @@
 # ANP-05 Implementation Validation Guide
 
 - Status: Informative validation guide for the unreleased protocol draft
-- Protocol baseline: [ANP-05 v0.6](../vnext/05-anp-did-authorization-protocol-specification.md)
+- Protocol baseline: [ANP-05 v0.6](../05-anp-did-authorization-protocol-specification.md)
 - Profiles: OAuth `anp.authorization.oauth2.did.v1-draft4`; VC `anp.authorization.vc.v1-draft2`
 - Chinese mirror: [实现验证指南](chinese/anp-05-validation-guide.md)
 
-This guide collects implementation validation scenarios derived from ANP-05. The protocol defines the requirements and conformance rules, especially in [Section 14](../vnext/05-anp-did-authorization-protocol-specification.md#conformance). Section numbers in the scenarios below refer to the protocol.
+This guide collects implementation validation scenarios derived from ANP-05. The protocol defines the requirements and conformance rules, especially in [Section 14](../05-anp-did-authorization-protocol-specification.md#conformance). Section numbers in the scenarios below refer to the protocol.
 
 ## Validation scenarios
 

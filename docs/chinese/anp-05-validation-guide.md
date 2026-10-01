@@ -1,11 +1,11 @@
 # ANP-05 实现验证指南
 
 - 状态：资料性验证指南；对应尚未发布的协议草案
-- 协议基线：[ANP-05 v0.6](../../vnext/chinese/05-ANP-基于DID的授权协议.md)
+- 协议基线：[ANP-05 v0.6](../../chinese/05-ANP-基于DID的授权协议.md)
 - Profile：OAuth `anp.authorization.oauth2.did.v1-draft4`；VC `anp.authorization.vc.v1-draft2`
 - 英文镜像：[Implementation Validation Guide](../anp-05-validation-guide.md)
 
-本指南收录从 ANP-05 提取的实现验证场景。协议要求与一致性规则以协议正文为准，尤其是[第 14 节](../../vnext/chinese/05-ANP-基于DID的授权协议.md#conformance)。下方场景中的章节编号均指协议正文。
+本指南收录从 ANP-05 提取的实现验证场景。协议要求与一致性规则以协议正文为准，尤其是[第 14 节](../../chinese/05-ANP-基于DID的授权协议.md#conformance)。下方场景中的章节编号均指协议正文。
 
 ## 验证场景
 

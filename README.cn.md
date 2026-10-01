@@ -53,13 +53,14 @@ ANP 构建在现有互联网基础设施之上，将已发布的协议能力组�
 | 认证 | [ANP-02：基于 DID 的身份认证协议](chinese/02-ANP-基于DID的身份认证协议.md) | 已发布 v1.2 | 方法无关 HTTP/JSON 认证及 WBA/Web 绑定；独立于消息和 WNS |
 | 身份 | [ANP-03：did:wba 方法规范](chinese/03-did-wba方法规范.md) | 已发布 v1.2 | Web DID 方法、`e1_` 绑定、稳定主体路径与可验证 DID 迁移 |
 | 命名 | [ANP-04：基于 DID:WBA 的命名空间规范](chinese/04-ANP-基于DID-WBA的命名空间规范.md) | 已发布 v1.2 | WNS Handle、名称到 DID 解析、WBA 绑定与既有原生 Web 兼容 |
+| 授权 | [ANP-05：基于 DID 的授权协议](chinese/05-ANP-基于DID的授权协议.md) | 草案 / 未发布；v0.6 | OAuth 的 DID 客户端身份，以及独立的 VC 委托与组织角色凭证直接出示 |
 | 元协议 | [ANP-06：智能体通信元协议规范](chinese/06-ANP-智能体通信元协议规范.md) | 草案；文档版本 1.2 | 可选语义协商、`MetaProtocolInterface` 及接口 / Profile / 安全模式 / Schema 选择 |
 | 描述 | [ANP-07：智能体描述协议规范](chinese/07-ANP-智能体描述协议规范.md) | 已发布 v1.2 | 智能体描述文档、接口描述和能力发布 |
 | 发现 | [ANP-08：智能体发现协议规范](chinese/08-ANP-智能体发现协议规范.md) | 已发布 v1.2 | 基于 `.well-known` 的主动发现与向搜索智能体注册的被动发现 |
 | 消息 | [ANP-09：端到端即时消息协议规范总纲](chinese/09-ANP-端到端即时消息协议规范.md) | 已发布 v1.2 目录；P6 为候选 | 私聊、群聊、设备绑定 E2EE、附件、联邦和 Mention |
 | 支付 | [ANP-10：AP2 支付适配草案](chinese/application/10-ANP-智能体支付协议规范.md) | 草案 / 未发布；英文文档 v1.1、中文文档 v0.1 | 拟议的 ANP 支付适配、授权凭证、收据和交易流程；不是稳定支付互操作标准 |
 
-[vNext 工作入口](vnext/README.md)收录协议草案与白皮书修订稿。[ANP-01 白皮书修订稿](vnext/chinese/01-AgentNetworkProtocol技术白皮书.md)是资料性工作草案。[ANP-05：基于 DID 的授权协议](vnext/chinese/05-ANP-基于DID的授权协议.md)是尚未发布的 OAuth 与 VC 授权草案；这些草案不属于 ANP 1.2。当前 1.2 规范引用使用上方正式路径。已废弃的历史 did:all 文档保留原有身份；当前 ANP-02 编号表示基于 DID 的身份认证协议。
+[vNext 工作入口](vnext/README.md)收录白皮书修订稿。[ANP-01 白皮书修订稿](vnext/chinese/01-AgentNetworkProtocol技术白皮书.md)是资料性工作草案。[ANP-05：基于 DID 的授权协议](chinese/05-ANP-基于DID的授权协议.md)的中文文档位于 `chinese/`，[英文镜像](05-anp-did-authorization-protocol-specification.md)位于仓库根目录；版本仍为 v0.6，状态仍为草案 / 未发布。这些草案不属于 ANP 1.2。当前 1.2 规范引用使用上方正式路径。已废弃的历史 did:all 文档保留原有身份；当前 ANP-02 编号表示基于 DID 的身份认证协议。
 
 ### 即时消息 Profile
 
@@ -87,7 +88,7 @@ ANP 构建在现有互联网基础设施之上，将已发布的协议能力组�
 ## 快速上手
 
 - 设计方法无关的普通 API 认证时，阅读 [ANP-02](chinese/02-ANP-基于DID的身份认证协议.md)；它不依赖消息、Handle 或设备 Manifest。
-- 研究基于 DID 的智能体授权时，阅读 [ANP-05（草案）](vnext/chinese/05-ANP-基于DID的授权协议.md)；它说明何时使用 OAuth、何时使用 VC，明确智能体授权路线图与 v1 身份/基础委托范围，定义完整性绑定元数据、首次准入、托管/本机 OAuth 流程，以及独立的 VC 委托与角色凭证直接出示；不代表已有实现支持。
+- 研究基于 DID 的智能体授权时，阅读 [ANP-05（草案）](chinese/05-ANP-基于DID的授权协议.md)；它说明何时使用 OAuth、何时使用 VC，明确智能体授权路线图与 v1 身份/基础委托范围，定义完整性绑定元数据、首次准入、托管/本机 OAuth 流程，以及独立的 VC 委托与角色凭证直接出示；不代表已有实现支持。
 
 - 如果想快速了解 ANP 概念和使用方式，请阅读 [ANP 入门指南](docs/chinese/ANP入门指南.md)。
 - 实现 ANP 1.2 身份时，从 ANP-02 开始；WBA 方法验证阅读 [ANP-03](chinese/03-did-wba方法规范.md)，原生 `did:web` 集成阅读[附录 B](chinese/附录B：与原生did-web-的兼容.md)。
@@ -114,9 +115,10 @@ AWiki 是基于 ANP 的智能体身份与消息开源实现，包含以下项目
 ## 仓库结构
 
 - `01-*.md`、`02-*.md`、`03-*.md`、`04-*.md`、`06-*.md`、`07-*.md`、`08-*.md`、`09-*.md`：英文核心文档，文档版本为 1.2，各自保留明确状态。
+- `05-anp-did-authorization-protocol-specification.md`：英文 ANP-05 授权草案，v0.6 / 未发布，不属于 ANP 1.2 发布范围。
 - `message/`：ANP Messaging 1.2 Profile 规范集与索引；P6 保留候选状态。
-- `chinese/`：核心及消息规范的中文镜像，以及相关研究笔记。
-- `vnext/`：存放中英文 ANP-01 白皮书修订稿与 ANP-05 授权草案；当前 1.2 文档仍在正式路径。
+- `chinese/`：核心及消息规范的中文镜像、ANP-05 授权草案，以及相关研究笔记。
+- `vnext/`：存放中英文 ANP-01 白皮书修订稿；当前 1.2 文档仍在正式路径。
 - `application/`：AP2 等独立版本化应用协议。
 - `docs/`：指南、扩展阅读和社区运营文档。
 - `blogs/`：技术文章与历史协议分析。

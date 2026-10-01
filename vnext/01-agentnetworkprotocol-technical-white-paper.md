@@ -143,7 +143,7 @@ sequenceDiagram
     A->>B: Read AD and selectively follow links to Information
     Note over A: Decide locally using the user's context
     A->>B: Invoke Interface with a DID signature (ANP-02 authentication)
-    Note over B: Resolve and validate A's DID Document; evaluate permissions independently
+    Note over B: Resolve and validate A's DID Document#59; evaluate permissions independently
     B-->>A: Return result
     A->>B: Continue through ANP messages (optional E2EE)
 ```

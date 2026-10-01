@@ -79,7 +79,7 @@ Publication of this draft does not establish SDK, AS or product support. The OAu
 <a id="anp-boundary"></a>
 ## 2. Relationship to ANP and mechanism selection
 
-Use the current [ANP-02 identity-material rules](../02-anp-did-authentication-protocol-specification.md#identity-input), [ANP-03 WBA binding](../03-did-wba-method-design-specification.md#wba-auth-binding), and [ANP-02 native Web binding](../02-anp-did-authentication-protocol-specification.md#web-binding). The historical ANP-02 snapshot beside this file is not this draft's normative baseline.
+Use the current [ANP-02 identity-material rules](02-anp-did-authentication-protocol-specification.md#identity-input), [ANP-03 WBA binding](03-did-wba-method-design-specification.md#wba-auth-binding), and [ANP-02 native Web binding](02-anp-did-authentication-protocol-specification.md#web-binding). Historical pre-release snapshots in Git history are not this draft's normative baseline.
 
 ANP-02 defines HTTP/JSON request authentication. ANP-05 reuses the DID validation and authentication-key authorization model, **not** its HTTP signature serialization, challenges, or optional token response headers. The OAuth token endpoint uses `client_assertion` and the standard OAuth JSON token response. It MUST NOT require a second ANP-02 HTTP signature to satisfy this Profile. A deployment needing HTTP Message Signatures as a distinct OAuth authentication method needs another explicit binding.
 
@@ -360,7 +360,7 @@ The following metadata is illustrative; addresses do not identify deployed servi
 
 
 
-[ANP-07 Agent Description](../07-anp-agent-description-protocol-specification.md) MAY link to an interface document explaining this OAuth requirement and the RFC 8414/RFC 9728 metadata locations. This version does not redefine ANP-07's `securityDefinitions`, require a new `scheme` value there, or place credentials in a public description. Description and discovery are not authorization.
+[ANP-07 Agent Description](07-anp-agent-description-protocol-specification.md) MAY link to an interface document explaining this OAuth requirement and the RFC 8414/RFC 9728 metadata locations. This version does not redefine ANP-07's `securityDefinitions`, require a new `scheme` value there, or place credentials in a public description. Description and discovery are not authorization.
 
 <a id="client-assertion"></a>
 ## 6. DID-backed JWT client authentication
@@ -1224,7 +1224,7 @@ OAuth client conformance requires native DID metadata publication/discovery, Sec
 
 When the VC Profile is claimed, holders implement Section 11.3 holder-bound VP creation and Section 11.6 Profile checking; verifiers implement Section 11.6 direct presentation and the complete Section 11.4 verification order, holder binding, issuer-authority confirmation, status checking, permission intersection and constraint enforcement; when session mode is used, also verify Section 11.6 identity binding, per-operation authorization and finite-lifetime rules. OAuth conformance and VC direct-presentation conformance are independent. Issuer conformance covers only correct credential format, proof and status-list publication; this version does not certify issuance interfaces or issuance protocols.
 
-Test applicable positive flows and all relevant rejection paths before release or public enablement; record unsupported optional features rather than reporting them as passes. The detailed scenario catalog, stable evidence identifiers and identifier maintenance notes are in the [ANP-05 implementation validation guide](../docs/anp-05-validation-guide.md) and its [Chinese mirror](../docs/chinese/anp-05-validation-guide.md).
+Test applicable positive flows and all relevant rejection paths before release or public enablement; record unsupported optional features rather than reporting them as passes. The detailed scenario catalog, stable evidence identifiers and identifier maintenance notes are in the [ANP-05 implementation validation guide](docs/anp-05-validation-guide.md) and its [Chinese mirror](docs/chinese/anp-05-validation-guide.md).
 
 A draft or an experimental prototype may be reviewed with one complete implementation and explicit negative-test evidence, but MUST be labeled experimental. A stable interoperable v1 release claim for the OAuth Profile requires two independently developed client/AS implementations and cross-implementation tests, applicable RS tests, first-contact admission at each AS, disabled-admission behavior, metadata tampering/updates, hosted and loopback redirects when authorization-code support is claimed, method/runtime-key lifecycle, multi-resource isolation for the declared flows, and an explicit security review. When the VC Profile is claimed, it also requires cross-tests between independently implemented holders and verifiers covering direct presentation, exact Profile matching, and credential revocation. Implementation independence means independent code paths for the protocol, not two instances of the same server; deployments must document shared components. This gate does not block publishing or reviewing a draft.
 
@@ -1279,4 +1279,4 @@ A future extension may evaluate externally issued VCs as authorization input to 
 ## Copyright Notice
 
 Copyright (c) 2026 ANP Open Source Community
-This file is released under the [Apache License 2.0](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.
+This file is released under the [Apache License 2.0](LICENSE). You are free to use and modify it, but you must retain this copyright notice.

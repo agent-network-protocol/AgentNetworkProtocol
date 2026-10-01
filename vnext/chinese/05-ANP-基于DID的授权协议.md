@@ -195,7 +195,7 @@ RS 只有在验证可信签发者或查询通道、令牌状态、目标受众�
 
 ### 4.1 DID 作为客户端标识
 
-声明本修订核心一致性的 AS 必须（MUST）实现 DID 直接作为客户端标识，以及下文的自发布元数据发现/准入流程。客户端标识为裸 DID，不含 DID URL 路径、查询或片段。DID 方法中以冒号分隔的路径属于 DID 本身，不是 DID URL 路径。例如，`did:web:agents.example:agent-a` 标识客户端，`did:web:agents.example:agent-a#auth-1` 标识密钥。
+声明本修订核心一致性的 AS 必须（MUST）实现 DID 直接作为客户端标识，以及下文的自发布元数据发现/准入流程。客户端标识为裸 DID，不含 DID URL 路径、查询或片段。DID 方法中以冒号分隔的路径属于 DID 本身，不是 DID URL 路径。例如，`did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` 标识客户端，`did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1` 标识密钥。
 
 AS 可以（MAY）保留预注册的原生客户端，也可以（MAY）通过本地策略关闭开放的首次接触准入；必须（MUST）按第 5 节声明已启用的登记模式。仅开放预注册的部署不能宣称客户端无需预注册即可接入。准入决定可以（MAY）自动作出，不把逐客户端的人工管理批准作为核心前提。
 
@@ -507,14 +507,14 @@ DID 作为客户端标识模式下，解码后的 JWS 头与载荷：
 {
   "typ": "client-authentication+jwt",
   "alg": "Ed25519",
-  "kid": "did:web:agents.example:agent-a#auth-1"
+  "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
 }
 ```
 
 ```json
 {
-  "iss": "did:web:agents.example:agent-a",
-  "sub": "did:web:agents.example:agent-a",
+  "iss": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "sub": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "aud": "https://auth.example",
   "iat": 1790467200,
   "exp": 1790467500,
@@ -529,7 +529,7 @@ POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=client_credentials&client_id=did%3Aweb%3Aagents.example%3Aagent-a&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
+grant_type=client_credentials&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
 ```
 
 ```http
@@ -585,30 +585,46 @@ Cache-Control: no-store
 
 ### 9.2 原生 DID 发布
 
-以下 did:web JSON 表示使用 Ed25519 Multikey（multicodec 为 0xed，无符号变长整数前缀字节 ed 01，后接 32 字节公钥），不含私钥。同一公钥验证上文原生断言，仍须方法及验证关系检查。本例不是 did:wba e1_ 文档证明测试向量，也不是 JSON-LD context 定义。service 摘要覆盖下方原生元数据代码块的精确 UTF-8 字节，包括末尾 LF 换行；序列化变化须重算摘要。
+以下 did:wba e1_ 示例使用 Ed25519 Multikey（multicodec 为 0xed，无符号变长整数前缀字节 ed 01，后接 32 字节公钥），DID 最后一段为该公钥的 RFC 7638 指纹。本示意示例授权同一密钥用于身份认证与文档证明；生产客户端应当（SHOULD）按第 10.1 节分离密钥。示例展示必需的 context、断言验证关系和 Data Integrity proof 结构，但 `zDOCUMENT_PROOF_PLACEHOLDER` 不是可验证的签名。AS 必须验证 WBA 指纹与文档证明后才能接受客户端断言。本例不含私钥。service 摘要覆盖下方原生元数据代码块的精确 UTF-8 字节，包括末尾 LF 换行；序列化变化须重算摘要。
 
 ```json
 {
-  "id": "did:web:agents.example:agent-a",
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/data-integrity/v2",
+    "https://w3id.org/security/multikey/v1"
+  ],
+  "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verificationMethod": [
     {
-      "id": "did:web:agents.example:agent-a#auth-1",
+      "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
       "type": "Multikey",
-      "controller": "did:web:agents.example:agent-a",
+      "controller": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
       "publicKeyMultibase": "z6Mkk8HzVpDddKLmZ6Bzpxe3xyCGEqFuCTRTFkXZktTuDoqD"
     }
   ],
   "authentication": [
-    "did:web:agents.example:agent-a#auth-1"
+    "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
   ],
   "service": [
     {
-      "id": "did:web:agents.example:agent-a#oauth-client",
+      "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#oauth-client",
       "type": "ANPOAuthClientMetadata",
       "serviceEndpoint": "https://agents.example/agent-a/oauth/native-client.json",
-      "anp_metadata_sha256": "18749a07243142cfe8cbe4e65efeff4a515ff056cd0c2c59ebc1a6b57db4f453"
+      "anp_metadata_sha256": "44de16f707659c7925b458d9c247edb892405e7c26c17e2cf64d8874b6f2cbcb"
     }
-  ]
+  ],
+  "assertionMethod": [
+    "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
+  ],
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-jcs-2022",
+    "created": "2026-09-27T00:00:00Z",
+    "verificationMethod": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "zDOCUMENT_PROOF_PLACEHOLDER"
+  }
 }
 ```
 
@@ -617,7 +633,7 @@ Cache-Control: no-store
 ```json
 {
   "anp_profile": "anp.authorization.oauth2.did.v1-draft4",
-  "client_id": "did:web:agents.example:agent-a",
+  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "client_name": "Example Agent A",
   "token_endpoint_auth_method": "private_key_jwt",
   "grant_types": [
@@ -647,7 +663,7 @@ Cache-Control: no-store
   "iss": "https://auth.example",
   "sub": "user-248",
   "aud": "https://docs.example/api",
-  "client_id": "did:web:agents.example:agent-a",
+  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "iat": 1790467200,
   "exp": 1790467800,
   "jti": "example-access-token-01",
@@ -657,7 +673,7 @@ Cache-Control: no-store
 
 ### 9.4 本地 Agent 回调示例
 
-另一个本地 Agent did:web:agents.example:local-a 发布并完整性绑定自己的完整元数据，其中包括 anp_application_type=native、authorization_code（可选 refresh_token）、private_key_jwt 和获准 loopback 条目。下表仅展示匹配规则，不能替代完整元数据文档或用户批准。
+另一个本地 Agent did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE 发布并完整性绑定自己的完整元数据，其中包括 anp_application_type=native、authorization_code（可选 refresh_token）、private_key_jwt 和获准 loopback 条目。下表仅展示匹配规则，不能替代完整元数据文档或用户批准。
 
 | 项目 | 值 |
 | --- | --- |
@@ -674,7 +690,7 @@ POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=authorization_code&client_id=did%3Aweb%3Aagents.example%3Alocal-a&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
+grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
 ```
 
 <a id="lifecycle"></a>
@@ -852,7 +868,7 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
 
 ### 11.8 示例（资料性）
 
-以下示例中的 `proofValue`、`BASE64URL_VP` 与 `FRESH_CLIENT_ASSERTION` 是占位符，不是可验证的签名。示例场景：企业 `did:web:corp.example` 授权 Agent `did:web:agents.example:agent-a` 在供应商处下单，单笔上限 5000 元；Agent 在 2026-09-27T00:00:00Z 向供应商的 AS 出示凭证并换发令牌。
+以下示例中的 `proofValue`、`BASE64URL_VP` 与 `FRESH_CLIENT_ASSERTION` 是占位符，不是可验证的签名。示例场景：企业 `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` 授权 Agent `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` 在供应商处下单，单笔上限 5000 元；Agent 在 2026-09-27T00:00:00Z 向供应商的 AS 出示凭证并换发令牌。
 
 用于令牌交换的 VP，内含委托凭证。`challenge` 等于同一请求中客户端断言的 `jti`：
 
@@ -864,7 +880,7 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
   "type": [
     "VerifiablePresentation"
   ],
-  "holder": "did:web:agents.example:agent-a",
+  "holder": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verifiableCredential": [
     {
       "@context": [
@@ -876,11 +892,11 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
         "VerifiableCredential",
         "ANPAgentDelegationCredential"
       ],
-      "issuer": "did:web:corp.example",
+      "issuer": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y",
       "validFrom": "2026-09-20T00:00:00Z",
       "validUntil": "2026-10-20T00:00:00Z",
       "credentialSubject": {
-        "id": "did:web:agents.example:agent-a",
+        "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
         "permissions": [
           {
             "resource": "https://supplier.example/api/orders",
@@ -908,7 +924,7 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
         "type": "DataIntegrityProof",
         "cryptosuite": "eddsa-jcs-2022",
         "created": "2026-09-20T00:00:00Z",
-        "verificationMethod": "did:web:corp.example#assert-1",
+        "verificationMethod": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y#assert-1",
         "proofPurpose": "assertionMethod",
         "proofValue": "ISSUER_PROOF_VALUE_PLACEHOLDER"
       }
@@ -918,7 +934,7 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
     "type": "DataIntegrityProof",
     "cryptosuite": "eddsa-jcs-2022",
     "created": "2026-09-27T00:00:00Z",
-    "verificationMethod": "did:web:agents.example:agent-a#auth-1",
+    "verificationMethod": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
     "proofPurpose": "authentication",
     "domain": "https://auth.supplier.example",
     "challenge": "Mflb_lNn12d4yt1jXKE9SQ",
@@ -960,7 +976,7 @@ POST /token HTTP/1.1
 Host: auth.supplier.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=did%3Aweb%3Aagents.example%3Aagent-a&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_CLIENT_ASSERTION&subject_token=BASE64URL_VP&subject_token_type=https%3A%2F%2Fagent-network-protocol.com%2Foauth%2Ftoken-type%2Fvp&resource=https%3A%2F%2Fsupplier.example%2Fapi%2Forders&scope=orders.create
+grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_CLIENT_ASSERTION&subject_token=BASE64URL_VP&subject_token_type=https%3A%2F%2Fagent-network-protocol.com%2Foauth%2Ftoken-type%2Fvp&resource=https%3A%2F%2Fsupplier.example%2Fapi%2Forders&scope=orders.create
 ```
 
 成功响应的 JSON 正文；HTTP 头与第 9 节相同，包含 `Cache-Control: no-store`：
@@ -981,7 +997,7 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
 {
   "type": "ANPPresentationRequest",
   "challenge": "JP-0hfyItrCTHObnXV3Svg",
-  "domain": "did:web:supplier.example:sales-agent",
+  "domain": "did:wba:supplier.example:sales-agent:e1_m9uTB9Y_JCB1ooA_WCYOJGOYjttwMdAIvug0S0zBkSA",
   "expires_at": 1790467500,
   "credential_types": [
     "ANPAgentDelegationCredential"
@@ -994,7 +1010,7 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
 }
 ```
 
-`expires_at` 是 NumericDate。供应商在接受下单前，还要确认 `did:web:corp.example` 对应其系统中的哪个企业客户（第 11.4 节第 7 步），并检查本次订单金额不超过 `perOperationLimit`。
+`expires_at` 是 NumericDate。供应商在接受下单前，还要确认 `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` 对应其系统中的哪个企业客户（第 11.4 节第 7 步），并检查本次订单金额不超过 `perOperationLimit`。
 
 <a id="vc-organization-agents"></a>
 ### 11.9 场景：代表公司工作的 HR Agent 与采购 Agent（资料性）
@@ -1030,11 +1046,11 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
     "VerifiableCredential",
     "ANPAgentRoleCredential"
   ],
-  "issuer": "did:web:corp.example",
+  "issuer": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y",
   "validFrom": "2026-09-01T00:00:00Z",
   "validUntil": "2026-12-01T00:00:00Z",
   "credentialSubject": {
-    "id": "did:web:agents.example:hr-agent",
+    "id": "did:wba:agents.example:hr-agent:e1_lYz_0-T5hDXHzkvmtNREe5P3VJuNJHVuGVDsLNAr7ZE",
     "role": "Recruiting agent",
     "capabilities": [
       {
@@ -1059,7 +1075,7 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
     "type": "DataIntegrityProof",
     "cryptosuite": "eddsa-jcs-2022",
     "created": "2026-09-01T00:00:00Z",
-    "verificationMethod": "did:web:corp.example#assert-1",
+    "verificationMethod": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y#assert-1",
     "proofPurpose": "assertionMethod",
     "proofValue": "ISSUER_PROOF_VALUE_PLACEHOLDER"
   }

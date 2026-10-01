@@ -235,7 +235,7 @@ function decodeBase58btc(value) {
   return Buffer.concat([Buffer.alloc(leading), number ? Buffer.from(hex, 'hex') : Buffer.alloc(0)]);
 }
 
-test('native sample contains only its authorized public Multikey', () => {
+test('WBA publication binds its DID fingerprint to the authorized public Multikey', () => {
   const {did, header} = samples(en);
   assert.equal(did.verificationMethod.length, 1);
   const method = did.verificationMethod[0];
@@ -249,8 +249,33 @@ test('native sample contains only its authorized public Multikey', () => {
   assert.deepEqual(bytes.subarray(0, 2), Buffer.from([0xed, 0x01]));
   const key = {kty: 'OKP', crv: 'Ed25519', x: bytes.subarray(2).toString('base64url')};
   assert.equal(key.x, 'VEpJi1nTD8okbTyhNIyr-NlO4dH7if8D8FOccCQyxQQ');
+  const fingerprint = createHash('sha256').update(JSON.stringify({crv: key.crv, kty: key.kty, x: key.x})).digest('base64url');
+  assert.equal(did.id, 'did:wba:agents.example:agent-a:e1_' + fingerprint);
+  assert.deepEqual(did['@context'], ['https://www.w3.org/ns/did/v1', 'https://w3id.org/security/data-integrity/v2', 'https://w3id.org/security/multikey/v1']);
+  assert.deepEqual(did.assertionMethod, [method.id]);
+  assert.equal(did.proof.type, 'DataIntegrityProof');
+  assert.equal(did.proof.cryptosuite, 'eddsa-jcs-2022');
+  assert.equal(did.proof.verificationMethod, method.id);
+  assert.equal(did.proof.proofPurpose, 'assertionMethod');
+  assert.equal(did.proof.proofValue, 'zDOCUMENT_PROOF_PLACEHOLDER');
   assert.equal(createPublicKey({key, format: 'jwk'}).asymmetricKeyType, 'ed25519');
   assert(!JSON.stringify(did).includes('privateKey'));
+});
+
+test('illustrative DID identities use did:wba in both languages and form bodies', () => {
+  for (const text of [en, cn]) {
+    assert.doesNotMatch(text, /did:web:[a-z0-9]|did%3Aweb%3A/i);
+    for (const block of jsonBlocks(text)) {
+      const walk = value => {
+        if (typeof value === 'string' && value.startsWith('did:wba:')) {
+          assert.match(value, /^did:wba:[a-z0-9.-]+:(?:agent-a|local-a|hr-agent|sales-agent|issuer):e1_[A-Za-z0-9_-]{43}(?:#[A-Za-z0-9-]+)?$/);
+        } else if (value && typeof value === 'object') {
+          for (const entry of Object.values(value)) walk(entry);
+        }
+      };
+      walk(block);
+    }
+  }
 });
 
 test('native grant and callback metadata are internally consistent', () => {
@@ -403,7 +428,7 @@ test('local code-redemption example repeats the actual loopback port and keeps a
   const request = blocks(en).find(block => block.language === 'http' && block.text.includes('grant_type=authorization_code&'));
   assert(request);
   const form = new URLSearchParams(request.text.split('\n\n')[1]);
-  assert.equal(form.get('client_id'), 'did:web:agents.example:local-a');
+  assert.equal(form.get('client_id'), 'did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE');
   assert.notEqual(form.get('client_id'), samples(en).did.id);
   assert.equal(form.get('redirect_uri'), 'http://127.0.0.1:49152/callback');
   assert.equal(form.get('resource'), samples(en).resource.resource);

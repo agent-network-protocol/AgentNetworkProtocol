@@ -195,7 +195,7 @@ The RS uses client_id only after verifying the trusted issuer or introspection c
 
 ### 4.1 DID as the client identifier
 
-An AS claiming this revision's core conformance MUST implement DID-as-client-ID and the self-published metadata discovery/admission procedure below. The bare DID is the client identifier; it has no DID URL path, query, or fragment. DID method-specific colon-separated paths are part of the DID, not DID URL paths. For example, `did:web:agents.example:agent-a` identifies the client and `did:web:agents.example:agent-a#auth-1` identifies a key.
+An AS claiming this revision's core conformance MUST implement DID-as-client-ID and the self-published metadata discovery/admission procedure below. The bare DID is the client identifier; it has no DID URL path, query, or fragment. DID method-specific colon-separated paths are part of the DID, not DID URL paths. For example, `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` identifies the client and `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1` identifies a key.
 
 The AS MAY retain pre-registered native clients, and MAY disable open first-contact admission by local policy. It MUST advertise the enabled enrollment modes in Section 5. A deployment allowing only pre-registration cannot claim that its clients can onboard without pre-registration. Admission MAY be automated; per-client human administrative approval is not a core prerequisite.
 
@@ -507,14 +507,14 @@ Decoded JWS header and payload for DID-as-client-ID mode:
 {
   "typ": "client-authentication+jwt",
   "alg": "Ed25519",
-  "kid": "did:web:agents.example:agent-a#auth-1"
+  "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
 }
 ```
 
 ```json
 {
-  "iss": "did:web:agents.example:agent-a",
-  "sub": "did:web:agents.example:agent-a",
+  "iss": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "sub": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "aud": "https://auth.example",
   "iat": 1790467200,
   "exp": 1790467500,
@@ -529,7 +529,7 @@ POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=client_credentials&client_id=did%3Aweb%3Aagents.example%3Aagent-a&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
+grant_type=client_credentials&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
 ```
 
 ```http
@@ -585,30 +585,46 @@ The client validates the resource association before discovering `https://auth.e
 
 ### 9.2 Native DID publication
 
-The following did:web JSON representation uses an Ed25519 Multikey (multicodec 0xed, unsigned-varint bytes ed 01, followed by 32 public-key bytes). It contains no private key. The same public key verifies the native assertion above; the method and verification-relationship checks still apply. This is not a did:wba e1_ document-proof fixture or a JSON-LD context definition. The service digest hashes the exact UTF-8 native-metadata block below, including its final LF newline; any changed serialization requires a recomputed digest.
+The following did:wba e1_ example uses an Ed25519 Multikey (multicodec 0xed, unsigned-varint bytes ed 01, followed by 32 public-key bytes). The final DID segment is the RFC 7638 thumbprint of this public key. The same key is authorized for authentication and the document proof in this schematic example; production clients SHOULD use the key separation described in Section 10.1. The required contexts, assertion relationship, and Data Integrity proof structure are shown, but `zDOCUMENT_PROOF_PLACEHOLDER` is not a verifiable signature. The AS must validate the WBA fingerprint and document proof before accepting client assertions. This example contains no private key. The service digest hashes the exact UTF-8 native-metadata block below, including its final LF newline; any changed serialization requires a recomputed digest.
 
 ```json
 {
-  "id": "did:web:agents.example:agent-a",
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/data-integrity/v2",
+    "https://w3id.org/security/multikey/v1"
+  ],
+  "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verificationMethod": [
     {
-      "id": "did:web:agents.example:agent-a#auth-1",
+      "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
       "type": "Multikey",
-      "controller": "did:web:agents.example:agent-a",
+      "controller": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
       "publicKeyMultibase": "z6Mkk8HzVpDddKLmZ6Bzpxe3xyCGEqFuCTRTFkXZktTuDoqD"
     }
   ],
   "authentication": [
-    "did:web:agents.example:agent-a#auth-1"
+    "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
   ],
   "service": [
     {
-      "id": "did:web:agents.example:agent-a#oauth-client",
+      "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#oauth-client",
       "type": "ANPOAuthClientMetadata",
       "serviceEndpoint": "https://agents.example/agent-a/oauth/native-client.json",
-      "anp_metadata_sha256": "18749a07243142cfe8cbe4e65efeff4a515ff056cd0c2c59ebc1a6b57db4f453"
+      "anp_metadata_sha256": "44de16f707659c7925b458d9c247edb892405e7c26c17e2cf64d8874b6f2cbcb"
     }
-  ]
+  ],
+  "assertionMethod": [
+    "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
+  ],
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-jcs-2022",
+    "created": "2026-09-27T00:00:00Z",
+    "verificationMethod": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "zDOCUMENT_PROOF_PLACEHOLDER"
+  }
 }
 ```
 
@@ -617,7 +633,7 @@ The native document at `https://agents.example/agent-a/oauth/native-client.json`
 ```json
 {
   "anp_profile": "anp.authorization.oauth2.did.v1-draft4",
-  "client_id": "did:web:agents.example:agent-a",
+  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "client_name": "Example Agent A",
   "token_endpoint_auth_method": "private_key_jwt",
   "grant_types": [
@@ -647,7 +663,7 @@ The following is the decoded payload of an illustrative AS-signed RFC 9068 acces
   "iss": "https://auth.example",
   "sub": "user-248",
   "aud": "https://docs.example/api",
-  "client_id": "did:web:agents.example:agent-a",
+  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "iat": 1790467200,
   "exp": 1790467800,
   "jti": "example-access-token-01",
@@ -657,7 +673,7 @@ The following is the decoded payload of an illustrative AS-signed RFC 9068 acces
 
 ### 9.4 Local Agent callback example
 
-A separate local Agent, did:web:agents.example:local-a, publishes and integrity-binds its own complete metadata with anp_application_type=native, authorization_code (and optionally refresh_token), private_key_jwt and an approved loopback entry. The following values illustrate the matching rule; they are not a substitute for that full metadata document or user approval.
+A separate local Agent, did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE, publishes and integrity-binds its own complete metadata with anp_application_type=native, authorization_code (and optionally refresh_token), private_key_jwt and an approved loopback entry. The following values illustrate the matching rule; they are not a substitute for that full metadata document or user approval.
 
 | Item | Value |
 | --- | --- |
@@ -674,7 +690,7 @@ POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=authorization_code&client_id=did%3Aweb%3Aagents.example%3Alocal-a&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
+grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
 ```
 
 <a id="lifecycle"></a>
@@ -852,7 +868,7 @@ This version defines the minimum fields of the presentation request object (exam
 
 ### 11.8 Examples (informative)
 
-In the examples below, `proofValue`, `BASE64URL_VP` and `FRESH_CLIENT_ASSERTION` are placeholders, not verifiable signatures. Scenario: the company `did:web:corp.example` authorizes the Agent `did:web:agents.example:agent-a` to place orders with a supplier, up to 5000 CNY per order; at 2026-09-27T00:00:00Z the Agent presents the credential to the supplier's AS and exchanges it for a token.
+In the examples below, `proofValue`, `BASE64URL_VP` and `FRESH_CLIENT_ASSERTION` are placeholders, not verifiable signatures. Scenario: the company `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` authorizes the Agent `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` to place orders with a supplier, up to 5000 CNY per order; at 2026-09-27T00:00:00Z the Agent presents the credential to the supplier's AS and exchanges it for a token.
 
 VP for token exchange, containing the delegation credential. Its `challenge` equals the `jti` of the client assertion in the same request:
 
@@ -864,7 +880,7 @@ VP for token exchange, containing the delegation credential. Its `challenge` equ
   "type": [
     "VerifiablePresentation"
   ],
-  "holder": "did:web:agents.example:agent-a",
+  "holder": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verifiableCredential": [
     {
       "@context": [
@@ -876,11 +892,11 @@ VP for token exchange, containing the delegation credential. Its `challenge` equ
         "VerifiableCredential",
         "ANPAgentDelegationCredential"
       ],
-      "issuer": "did:web:corp.example",
+      "issuer": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y",
       "validFrom": "2026-09-20T00:00:00Z",
       "validUntil": "2026-10-20T00:00:00Z",
       "credentialSubject": {
-        "id": "did:web:agents.example:agent-a",
+        "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
         "permissions": [
           {
             "resource": "https://supplier.example/api/orders",
@@ -908,7 +924,7 @@ VP for token exchange, containing the delegation credential. Its `challenge` equ
         "type": "DataIntegrityProof",
         "cryptosuite": "eddsa-jcs-2022",
         "created": "2026-09-20T00:00:00Z",
-        "verificationMethod": "did:web:corp.example#assert-1",
+        "verificationMethod": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y#assert-1",
         "proofPurpose": "assertionMethod",
         "proofValue": "ISSUER_PROOF_VALUE_PLACEHOLDER"
       }
@@ -918,7 +934,7 @@ VP for token exchange, containing the delegation credential. Its `challenge` equ
     "type": "DataIntegrityProof",
     "cryptosuite": "eddsa-jcs-2022",
     "created": "2026-09-27T00:00:00Z",
-    "verificationMethod": "did:web:agents.example:agent-a#auth-1",
+    "verificationMethod": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
     "proofPurpose": "authentication",
     "domain": "https://auth.supplier.example",
     "challenge": "Mflb_lNn12d4yt1jXKE9SQ",
@@ -960,7 +976,7 @@ POST /token HTTP/1.1
 Host: auth.supplier.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=did%3Aweb%3Aagents.example%3Aagent-a&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_CLIENT_ASSERTION&subject_token=BASE64URL_VP&subject_token_type=https%3A%2F%2Fagent-network-protocol.com%2Foauth%2Ftoken-type%2Fvp&resource=https%3A%2F%2Fsupplier.example%2Fapi%2Forders&scope=orders.create
+grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_CLIENT_ASSERTION&subject_token=BASE64URL_VP&subject_token_type=https%3A%2F%2Fagent-network-protocol.com%2Foauth%2Ftoken-type%2Fvp&resource=https%3A%2F%2Fsupplier.example%2Fapi%2Forders&scope=orders.create
 ```
 
 JSON body of the successful response; the HTTP headers are as in Section 9, including `Cache-Control: no-store`:
@@ -981,7 +997,7 @@ For direct presentation, the presentation request object returned by the supplie
 {
   "type": "ANPPresentationRequest",
   "challenge": "JP-0hfyItrCTHObnXV3Svg",
-  "domain": "did:web:supplier.example:sales-agent",
+  "domain": "did:wba:supplier.example:sales-agent:e1_m9uTB9Y_JCB1ooA_WCYOJGOYjttwMdAIvug0S0zBkSA",
   "expires_at": 1790467500,
   "credential_types": [
     "ANPAgentDelegationCredential"
@@ -994,7 +1010,7 @@ For direct presentation, the presentation request object returned by the supplie
 }
 ```
 
-`expires_at` is a NumericDate. Before accepting the order, the supplier still confirms which enterprise customer in its system corresponds to `did:web:corp.example` (Section 11.4 step 7) and checks that the order amount does not exceed `perOperationLimit`.
+`expires_at` is a NumericDate. Before accepting the order, the supplier still confirms which enterprise customer in its system corresponds to `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` (Section 11.4 step 7) and checks that the order amount does not exceed `perOperationLimit`.
 
 <a id="vc-organization-agents"></a>
 ### 11.9 Scenario: HR and purchasing Agents working for a company (informative)
@@ -1030,11 +1046,11 @@ The following is a role credential for the HR Agent. The action URIs use an exam
     "VerifiableCredential",
     "ANPAgentRoleCredential"
   ],
-  "issuer": "did:web:corp.example",
+  "issuer": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y",
   "validFrom": "2026-09-01T00:00:00Z",
   "validUntil": "2026-12-01T00:00:00Z",
   "credentialSubject": {
-    "id": "did:web:agents.example:hr-agent",
+    "id": "did:wba:agents.example:hr-agent:e1_lYz_0-T5hDXHzkvmtNREe5P3VJuNJHVuGVDsLNAr7ZE",
     "role": "Recruiting agent",
     "capabilities": [
       {
@@ -1059,7 +1075,7 @@ The following is a role credential for the HR Agent. The action URIs use an exam
     "type": "DataIntegrityProof",
     "cryptosuite": "eddsa-jcs-2022",
     "created": "2026-09-01T00:00:00Z",
-    "verificationMethod": "did:web:corp.example#assert-1",
+    "verificationMethod": "did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y#assert-1",
     "proofPurpose": "assertionMethod",
     "proofValue": "ISSUER_PROOF_VALUE_PLACEHOLDER"
   }

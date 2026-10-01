@@ -1,19 +1,19 @@
-# ANP 1.2 核心协议发布前草案归档
+# ANP vNext 中文协议集
 
 - 统一入口：[vNext 协议集](../README.md)
-- 状态：历史草案快照；不是当前规范入口
+- 状态：下一版草案；不属于 ANP 1.2
 - 当前文档：[ANP 1.2 规范集](../../README.cn.md)
 
-本目录保留合并至 ANP 1.2 之前的草案正文，供历史链接和差异审查使用。草案内的版本、状态、发布前说明及基线描述仅代表当时状态，不定义当前规范合同。当前规范应读取上方入口及以下对应文档；后续修订不得把此快照误当成新一轮 vNext。
+本目录存放相对当前发布版有实质内容变化的协议草案与白皮书修订稿。现行 ANP 1.2 文档仍在正式路径；更早的发布前快照可从 Git 历史查看。
 
-ANP-02、ANP-03、ANP-04 和原生 did:web 附录已合入当前文档；ANP-06 元协议仍保留其草案状态。
+| 草案 | 状态 | 定义内容 |
+| --- | --- | --- |
+| [ANP-01：技术白皮书](01-AgentNetworkProtocol技术白皮书.md) / [English](../01-agentnetworkprotocol-technical-white-paper.md) | 资料性修订草案 / 未发布；基于 v1.2 | 修订理念、架构、身份、消息、发现、描述和应用协议的说明。 |
+| [ANP-05：基于 DID 的授权协议](05-ANP-基于DID的授权协议.md) / [English](../05-anp-did-authorization-protocol-specification.md) | 草案 / 未发布；v0.6 | 智能体授权路线图；OAuth 与 VC 的分工；v1 DID 身份/基础委托、元数据完整性、本机回调及生命周期规则；独立的 VC 委托与角色凭证直接出示。 |
 
-| 历史快照 | 当前 1.2 文档 |
-| --- | --- |
-| [02-ANP-基于DID的身份认证协议.md](02-ANP-基于DID的身份认证协议.md) | [ANP 1.2](../../chinese/02-ANP-基于DID的身份认证协议.md) |
-| [03-did-wba方法规范.md](03-did-wba方法规范.md) | [ANP 1.2](../../chinese/03-did-wba方法规范.md) |
-| [04-ANP-基于DID-WBA的命名空间规范.md](04-ANP-基于DID-WBA的命名空间规范.md) | [ANP 1.2](../../chinese/04-ANP-基于DID-WBA的命名空间规范.md) |
-| [附录B：与原生did-web-的兼容.md](附录B：与原生did-web-的兼容.md) | [ANP 1.2](../../chinese/附录B：与原生did-web-的兼容.md) |
+ANP-05 引用当前 ANP 1.2 身份材料绑定。正式发布或公开启用前，必须完成评审与客户端/AS/RS 互操作验证。
+
+实现验证场景与编号维护说明：[中文指南](../../docs/chinese/anp-05-validation-guide.md) / [English](../../docs/anp-05-validation-guide.md)。
 
 ## 版权声明
 

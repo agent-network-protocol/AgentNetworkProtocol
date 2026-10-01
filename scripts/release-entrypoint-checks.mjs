@@ -52,3 +52,25 @@ export function checkPaymentMetadata(document, text) {
   check(version === document.version, 'payment-independent-version-changed');
   return errors;
 }
+
+export function checkWhitePaperAuthorizationScope(document, text) {
+  const errors = [];
+  const check = (condition, reason) => { if (!condition) errors.push({file: document.file, reason}); };
+  // Check an ANP-05 overview when present; unrelated white-paper sections may
+  // discuss generic VC capabilities without claiming this Profile implements them.
+  for (const heading of text.matchAll(/^#{2,3} [^\n]*(?:authorization|授权)[^\n]*$/gim)) {
+    const tail = text.slice(heading.index + heading[0].length);
+    const section = tail.split(/\n#{1,3} /)[0];
+    if (!section.includes('ANP-05')) continue;
+    check(/two independent (?:authorization )?paths|两条独立路径/i.test(section), 'white-paper-authorization-paths-unclear');
+    check(/(?:v1|first release|first version)[^\n.!]{0,120}does not define[^\n.!]{0,120}VC\/VP[^\n.!]{0,120}(?:access tokens|token exchange)|首版不定义 VC\/VP 换取 OAuth 访问令牌/i.test(section), 'white-paper-v1-vc-exchange-boundary-missing');
+    // Qualify each conversion claim by its sentence. A clearly marked future
+    // composition remains allowed, so this does not ban the word "exchange".
+    for (const sentence of section.split(/。|[.!?](?=\s|$)|[；;]/)) {
+      const conversion = /\b(?:VC|VP)\b|凭证/.test(sentence) && /exchange|convert|换发|换取|转换/i.test(sentence) && /token|令牌/i.test(sentence);
+      const qualified = /future|subsequent extension|后续|未来|does not|MUST NOT|不定义|不支持|不允许|不得/i.test(sentence);
+      check(!conversion || qualified, 'white-paper-claims-current-vc-token-exchange');
+    }
+  }
+  return errors;
+}

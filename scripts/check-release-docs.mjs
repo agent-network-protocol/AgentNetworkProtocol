@@ -1,20 +1,29 @@
 // Copyright (c) 2024 ANP Open Source Community. Apache-2.0.
-// Documentation promotion checks; does not establish SDK or product conformance.
+// Documentation and draft-boundary checks; does not establish SDK or product conformance.
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readerGuides, paymentDocuments, checkReaderGuide, checkPaymentMetadata} from './release-entrypoint-checks.mjs';
+import {readerGuides, paymentDocuments, checkReaderGuide, checkPaymentMetadata, checkWhitePaperAuthorizationScope} from './release-entrypoint-checks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const list = dir => fs.readdirSync(path.join(root, dir)).filter(name => name.endsWith('.md')).map(name => path.posix.join(dir, name));
 const core = [...list('.'), ...list('chinese')].filter(name => /^(?:chinese\/)?(?:0[1-9]-|appendix-|附录)/.test(name));
 const messages = [...list('message'), ...list('chinese/message')];
-const archiveIndexes = ['vnext/README.md', 'vnext/chinese/README.md', 'vnext/message/README.md', 'vnext/chinese/message/README.md', 'chinese/vnext/README.md', 'message/vnext/README.md', 'chinese/message/vnext/README.md'];
-const unifiedArchiveDirectories = [['vnext', 'vnext'], ['chinese/vnext', 'vnext/chinese'], ['message/vnext', 'vnext/message'], ['chinese/message/vnext', 'vnext/chinese/message']];
-const unifiedArchive = [...list('vnext'), ...list('vnext/chinese'), ...list('vnext/message'), ...list('vnext/chinese/message')].filter(name => !name.endsWith('/README.md'));
+const draftIndexes = ['vnext/README.md', 'vnext/chinese/README.md'];
+const obsoleteArchiveDirectories = ['chinese/vnext', 'message/vnext', 'chinese/message/vnext', 'deprecated/vnext', 'chinese/deprecated/vnext', 'vnext/message', 'vnext/chinese/message', 'vnext/deprecated'];
+const authorizationDrafts = [
+  'vnext/05-anp-did-authorization-protocol-specification.md',
+  'vnext/chinese/05-ANP-基于DID的授权协议.md',
+];
+const whitePaperDrafts = [
+  'vnext/01-agentnetworkprotocol-technical-white-paper.md',
+  'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md',
+];
+const nextVersionDrafts = [...authorizationDrafts, ...whitePaperDrafts];
+const authorizationValidationGuides = ['docs/anp-05-validation-guide.md', 'docs/chinese/anp-05-validation-guide.md'];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
-const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...archiveIndexes, ...exampleIndexes, ...readerGuides.map(guide => guide.file)])].sort();
+const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...authorizationValidationGuides, ...readerGuides.map(guide => guide.file)])].sort();
 const errors = [];
 const schematicExamples = [];
 const cache = new Map();
@@ -83,37 +92,20 @@ for (const file of documents) {
     } else if (block.language === 'text' || block.language === 'jsonc') schematicExamples.push({file, line: block.line});
   }
 }
-for (const file of unifiedArchive) {
-  for (const target of targets(parsed(file).prose)) checkLink(file, target);
+for (const directory of obsoleteArchiveDirectories) check(!fs.existsSync(path.join(root, directory)), {directory, reason: 'obsolete-vnext-directory'});
+const actualDrafts = [...list('vnext'), ...list('vnext/chinese')].filter(name => !name.endsWith('/README.md')).sort();
+check(JSON.stringify(actualDrafts) === JSON.stringify([...nextVersionDrafts].sort()), {reason: 'unexpected-vnext-draft-inventory', actualDrafts});
+for (const file of nextVersionDrafts) {
+  const text = read(file);
+  check(/^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m.test(text), {file, reason: 'new-draft-status-lost'});
+  const version = authorizationDrafts.includes(file) ? '0\\.6' : '1\\.2';
+  check(new RegExp('^- (?:Version: |版本：)' + version + '$', 'm').test(text), {file, reason: 'new-draft-version-changed'});
 }
-for (const [original, consolidated] of unifiedArchiveDirectories) {
-  for (const source of list(original).filter(name => !name.endsWith('/README.md'))) {
-    const destination = path.posix.join(consolidated, path.posix.basename(source));
-    check(fs.existsSync(path.join(root, destination)), {source, destination, reason: 'missing-unified-archive-document'});
-  }
-}
-check(unifiedArchive.length === 26, {reason: 'unexpected-unified-archive-coverage', count: unifiedArchive.length});
 
 for (const guide of readerGuides) errors.push(...checkReaderGuide(guide, read(guide.file)));
 for (const document of paymentDocuments) errors.push(...checkPaymentMetadata(document, read(document.file)));
+for (const file of whitePaperDrafts) errors.push(...checkWhitePaperAuthorizationScope({file}, parsed(file).prose));
 
-const promotedPairs = [];
-for (const directory of ['vnext', 'chinese/vnext', 'message/vnext', 'chinese/message/vnext']) {
-  for (const source of list(directory).filter(name => !name.endsWith('/README.md'))) {
-    const destination = path.posix.join(path.posix.dirname(directory), path.posix.basename(source));
-    promotedPairs.push([source, destination]);
-    check(fs.existsSync(path.join(root, destination)), {source, destination, reason: 'missing-promoted-document'});
-    if (!fs.existsSync(path.join(root, destination))) continue;
-    // Fenced wire examples remain byte-identical; relabeling schematic JSON as text is editorial.
-    const examples = name => parsed(name).blocks.map(block => block.text);
-    check(JSON.stringify(examples(source)) === JSON.stringify(examples(destination)), {source, destination, reason: 'promoted-code-example-changed'});
-    const identifiers = name => [...new Set(read(name).match(/\banp\.[a-z0-9_.-]+\.v[0-9]+\b/g) ?? [])].sort();
-    check(JSON.stringify(identifiers(source)) === JSON.stringify(identifiers(destination)), {source, destination, reason: 'wire-profile-identifier-changed'});
-    const errorRows = name => [...read(name).matchAll(/^\|\s*(\d{4})\s*\|\s*`([^`]+)`/gm)].map(match => match[1] + ':' + match[2]);
-    check(JSON.stringify(errorRows(source)) === JSON.stringify(errorRows(destination)), {source, destination, reason: 'wire-error-table-changed'});
-  }
-}
-check(promotedPairs.length === 26, {reason: 'unexpected-promotion-coverage', count: promotedPairs.length});
 const normative = [...core, ...messages.filter(name => !name.endsWith('/README.md'))];
 for (const file of normative) {
   const text = read(file);
@@ -148,5 +140,5 @@ for (const scenario of scenarios.scenarios) {
     checkLink(scenariosFile, target);
   }
 }
-console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-1.2-documentation-promotion', documents: documents.length, unified_archive_specifications_checked: unifiedArchive.length, promoted_specifications: promotedPairs.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
+console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-documentation', documents: documents.length, vnext_drafts_checked: nextVersionDrafts.length, authorization_drafts_checked: authorizationDrafts.length, white_paper_drafts_checked: whitePaperDrafts.length, authorization_validation_guides_checked: authorizationValidationGuides.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
 process.exitCode = errors.length ? 1 : 0;

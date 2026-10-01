@@ -13,6 +13,8 @@
 
 ANP-05 引用当前 ANP 1.2 身份材料绑定。正式发布或公开启用前，必须完成评审与客户端/AS/RS 互操作验证。
 
+实现验证场景与编号维护说明：[中文指南](../../docs/chinese/anp-05-validation-guide.md) / [English](../../docs/anp-05-validation-guide.md)。
+
 ## 版权声明
 
 Copyright (c) 2024 ANP 开源社区

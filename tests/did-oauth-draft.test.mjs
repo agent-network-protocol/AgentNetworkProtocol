@@ -15,6 +15,10 @@ const cnFile = 'vnext/chinese/05-ANP-基于DID的授权协议.md';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const en = read(enFile);
 const cn = read(cnFile);
+const enValidationFile = 'docs/anp-05-validation-guide.md';
+const cnValidationFile = 'docs/chinese/anp-05-validation-guide.md';
+const enValidation = read(enValidationFile);
+const cnValidation = read(cnValidationFile);
 const profile = 'anp.authorization.oauth2.did.v1-draft4';
 const vcProfile = 'anp.authorization.vc.v1-draft2';
 const blocks = text => [...text.matchAll(/^```([^\n]*)\n([\s\S]*?)^```\s*$/gm)].map(match => ({language: match[1], text: match[2].trimEnd()}));
@@ -143,12 +147,23 @@ test('mirrors retain applicable security scenarios without reusing removed scena
   ids.push(...Array.from({length: 5}, (_, index) => index + 53));
   ids.push(...Array.from({length: 17}, (_, index) => index + 59));
   const expected = ids.map(id => 'AUTHZ-' + String(id).padStart(2, '0'));
-  assert.deepEqual(scenarios(en), expected);
-  assert.deepEqual(scenarios(cn), expected);
+  assert.deepEqual(scenarios(enValidation), expected);
+  assert.deepEqual(scenarios(cnValidation), expected);
   assert.match(en, /not executable cryptographic fixtures/);
   assert.match(cn, /不是可执行密码学测试向量/);
-  assert.match(en, /not a claim that an implementation has passed/);
-  assert.match(cn, /不是宣称某个实现已经通过/);
+  assert.match(enValidation, /not a claim that an implementation has passed/);
+  assert.match(cnValidation, /不是宣称某个实现已经通过/);
+  assert.doesNotMatch(en, /^\| AUTHZ-\d+/m);
+  assert.doesNotMatch(cn, /^\| AUTHZ-\d+/m);
+  assert(en.includes('(../' + enValidationFile + ')'));
+  assert(cn.includes('(../../' + cnValidationFile + ')'));
+  assert(enValidation.includes('(../' + enFile + '#conformance)'));
+  assert(cnValidation.includes('(../../' + cnFile + '#conformance)'));
+  for (const guide of [enValidation, cnValidation]) {
+    assert(guide.includes('v0.6'));
+    assert(guide.includes(profile));
+    assert(guide.includes(vcProfile));
+  }
 });
 
 test('identity references use the current ANP-02 bindings', () => {
@@ -186,6 +201,7 @@ test('release checker validates authorization and white paper drafts without red
   assert.equal(report.vnext_drafts_checked, 4);
   assert.equal(report.authorization_drafts_checked, 2);
   assert.equal(report.white_paper_drafts_checked, 2);
+  assert.equal(report.authorization_validation_guides_checked, 2);
   assert.deepEqual(fs.readdirSync(path.join(root, 'vnext')).sort(), ['01-agentnetworkprotocol-technical-white-paper.md', '05-anp-did-authorization-protocol-specification.md', 'README.md', 'chinese']);
   assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['01-AgentNetworkProtocol技术白皮书.md', '05-ANP-基于DID的授权协议.md', 'README.md']);
   assert.equal(report.sdk_or_product_tests_run, false);
@@ -626,7 +642,7 @@ test('examples distinguish supported role credentials from the type requested in
   assert(presentationRequest.credential_types.includes(requestedType));
   assert(authorizationTypes.includes(otherType));
   assert(!presentationRequest.credential_types.includes(otherType));
-  for (const text of [en, cn]) assert(scenarios(text).includes('AUTHZ-70'));
+  for (const text of [enValidation, cnValidation]) assert(scenarios(text).includes('AUTHZ-70'));
 });
 
 test('organization role credential authorizes by action URI, not by resource or role name', () => {

@@ -21,8 +21,9 @@ const whitePaperDrafts = [
   'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md',
 ];
 const nextVersionDrafts = [...authorizationDrafts, ...whitePaperDrafts];
+const authorizationValidationGuides = ['docs/anp-05-validation-guide.md', 'docs/chinese/anp-05-validation-guide.md'];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
-const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...readerGuides.map(guide => guide.file)])].sort();
+const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...authorizationValidationGuides, ...readerGuides.map(guide => guide.file)])].sort();
 const errors = [];
 const schematicExamples = [];
 const cache = new Map();
@@ -139,5 +140,5 @@ for (const scenario of scenarios.scenarios) {
     checkLink(scenariosFile, target);
   }
 }
-console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-documentation', documents: documents.length, vnext_drafts_checked: nextVersionDrafts.length, authorization_drafts_checked: authorizationDrafts.length, white_paper_drafts_checked: whitePaperDrafts.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
+console.log(JSON.stringify({result: errors.length ? 'FAIL' : 'PASS', scope: 'anp-documentation', documents: documents.length, vnext_drafts_checked: nextVersionDrafts.length, authorization_drafts_checked: authorizationDrafts.length, white_paper_drafts_checked: whitePaperDrafts.length, authorization_validation_guides_checked: authorizationValidationGuides.length, bilingual_message_profiles: 9, reader_guides_checked: readerGuides.length, payment_metadata_checked: paymentDocuments.length, local_links_checked: localLinks, parseable_json_examples: jsonExamples, schematic_or_annotated_example_blocks: schematicExamples.length, design_scenario_references_checked: scenarios.scenarios.length, sdk_or_product_tests_run: false, errors}, null, 2));
 process.exitCode = errors.length ? 1 : 0;

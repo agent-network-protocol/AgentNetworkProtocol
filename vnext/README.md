@@ -12,6 +12,8 @@ This directory contains protocol drafts and white paper revisions with substanti
 
 ANP-05 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
 
+Implementation validation scenarios and identifier maintenance: [English guide](../docs/anp-05-validation-guide.md) / [中文](../docs/chinese/anp-05-validation-guide.md).
+
 ## Copyright Notice
 
 Copyright (c) 2024 ANP Open Source Community

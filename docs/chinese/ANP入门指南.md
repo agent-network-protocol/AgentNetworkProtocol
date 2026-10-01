@@ -1,23 +1,27 @@
 # ANP入门指南
 
+- 规范集：ANP 1.2
+
 ## 概述
 
 ### 什么是 ANP
 
 ANP（Agent Network Protocol）是面向 Agentic Web 的开放协议栈。它的目标是让开放互联网上的智能体能够互相识别身份、发布能力、发现服务、协商可用接口、交换安全消息，并在应用层完成协作。
 
-当前规范集围绕 ANP 1.1 版本线组织，覆盖：
+本指南对应当前工作区的 ANP 1.2 文档集，核心与消息规范覆盖：
 
-- `did:wba` 身份与跨域认证
+- [ANP-02 通用 DID 请求认证](../../chinese/02-ANP-基于DID的身份认证协议.md)，支持 `did:wba` 与原生 `did:web`
+- ANP-03 的 WBA 方法规则与身份连续性
 - WNS（WBA Name Space）人类可读 Handle
 - 智能体描述文档
 - 智能体发现文档与搜索注册
 - 端到端即时消息 Profile
-- AP2 智能体支付等应用协议
 
-元协议规范当前仍是草案。它可用于语义协商，但不是当前已发布架构的必需组成部分。
+元协议 ANP-06 仍为草案；P6 群组 E2EE 全文纳入目录，但仍为候选，临时 MLS ExtensionType `0xF0A1` 的稳定注册门槛未被取消。AP2 支付适配文档独立版本化，仍为草案／未发布。
 
-> 版本说明：`Version: 1.1` 表示规范/文档发布版本，不改变示例中的 ANP 载荷字段，例如 `"protocolVersion": "1.0.0"`。
+规范文档状态不代表 SDK 或产品已经实现、通过符合性验证、开放公开能力发现或完成 tag / GitHub Release。
+
+> 版本说明：`Version: 1.2` 表示规范/文档版本，不是 wire 版本。P1/P2/P3/P7/P8 保留 `.v1`，P4/P5/P6 采用既有 vNext 定义的 `.v2`；P9 保留 v1 binding 扩展，不定义独立 `meta.profile`。示例中的 `protocolVersion` 等字段按所属规范解释，不统一改号。
 
 ### 为什么需要 ANP
 
@@ -38,7 +42,7 @@ ANP（Agent Network Protocol）是面向 Agentic Web 的开放协议栈。它的
 1. 个人助手拥有自己的 DID，也可以拥有一个人类可读的 WNS Handle。
 2. 它可以通过搜索、`.well-known/agent-descriptions` 或 Handle 发现酒店智能体。
 3. 它读取酒店智能体的 Agent Description 文档，了解产品、服务和接口。
-4. 它使用 `did:wba` 对请求进行认证，而不是为每个平台创建单独账号。
+4. 它使用 ANP-02 对请求进行认证，按实际支持的方法验证 `did:wba` 或原生 `did:web` 身份；是否允许具体业务操作另由服务授权策略判断。
 5. 它可以使用结构化接口完成预订，也可以使用自然语言接口处理特殊需求。
 6. 如果需要支付或人工授权，接口描述会明确说明，并由对应应用协议处理。
 
@@ -75,8 +79,8 @@ ANP 不重建互联网协议栈，而是复用：
 它包括：
 
 - 基于 W3C DID 的身份
-- `did:wba` DID 方法
-- HTTP Message Signatures 风格认证
+- ANP-03 的 `did:wba` 方法规则，以及原生 `did:web` 方法绑定
+- ANP-02 的 HTTP Message Signatures / JSON 认证信息承载
 - DID Document 服务发现
 - 签名密钥与密钥协商密钥分离
 - 私聊和群聊端到端加密基础能力
@@ -126,6 +130,13 @@ WNS Handle 或搜索结果
 
 ## 身份：`did:wba`
 
+<a id="authentication-model"></a>
+### 先区分认证与 DID 方法
+
+[ANP-02](../../chinese/02-ANP-基于DID的身份认证协议.md) 定义通用请求认证；[ANP-03](../../chinese/03-did-wba方法规范.md) 定义 WBA 的标识符、DID Document、解析、密钥绑定和迁移规则。[原生 did:web 集成附录](../../chinese/附录B：与原生did-web-的兼容.md) 说明 Web 身份如何直接使用同一认证与消息合同，无需转换为 WBA，也不承受 WBA 特有的根 proof 要求。
+
+普通 API 认证不要求 WNS、消息 Profile 或 `deviceManifest`。下文的 WBA 示例不是对其他 DID 方法的额外限制；`did:webvh` 等方法须有相应方法绑定与实现支持，不能从 DID Core 兼容性推定。
+
 ### `did:wba` 提供什么
 
 `did:wba` 是 ANP 的 Web-based DID 方法。它让智能体拥有去中心化身份，同时继续使用普通 Web 基础设施。
@@ -165,7 +176,7 @@ did:wba:example.com%3A3000:user:alice:e1_<fingerprint>
 - **裸域名 DID**（如 `did:wba:example.com`）通常表示域名级主体或服务身份。
 - **路径型 DID**（如 `did:wba:example.com:user:alice:e1_<fingerprint>`）表示域名下的具体主体。
 - 新建路径型 DID 应使用默认的 `e1_` Ed25519 绑定指纹 Profile。
-- 当绑定密钥变化时，路径型 DID 可能轮换；如果需要稳定的人类可读引用，应使用 WNS Handle。
+- 当绑定密钥变化时，路径型 DID 可能轮换；WNS Handle 可提供稳定的人类可读引用。稳定主体路径相同或 Handle 解析到新 DID，都不能独立证明权限连续性；须从此前可信的 DID 验证 ANP-03 迁移链，再按业务策略处理。
 
 ### 最小 DID Document 形态
 
@@ -239,13 +250,13 @@ DID Document 发布密钥和服务。在 ANP 中常见服务类型包括：
 
 ### 身份认证流程
 
-高层流程如下：
+通用流程以 [ANP-02 HTTP 请求认证](../../chinese/02-ANP-基于DID的身份认证协议.md#http-binding) 为准：
 
-1. 智能体 A 使用与其 DID Document 对应的私钥签名 HTTP 请求。
-2. 智能体 B 解析智能体 A 的 DID Document。
-3. 智能体 B 检查该密钥是否被授权用于认证。
-4. 智能体 B 验证请求签名。
-5. 认证通过后，双方使用选定的 ANP 接口或消息 Profile 交互。
+1. 智能体 A 使用 `authentication` 授权的验证方法对应私钥签名，通过 `Signature-Input` 和 `Signature` 承载；有消息体时计算并签名覆盖 `Content-Digest`。
+2. 智能体 B 按适用 DID 方法解析和验证 A 的 DID Document，检查 `keyid` 和认证密钥用途。
+3. B 按实际 HTTP 请求重建签名基串，校验签名、摘要、签名覆盖范围、时间窗口和重放保护。
+4. B 独立判断业务权限；认证成功不等于操作授权，也不证明已取得人类授权。
+5. 如采用可选 Token 流程，后续请求按 ANP-02 和服务策略使用 Token；消息原发者证明仍另按 P1 及所属 Profile 验证。
 
 ## Name Service：WNS Handle
 
@@ -302,12 +313,12 @@ https://example.com/.well-known/handle/alice
 }
 ```
 
-重要规则：
+以下规则描述 WBA 主线 WNS。原生 Web 使用[附录 B](../../chinese/附录B：与原生did-web-的兼容.md#legacy-web-handle)中的较弱域声明兼容模型，不能据此认定 `exact-handle`：
 
 - 外层 `did` 是权威身份结果。
 - `profile` 只是公开展示元数据。
 - `profile` 不得用于身份认证、授权、路由、E2EE 绑定或服务端点选择。
-- 安全敏感操作必须通过 DID Document 中的 `ANPHandleService` 验证 Handle 到 DID 的绑定。
+- 安全敏感操作若使用 WBA Handle，必须通过 DID Document 中的 `ANPHandleService` 验证 Handle 到 DID 的绑定；普通 DID API 认证不要求 Handle。
 - 需要信任具体 Handle 时必须获得 `exact-handle` 验证；仅 `provider-confirmed` 不足以满足高保证绑定。
 
 ## 智能体描述
@@ -400,6 +411,8 @@ Agent Description 使用两个核心概念：
 }
 ```
 
+> 认证说明：示例保留 ANP-07 的 `didwba` 声明及其中历史的 `Authorization` 字段标签，不替代 ANP-02 的请求头规则。新签名请求使用 `Signature-Input`、`Signature` 和适用的 `Content-Digest`，不要从该声明推导旧 DIDWba Authorization 签名方案。
+
 > 注意：当前智能体描述规范示例使用字段名 `Infomations`。实现时应遵循当前有效规范，同时为未来版本可能修正拼写做好兼容处理。
 
 ## 智能体发现
@@ -482,7 +495,7 @@ ANP 端到端即时消息是一组用于跨域智能体消息通信的 Profile�
 
 当前消息 Profile 期望 DID Document 对外暴露一个用于跨域交互的公共 `ANPMessageService`。实现内部可以拆分私聊、群组、密钥、对象和联邦组件，但对外这些能力收敛在统一服务端点之后。
 
-服务条目可以包含静态提示：
+以下示例只声明普通 DID 定址消息与附件能力，不声明 E2EE，因而不要求设备 Manifest：
 
 ```json
 {
@@ -492,13 +505,12 @@ ANP 端到端即时消息是一组用于跨域智能体消息通信的 Profile�
   "serviceDid": "did:wba:example.com",
   "profiles": [
     "anp.core.binding.v1",
+    "anp.identity.discovery.v1",
     "anp.direct.base.v1",
-    "anp.direct.e2ee.v1",
     "anp.attachment.v1"
   ],
   "securityProfiles": [
-    "transport-protected",
-    "direct-e2ee"
+    "transport-protected"
   ]
 }
 ```
@@ -511,23 +523,25 @@ anp.get_capabilities
 
 当 DID 静态提示与运行时能力结果不一致时，以运行时结果为准。
 
+启用 `anp.direct.e2ee.v2` 或候选 `anp.group.e2ee.v2` 时，必须满足完整依赖与 P2 的当前 `deviceManifest` 资格规则；不能只给上述 Base 示例加一个 Profile 字符串，也不能把 v1 会话静默当作 v2。见[完整消息索引](../../chinese/message/README.md)及其多设备示例。
+
 ### 即时消息 Profile 索引
 
-即时消息规范集拆分为九个 Profile：
+[ANP Messaging 1.2 索引](../../chinese/message/README.md) 包含九份文档。普通 Base 操作保持 DID/Group DID 定址；P4 v2 定义 DID-only 成员及 Host 协调的 DID 更新，P5/P6 v2 才引入密码学设备端点。P6 仍为候选，稳定发布须满足 MLS ExtensionType 注册门槛。
 
-| Profile | 作用 |
-| --- | --- |
-| [P1 核心绑定](../../chinese/message/01-核心绑定.md) | JSON-RPC 2.0 绑定、`params` 结构、能力协商、幂等和错误模型 |
-| [P2 身份与发现](../../chinese/message/02-身份与发现.md) | Agent DID / Group DID、DID Document 解释规则和 `ANPMessageService` 发现 |
-| [P3 私聊基础语义](../../chinese/message/03-私聊基础语义.md) | `direct.send`、内容模型、回执、排序和发送方证明边界 |
-| [P4 群组基础语义](../../chinese/message/04-群组基础语义.md) | 群生命周期、成员关系、群消息、群状态版本和 Host 排序 |
-| [P5 私聊端到端加密](../../chinese/message/05-私聊端到端加密.md) | 使用 DID 绑定密钥材料和 Ratchet 思路的私聊 E2EE |
-| [P6 群组端到端加密](../../chinese/message/06-群组端到端加密.md) | 基于 MLS 的群组 E2EE 和群密码学状态 |
-| [P7 附件与对象传输](../../chinese/message/07-附件与对象传输.md) | 附件 Manifest、对象服务、上传 / 下载 ticket 和对象级加密 |
-| [P8 联邦与跨域](../../chinese/message/08-联邦与跨域.md) | 跨域服务调用、路由、中继和结果见证 |
-| [P9 消息 Mention 扩展](../../chinese/message/09-消息Mention扩展.md) | 结构化群消息 mention 和 selector 语义 |
+| Profile | 标识 / 状态 | 作用 |
+| --- | --- | --- |
+| [P1 核心绑定](../../chinese/message/01-核心绑定.md) | `anp.core.binding.v1` | JSON-RPC 2.0 绑定、`params` 结构、能力协商、幂等和错误模型 |
+| [P2 身份与发现](../../chinese/message/02-身份与发现.md) | `anp.identity.discovery.v1` | Agent DID / Group DID、DID Document 解释规则和 `ANPMessageService` 发现 |
+| [P3 私聊基础语义](../../chinese/message/03-私聊基础语义.md) | `anp.direct.base.v1` | `direct.send`、内容模型、回执、排序和发送方证明边界 |
+| [P4 群组基础语义](../../chinese/message/04-群组基础语义.md) | `anp.group.base.v2` | 群生命周期、成员关系、群消息、群状态版本和 Host 排序 |
+| [P5 私聊端到端加密](../../chinese/message/05-私聊端到端加密.md) | `anp.direct.e2ee.v2` | 使用 DID 绑定密钥材料和 Ratchet 思路的私聊 E2EE |
+| [P6 群组端到端加密](../../chinese/message/06-群组端到端加密.md) | `anp.group.e2ee.v2`；候选 | 基于 MLS 的群组 E2EE 和群密码学状态 |
+| [P7 附件与对象传输](../../chinese/message/07-附件与对象传输.md) | `anp.attachment.v1` | 附件 Manifest、对象服务、上传 / 下载 ticket 和对象级加密 |
+| [P8 联邦与跨域](../../chinese/message/08-联邦与跨域.md) | `anp.federation.relay.v1` | 跨域服务调用、路由、中继和结果见证 |
+| [P9 消息 Mention 扩展](../../chinese/message/09-消息Mention扩展.md) | v1 binding；无独立 Profile | 结构化群消息 mention 和 selector 语义 |
 
-推荐阅读顺序：先读 P1/P2，再读 P3/P4，然后读 P5/P6，最后按需阅读 P7/P8/P9。
+推荐阅读顺序：先读 ANP-02 及适用方法绑定，再读 P1/P2、P3/P4、P5/P6，最后按需阅读 P7/P8/P9。
 
 ## 协议 SDK：AgentConnect
 
@@ -537,7 +551,7 @@ ANP 的开源 SDK 和参考实现维护在 AgentConnect：
 
 AgentConnect 提供身份、认证、proof、WNS、Agent Description、OpenRPC / JSON-RPC、爬取、AP2、E2EE 和示例支持。
 
-下表基于 2026-06-27 检查的 AgentConnect README：
+下表仅保留 2026-06-27 的 SDK 包导航快照，不是当前注册表状态或 ANP 1.2 符合性清单。实际包名、版本、Profile 支持和启用状态须以 SDK 仓库及对应实现验证为准：
 
 | 语言 | 包 / 模块 | 如何开始 | 状态 |
 | --- | --- | --- | --- |
@@ -584,7 +598,7 @@ app.include_router(CalculatorAgent.router())
 ## 推荐阅读路径
 
 1. 阅读 [README.cn](../../README.cn.md) 了解当前规范索引和架构。
-2. 阅读 [ANP-03：did:wba](../../chinese/03-did-wba方法规范.md) 和 [ANP-04：WNS](../../chinese/04-ANP-基于DID-WBA的命名空间规范.md) 了解身份和命名。
+2. 先阅读 [ANP-02：基于 DID 的身份认证](../../chinese/02-ANP-基于DID的身份认证协议.md)，再按方法阅读 [ANP-03：did:wba](../../chinese/03-did-wba方法规范.md) 或[原生 did:web 集成附录](../../chinese/附录B：与原生did-web-的兼容.md)；需要人类可读命名时再阅读 [ANP-04：WNS](../../chinese/04-ANP-基于DID-WBA的命名空间规范.md)。
 3. 阅读 [ANP-07：智能体描述](../../chinese/07-ANP-智能体描述协议规范.md) 和 [ANP-08：智能体发现](../../chinese/08-ANP-智能体发现协议规范.md) 发布和发现智能体。
 4. 构建消息能力时阅读 [ANP-09](../../chinese/09-ANP-端到端即时消息协议规范.md) 和各消息 Profile。
 5. 使用 [AgentConnect](https://github.com/agent-network-protocol/AgentConnect) 构建或测试可运行实现。
@@ -605,6 +619,6 @@ ANP流程主要包括以下几个步骤：
 
 4. **身份验证**：智能体B接收到请求后，根据请求中的DID标识符获取智能体A的DID文档，从中提取公钥，并验证请求签名的有效性，确认智能体A的身份。
 
-5. **服务交互**：身份验证通过后，智能体B返回请求的数据或服务响应。智能体A根据返回的数据完成任务，如预订酒店、查询信息等。整个过程基于标准化的接口和数据格式，确保了跨平台互操作性。
+5. **服务交互**：身份验证及独立的业务授权检查通过后，智能体B返回请求的数据或服务响应。智能体A根据返回的数据完成任务，如预订酒店、查询信息等。整个过程基于标准化的接口和数据格式，确保了跨平台互操作性。
 
 这种基于DID的身份验证和标准化描述文档的方式，使得智能体能够在互联网上安全、高效地相互发现和交互，无需依赖中心化平台。

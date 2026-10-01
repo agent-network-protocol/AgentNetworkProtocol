@@ -398,5 +398,5 @@ DID文档对应的私钥至关重要，如果私钥发生泄漏，会导致DID�
 [3] W3C DIDs：拆解权力结构的数字身份标准，[https://yurenju.blog/posts/2024-01-01_w3c-dids-redefining-identity-authority/](https://yurenju.blog/posts/2024-01-01_w3c-dids-redefining-identity-authority/)
 
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  

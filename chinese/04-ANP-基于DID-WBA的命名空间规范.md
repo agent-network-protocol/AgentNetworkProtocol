@@ -3,11 +3,15 @@
 - 文档编号：ANP-04
 - 标题：ANP-基于DID:WBA的命名空间规范
 - 状态：已发布
-- 版本：1.1
+- 版本：1.2
 - 语言：中文
 - 适用范围：本规范适用于 ANP 中面向人类可读的 Handle 命名、WNS 解析与 did:wba 名称映射。
 
+> ANP 1.2 发布说明：通用 DID 身份认证由 ANP-02 定义；DID 方法与命名规则仍由各自规范拥有。英文镜像为 [ANP-DID:WBA Name Space Specification](../04-anp-did-wba-name-space-specification.md)。
+
 简称：WNS (WBA Name Space)
+
+本次修订保留 WBA 的原有名称映射、端点验证、绑定管理、缓存及迁移规则。原生 `did:web` 沿用[附录 B.4 的既有域声明兼容方案](附录B：与原生did-web-的兼容.md#legacy-web-handle)，不要求迁移为 WBA，也不把该兼容结果升级为 WBA 的 `exact-handle`。下文 WBA 主机名一致性和第 6 节的精确/私密端点流程不扩展到 Web 兼容模式。通用请求认证已提取到 [ANP-02](02-ANP-基于DID的身份认证协议.md)。
 
 ## 摘要
 
@@ -15,7 +19,7 @@
 
 Handle 解决了 DID 标识符对人类不友好的问题——`did:wba:example.com:user:alice:e1_<fingerprint>` 这样的标识符对机器友好但难以记忆和传播。尤其在最新 did:wba 规范中，路径型 DID 默认会携带绑定公钥指纹，并且当绑定密钥或绑定 profile 变化时，路径型 DID 可能发生轮换。WNS 因而不仅提供类似 email 地址或社交平台用户名的体验，也承担“稳定的人类可读名称层”角色：Handle 可以保持稳定，而底层 did:wba 可以随着绑定密钥变化而轮换。
 
-为了使该稳定名称可被跨域协议安全地用作身份连续性锚点，本规范强制要求：Handle 一旦分配即永久归属于同一主体，不得转让、撤销后不得复用；所有合规 Handle Provider 都必须作出并执行这一协议承诺。
+为了使该稳定名称可被跨域协议安全地用作稳定引用，本规范强制要求：Handle 一旦分配即永久归属于同一主体，不得转让、撤销后不得复用；所有合规 Handle Provider 都必须作出并执行这一协议承诺。Handle 的稳定性和 Handle→DID 映射本身不替代 03 规范定义的 DID 迁移密码学证明。
 
 本规范关于handle相关功能，也可以和原生的did:web方法兼容，兼容方案参考附录A。
 
@@ -50,7 +54,7 @@ WNS 的设计目标包括：
 
 ### 1.3 与已有协议的关系
 
-- **03-did:wba 方法规范**：WNS Handle 是 did:wba DID 的可读别名，Handle 解析最终依赖 03 规范完成 DID Document 的获取。对于采用默认路径方案的路径型 DID，WNS 不重新定义绑定指纹生成规则，而直接复用 03 规范。
+- **03-did:wba 方法规范**：WNS Handle 是 did:wba DID 的可读别名，Handle 解析最终依赖 03 规范完成 DID Document 的获取。对于采用默认路径方案的路径型 DID，WNS 不重新定义绑定指纹生成规则，而直接复用 03 规范；底层 DID 轮换时的稳定主体路径、`successorDid`、`alsoKnownAs` 与迁移 `proof` 也由 03 规范定义。
 - **07-智能体描述协议**：Handle 解析后通过 DID Document 的 service 到达 Agent Description 文档
 - **08-智能体发现协议**：Handle Provider 可作为智能体发现的补充入口
 - **09-端到端即时消息协议**：Handle 可用于收件人的展示和输入，消息路由仍基于 DID
@@ -65,8 +69,8 @@ WNS 的设计目标包括：
 | **Domain** | Handle 的域名部分，如 `alice.example.com` 中的 `example.com` |
 | **DID Binding** | Handle 到 DID 的一对一映射关系 |
 | **Handle Resolution** | 将 Handle 解析为 DID 的过程 |
-| **DID Rotation** | 对于路径型 did:wba，因绑定密钥或绑定 profile 变化导致 DID 发生变化的过程 |
-| **Binding Generation** | Handle 绑定状态的单调递增代次，用于检测 DID 换绑、状态变更与回滚攻击 |
+| **DID Rotation** | 对于路径型 did:wba，因绑定密钥或绑定 profile 变化导致完整 DID 发生变化，并按 03 规范建立主体连续性的过程 |
+| **Binding Generation** | WNS Handle 绑定状态的单调递增代次，用于检测 DID 换绑、状态变更与回滚攻击；它不是 did:wba DID 的代际字段 |
 | **Handle Tombstone** | Handle 被撤销后永久保留的占用记录，用于阻止同名 Handle 被重新分配 |
 | **WNS** | WBA Name Space，本规范定义的命名空间体系 |
 | **Handle Resolution Document** | Handle 解析端点返回的 JSON 文档，包含 Handle 到 DID 的映射信息 |
@@ -159,7 +163,7 @@ sequenceDiagram
     C->>H: GET /.well-known/handle/{local-part}
     H-->>C: Handle Resolution Document (含 DID)
     Note over C: 从 Resolution Document 中提取 DID
-    C->>D: 按 03 规范解析 DID Document
+    C->>D: 按适用方法解析 DID Document（WBA: 03；Web: 附录 B）
     D-->>C: DID Document
     Note over C: 从 DID Document 获取服务端点
 ```
@@ -395,9 +399,10 @@ DID:     did:wba:example.com%3A8800:user:alice:e1_<fingerprint>
 
 上例中，Handle 的 domain 为 `example.com`；第二个 DID 虽然包含编码后的端口 `%3A8800`，但其主机名仍为 `example.com`，因此映射仍然有效。Handle 本身不携带端口号；端口只影响 DID Document 的解析位置，不影响 Handle 的文本形式。
 
+<a id="method-resolution"></a>
 ### 4.5 did:wba 标准解析
 
-获得 DID 后，必须（MUST）按照 [did:wba 方法规范](03-did-wba方法规范.md) 解析 DID Document。
+获得 DID 后，必须（MUST）按照 [did:wba 方法规范](03-did-wba方法规范.md) 解析 DID Document。 原生 `did:web` 按 [ANP-02 附录 B](02-ANP-基于DID的身份认证协议.md#web-binding)引用的原有 Web 方法解析与认证兼容规则处理；Handle 绑定继续使用附录 B.4 的既有方案。
 
 实现者不得（MUST NOT）绕过 DID Document，直接由 Handle 推断服务端点、绑定密钥或其他 DID 相关信息。DID Document 是智能体能力和服务的权威来源。
 
@@ -514,6 +519,7 @@ DID 持有者在其 DID Document 的 `service` 中添加 `ANPHandleService` 类�
 
 后续版本可以在保持兼容的前提下，引入 `providerDid`、`handleCommitment` 等更强的 Name Service 提供者身份或隐私保护机制。
 
+<a id="binding-verification"></a>
 ### 6.3 验证流程
 
 对于以下安全敏感场景，验证者必须（MUST）执行双向绑定验证：
@@ -688,6 +694,7 @@ Handle Provider 必须（MUST）满足以下要求：
 - 当返回 `429 Too Many Requests` 时，应当（SHOULD）携带 `Retry-After`
 - 当 Handle 处于迁移或底层 DID 轮换窗口时，应当（SHOULD）降低缓存 TTL
 
+<a id="binding-management"></a>
 ### 8.2 Handle 管理
 
 - Handle Provider 负责 Handle 的分配和生命周期管理
@@ -716,12 +723,14 @@ Handle Provider 必须（MUST）满足以下要求：
 
 - Handle 可以（MAY）保持不变，以提供稳定的人类可读名称
 - Handle Provider 必须（MUST）在新的 DID Document 可用且其独立恢复或身份验证策略完成后，将 Handle 映射更新到新 DID，并严格递增 `binding_generation`
+- `binding_generation` 只表示 Handle 映射状态；它不得（MUST NOT）被解释为 DID 代际或 DID 迁移的密码学证明
 - DID 换绑必须（MUST）表示同一 Handle 主体的凭证更新，不得（MUST NOT）被用于转让 Handle 或更换 Handle 主体
+- 若 Handle Provider 或客户端需要将新旧 DID 视为同一持续主体，必须（MUST）按 03 规范从旧 DID 出发，验证稳定主体路径和每个直接 `successorDid`，并最终到达 proof 有效的 active DID。有效的旧 binding proof 或预授权 recovery proof 提供密码学连续性；缺少这两种 proof 时，已认证的同源 HTTPS 完整链解析可以报告 `provider_asserted`，但 Handle 映射、相同前缀或 binding generation 本身仍只产生 `unverified`
 - 在轮换窗口中，Handle Provider 应当（SHOULD）降低缓存 TTL，以减少客户端使用旧映射的时间
 - 客户端不得（MUST NOT）假定 Handle 永远绑定同一个 DID；当前解析结果才是该 Handle 的权威当前 DID
 - 对于安全敏感操作，客户端在使用 Handle 获得新的 DID 后，必须（MUST）重新执行双向绑定验证
 - 若上层操作要求确认某个具体 Handle，则客户端必须（MUST）要求得到 `exact-handle` 结果，而不能仅接受 `provider-confirmed`
-- 旧 DID 的停用、保留或并行存在策略，由 03 规范与具体部署共同决定；WNS 只负责稳定名称与当前 DID 的映射
+- 旧 DID 的停用、`successorDid` 链和新 DID 的 `alsoKnownAs` 规则由 03 规范定义；WNS 只负责稳定名称与当前 DID 的映射
 
 ## 9. 安全考虑
 
@@ -818,10 +827,11 @@ did:wba:example.com:user:alice:e1_<new-fingerprint>
 在该过程中：
 
 1. Alice 的 Handle `alice.example.com` 保持不变
-2. Handle Provider 将该 Handle 的映射更新为新的 DID，并将 `binding_generation` 从旧值严格递增
-3. Alice 更新新 DID Document 中的 `ANPHandleService`
-4. 解析者重新执行双向绑定验证后，继续通过同一个 Handle 找到 Alice 的当前 DID
-5. 若 Alice 撤销 Handle 本身，Provider 永久保留 tombstone，而不是将同名 Handle 交给新主体
+2. 旧 DID Document 按 03 规范设置 `deactivated = true`、`successorDid = <new DID>` 并生成整体 `proof`
+3. 新 DID Document 可以通过 `alsoKnownAs` 引用旧 DID，并继续声明 `ANPHandleService`
+4. Handle Provider 将该 Handle 的映射更新为新的 DID，并将 `binding_generation` 从旧值严格递增
+5. 解析者按 03 规范验证 DID 迁移关系，并重新执行 WNS 双向绑定验证后，继续通过同一个 Handle 找到 Alice 的当前 DID
+6. 若 Alice 撤销 Handle 本身，Provider 永久保留 tombstone，而不是将同名 Handle 交给新主体
 
 ## 11. 规范性要求摘要
 
@@ -863,6 +873,9 @@ did:wba:example.com:user:alice:e1_<new-fingerprint>
 32. Handle Provider 迁移必须保持同一个 Handle 主体，不得被用于身份转让
 33. 新 Provider 必须继承最大绑定代次、绑定历史与 tombstone 义务，不得重置或回滚 `binding_generation`
 34. Provider 迁移必须保持完整 Handle 及其 domain 不变；迁移到不同 domain 不具有自动身份连续性
+35. `binding_generation` 不得被解释为 DID 代际或 DID 迁移的密码学证明
+36. 将轮换前后的 DID 视为经密码学验证的同一持续主体时，必须按 03 规范验证稳定主体路径、`successorDid` 和整体 `proof`
+37. 不得仅凭 Handle 相同或 DID 前缀相同认定两个 DID 属于同一持续主体
 
 ### SHOULD（应当）
 
@@ -903,7 +916,7 @@ did:wba:example.com:user:alice:e1_<new-fingerprint>
 
 ## 附录 A：原生`did:web` 兼容方案
 
-参考文档[附录B：与原生did-web-的兼容.md](/chinese/附录B：与原生did-web-的兼容.md)
+参考文档[附录B：与原生did-web-的兼容.md](附录B：与原生did-web-的兼容.md)
 
 ## 参考文献
 
@@ -914,7 +927,7 @@ did:wba:example.com:user:alice:e1_<new-fingerprint>
 - [RFC 8615 - Well-Known URIs](https://www.rfc-editor.org/rfc/rfc8615)
 - [RFC 9110 - HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
 - [ANP 技术白皮书](01-AgentNetworkProtocol技术白皮书.md)
-- [DID:WBA 方法设计规范](03-did-wba-method-specification.md)
+- [DID:WBA 方法设计规范](03-did-wba方法规范.md)
 - [智能体描述协议规范](07-ANP-智能体描述协议规范.md)
 - [智能体发现协议规范](08-ANP-智能体发现协议规范.md)
 - [端到端即时消息协议规范](09-ANP-端到端即时消息协议规范.md)
@@ -922,4 +935,4 @@ did:wba:example.com:user:alice:e1_<new-fingerprint>
 ## 版权声明
 
 Copyright (c) 2024 ANP Community  
-本文件依据 [MIT 许可证](LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
+本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

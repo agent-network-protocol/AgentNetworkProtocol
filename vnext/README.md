@@ -1,41 +1,21 @@
-# ANP Core Protocol vNext Draft Index
+# ANP vNext Protocol Collection
 
-- Status: Draft / not released
-- Scope: Candidate revisions to ANP-01 through ANP-09
-- Released baseline: [ANP 1.1 core specifications](../README.md)
-- Chinese mirror: [ANP 核心协议 vNext 草案索引](../chinese/vnext/README.md)
+- Status: Next-version drafts; not part of ANP 1.2
+- Current specifications: [ANP 1.2](../README.md) and [Chinese index](../README.cn.md)
 
-## 1. Version boundary
+This directory contains protocol drafts and white paper revisions with substantive changes from the current release. Add a vNext copy when an existing specification or white paper needs revision. The current ANP 1.2 documents remain at their release paths; earlier pre-release snapshots are available in Git history.
 
-The documents in this directory are candidate drafts for the core ANP protocol suite. They do not modify the released files at the repository root until this draft is published.
-
-- A **released specification** remains the interoperability contract until a vNext draft is reviewed and published in its place.
-- Draft presence does not indicate SDK, service, or product implementation support, and does not authorize public capability advertisement.
-- Reviewers should treat any field, flow, error-name, or example mismatch between the English and Chinese drafts as a draft defect.
-
-This directory adds independent ANP-02 DID authentication and refactors ANP-03 into WBA method rules and ANP-04 to preserve existing WNS and Web compatibility rules. Number 02 is reassigned from the deprecated did:all specification; historical files and links remain. ANP-01, ANP-06, ANP-07, ANP-08, and ANP-09 may be added later.
-
-## 2. Document set
-
-| ID | Document | Status |
+| Draft | Status | Scope |
 | --- | --- | --- |
-| ANP-01 | [Technical White Paper](../01-agentnetworkprotocol-technical-white-paper.md) | Released v1.1; vNext draft not copied yet |
-| ANP-02 | [DID Authentication Protocol](02-anp-did-authentication-protocol-specification.md) | New draft; DID-method-independent HTTP/JSON authentication with WBA/Web support, informative WebVH/other-method directions |
-| ANP-03 | [did:wba Method Specification](03-did-wba-method-design-specification.md) | Candidate revision; common authentication extracted to ANP-02 |
-| ANP-04 | [ANP DID Namespace Specification (WNS)](04-anp-did-wba-name-space-specification.md) | Candidate revision; original WBA binding behavior and existing Web domain compatibility |
-| ANP-06 | [Agent Communication Meta-Protocol](../06-anp-agent-communication-meta-protocol-specification.md) | Released draft; vNext copy not added yet |
-| ANP-07 | [Agent Description Protocol](../07-anp-agent-description-protocol-specification.md) | Released v1.1; vNext draft not copied yet |
-| ANP-08 | [Agent Discovery Protocol](../08-ANP-Agent-Discovery-Protocol-Specification.md) | Released v1.1; vNext draft not copied yet |
-| ANP-09 | [End-to-End Instant Messaging Overview](../09-ANP-end-to-end-instant-messaging-protocol-specification.md) | Released v1.1; messaging vNext remains in [`message/vnext/`](../message/vnext/README.md) |
+| [ANP-01: Technical White Paper](01-agentnetworkprotocol-technical-white-paper.md) / [中文](chinese/01-AgentNetworkProtocol技术白皮书.md) | Informative working draft / not released; based on v1.2 | Revised vision, architecture, identity, messaging, discovery, description, and application-protocol discussion. |
 
-Historical appendices remain available; this directory adds a candidate Web integration appendix:
+## Authorization draft at the repository root
 
-- [Appendix A: did:wba `k1_` Compatibility Extension](../appendix-a-did-wba-k1-compatibility-extension.md)
-- [Appendix B: Native `did:web` integration candidate](appendix-b-compatibility-with-native-did-web.md); the [released compatibility text](../appendix-b-compatibility-with-native-did-web.md) stays unchanged
+[ANP-05: DID-Based Authorization](../05-anp-did-authorization-protocol-specification.md) and its [Chinese mirror](../chinese/05-ANP-基于DID的授权协议.md) now reside at the main document paths. Their version remains v0.6 and status remains Draft / not released; they are not part of ANP 1.2. The draft defines DID client identity for OAuth and independent VC direct presentation for delegation and organization-role credentials.
 
-## 3. Reading and review order
+ANP-05 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
 
-Read ANP-02 common authentication and method bindings, then ANP-03 method rules, ANP-04 WNS, and Messaging P1/P2. Normative dependencies run from ordinary APIs to ANP-02 to applicable method rules, and from Messaging to P1/P2 to ANP-02 public requirements. ANP-02 does not require Messaging or WNS in reverse. Review both languages, the [vectors](../examples/did-authentication-vnext/README.md).
+Implementation validation scenarios and identifier maintenance: [English guide](../docs/anp-05-validation-guide.md) / [中文](../docs/chinese/anp-05-validation-guide.md).
 
 ## Copyright Notice
 

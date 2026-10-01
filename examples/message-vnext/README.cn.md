@@ -1,10 +1,10 @@
 # ANP Messaging 1.2 多设备示例
 
-状态：说明性草案示例，不是密码学一致性向量。
+状态：说明性示例，不是密码学一致性向量。
 
 [English](README.md) | [中文](README.cn.md)
 
-这些文件配套[混合版本的 ANP Messaging 1.2 草案](../../chinese/message/vnext/README.md)。JSON 可用于 schema 与流程评审；其中公钥、digest、签名、密文和 proof value 都是明确的占位符，绝不能（**MUST NOT**）作为密码学测试向量使用。
+这些文件配套[混合版本的 ANP Messaging 1.2 规范](../../chinese/message/README.md)。JSON 可用于 schema 与流程评审；其中公钥、digest、签名、密文和 proof value 都是明确的占位符，绝不能（**MUST NOT**）作为密码学测试向量使用。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -19,6 +19,8 @@
 中英文 Profile 规范仍是权威来源。未来的一致性向量任务必须用可复现输入和预期字节替换所有密码学占位值。
 
 transition 示例特意不是密码学向量。尤其是 `alsoKnownAs` 和 1019 `current_did` 都不能建立连续性；示例中的 `verified` 结果依赖独立验证两个 E1 文档和 predecessor 的旧 binding-key proof。
+
+> 目录保留 `-vnext` 名称以兼容既有路径。引用已指向 1.2 文档；P6 仍为候选，稳定版仍待完成 MLS ExtensionType 注册发布门槛。
 
 ## 版权声明
 

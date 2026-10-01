@@ -19,14 +19,14 @@ def add_copyright_notice(filepath):
         if is_chinese_file(filepath):
             copyright_notice = """
 ## 版权声明  
-Copyright (c) 2024 GaoWei Chang  
-本文件依据 [MIT 许可证](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。  
+Copyright (c) 2024 ANP Community  
+本文件依据 [Apache License 2.0](./LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
 """
         else:
             copyright_notice = """
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
-This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.
+Copyright (c) 2024 ANP Community  
+This file is released under the [Apache License 2.0](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.
 """
         
         # Add copyright notice to the end of file

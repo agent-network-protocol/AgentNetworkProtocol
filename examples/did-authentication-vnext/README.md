@@ -1,10 +1,10 @@
-# ANP-02 and Mixed-Method Draft Vectors
+# ANP 1.2: ANP-02 and Mixed-Method Vectors
 
-Status: offline candidate fixtures and protocol scenario designs; no SDK or product conformance claim.
+Status: offline fixtures and protocol scenario designs; no SDK or product conformance claim.
 
 [中文](README.cn.md)
 
-These artifacts support [ANP-02](../../vnext/02-anp-did-authentication-protocol-specification.md), its WBA/Web bindings, and the method-independent [Messaging draft suite](../../message/vnext/README.md). All identities use reserved example domains. Keys are deterministically derived public test material, never operational credentials. No identity is registered and no request is sent to a backend.
+These artifacts support [ANP-02](../../02-anp-did-authentication-protocol-specification.md), its WBA/Web bindings, and the method-independent [Messaging 1.2 suite](../../message/README.md). All identities use reserved example domains. Keys are deterministically derived public test material, never operational credentials. No identity is registered and no request is sent to a backend.
 
 | Artifact | Contents and evidence boundary |
 |---|---|
@@ -12,7 +12,7 @@ These artifacts support [ANP-02](../../vnext/02-anp-did-authentication-protocol-
 | [byte-vectors.json](byte-vectors.json) | Exact request components, payload/JCS bytes, signature bases, Ed25519 signatures, E1/Object Proof hashes and signatures, and P5 ChaCha20-Poly1305 AAD/ciphertexts, with explicit tamper mutations. |
 | [scenario-vectors.json](scenario-vectors.json) | Phase A/B setup/action/expected-outcome inputs for authentication, WNS, message/E2EE flows, extensions, continuity and admission. Every scenario is explicitly not executed against an SDK or product. |
 | [manifest.json](manifest.json) | File hashes, generation/check commands and counts. Counts describe artifacts, not successful SDK tests. |
-| [Verification responsibilities](../../message/vnext/02-identity-and-discovery.md#method-validation) | DID method validation and the identity, key-purpose, and device-eligibility rules of the message Profiles. |
+| [Verification responsibilities](../../message/02-identity-and-discovery.md#method-validation) | DID method validation and the identity, key-purpose, and device-eligibility rules of the message Profiles. |
 
 ## 1. Reproduce and check
 
@@ -43,7 +43,7 @@ Byte-negative vectors mutate a prepared signed input or signature and check cryp
 
 These fixtures deliberately select Ed25519, Multikey, and JWK to demonstrate interoperability under those capabilities; they do not add universal ANP-02 algorithm or representation requirements. Select applicable scenarios according to an implementation's declared support. JWT issuer/audience/scope scenarios explicitly select an example token policy and error mapping; they apply only when that policy is adopted and do not require every ANP-02 implementation to use those fields or policies. Existing WBA E1 and selected E2EE Profile cryptographic requirements remain in force.
 
-Authentication-related scenarios carry `applicability: illustrative-implementation-policy-not-additional-anp02-conformance`. Their replay boundaries, cache, resolver, credential selection, error mapping, digest, and token policies are example choices, not additional ANP-02 requirements or mandatory changes to existing behavior. Where the original text does not specify a particular condition, use original ANP-03 vNext and existing implementation policy rather than deriving protocol rules from expected scenario results. Verbatim extraction also preserves the original JWT date-string example; NumericDate fixtures here are a selected JWT example and do not mandate changing existing tokens through test vectors.
+Authentication-related scenarios carry `applicability: illustrative-implementation-policy-not-additional-anp02-conformance`. Their replay boundaries, cache, resolver, credential selection, error mapping, digest, and token policies are example choices, not additional ANP-02 requirements or mandatory changes to existing behavior. Where the original text does not specify a particular condition, use ANP-02 1.2 and existing implementation policy rather than deriving protocol rules from expected scenario results. Verbatim extraction also preserves the original JWT date-string example; NumericDate fixtures here are a selected JWT example and do not mandate changing existing tokens through test vectors.
 
 Each scenario contains:
 
@@ -58,6 +58,8 @@ An adapter must construct a valid baseline before applying a negative mutation. 
 WNS scenarios retain the original models separately: WBA keeps hostname consistency, public exact-Handle checks and private Provider confirmation; Web keeps forward-DID and HTTPS Provider-domain checks without mandatory endpoint dereferencing or weak-binding migration. The example outcome `legacy-domain-binding-accepted` is only a test label, not a new wire result or an exact-Handle assertion. API fixtures intentionally omit Handle, service entries, and device Manifests. Full message scenarios cover WBA→WBA, WBA→Web, Web→WBA, and Web→Web with Direct, Group, P5/P6, ordinary/encrypted Direct/Group attachments, and ordinary/encrypted Mentions. Service identity is also varied independently from its caller anchor.
 
 An SDK/product runner must record actual results in its own evidence without rewriting this catalog's design status. Required method-resolution, TLS/cache, concurrency, persistence, revocation, MLS, object-store, and user-facing behavior remain phase A/B work. WebVH is deliberately unsupported in the enabled-method negative case; this does not claim a WebVH implementation.
+
+> The `-vnext` directory name is retained for path compatibility. References point to the 1.2 documents; P6 remains a candidate pending its registered MLS ExtensionType release gate.
 
 ## Copyright Notice
 

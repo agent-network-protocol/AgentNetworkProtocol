@@ -232,5 +232,5 @@ https://github.com/agent-network-protocol/AgentNetworkProtocol
 Please continue following our open-source project. If you are interested in any kind of collaboration, feel free to contact us.
 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 This file is released under the [MIT License](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.

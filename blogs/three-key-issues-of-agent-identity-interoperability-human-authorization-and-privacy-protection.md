@@ -120,5 +120,5 @@ This multi-level identity architecture allows users to use different identities 
 Most importantly, this design gives users control over their digital identities, enabling them to decide when, where, and how to present their identity information, truly realizing the vision of "user data controlled by users."
 
 ## Copyright Notice  
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This document is released under the [MIT License](./LICENSE), you are free to use and modify it, but you must retain this copyright notice.

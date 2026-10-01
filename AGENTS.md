@@ -10,8 +10,10 @@ If Harness is absent, use local docs/tests/CI and disclose missing acceptance ev
 ## Project Structure & Module Organization
 
 - Root contains protocol specifications and white papers (e.g., `01-*.md`, `06-*.md`, `07-*.md`, `08-*.md`).
-- `vnext/` and `chinese/vnext/` hold candidate drafts for core protocols 01–09.
+- Root and `chinese/` hold the current ANP 1.2 core documents and the ANP-05 DID-based OAuth and VC authorization draft. ANP-05 remains v0.6 / Draft / not released and is outside ANP 1.2. `message/` and `chinese/message/` hold the full Messaging 1.2 catalog. ANP-06 remains a draft and P6 remains a candidate pending its registered MLS ExtensionType release gate.
+- Root `vnext/` holds the ANP-01 white paper revisions in both languages. These revisions are not part of ANP 1.2. Add a vNext copy of an existing specification or white paper only when its content changes; keep the original white papers aligned with `origin/main` and edit their revisions in `vnext/`.
 - `docs/` and `docs/chinese/` hold guides, links, and community operations.
+- ANP-05's detailed validation scenarios and stable `AUTHZ-*` identifiers live in `docs/anp-05-validation-guide.md` and `docs/chinese/anp-05-validation-guide.md`; the protocol's Section 14 retains conformance requirements and links to these guides.
 - `chinese/` mirrors core documents in Chinese plus research notes and process docs.
 - `blogs/` and `blogs/cn/` store long-form articles; `blogs/images/` holds blog assets.
 - `images/` and `standard/` provide shared figures and standards references.
@@ -31,6 +33,9 @@ This repository is documentation-first and has focused tests for maintenance aut
   - `uv run python scripts/add_copyright.py`
   - `uv run python scripts/rename_images.py`
   - `uv run python scripts/replace_spaces_with_hyphens.py`
+- Check ANP 1.2 documentation and vNext draft boundaries with `node scripts/check-release-docs.mjs`, then run `node scripts/generate-anp02-vectors.mjs` and `node scripts/check-anp02-vectors.mjs` for offline fixture checks. Earlier extraction baselines remain available in Git history.
+- Check onboarding and payment-status regressions with `node --test tests/release-doc-entrypoints.test.mjs`. The release checker includes the three current onboarding guides; AP2 checks cover status/version only, not payment conformance.
+- Check ANP-05 draft metadata, bilingual wire examples, and draft/release separation with `node --test tests/did-oauth-draft.test.mjs`. These are documentation checks, not OAuth runtime or cryptographic conformance tests.
 - Test contributor avatar automation with `node --test tests/update_contributors.test.js`.
 
 ## Coding Style & Naming Conventions
@@ -48,6 +53,7 @@ This repository is documentation-first and has focused tests for maintenance aut
 
 ## Commit & Pull Request Guidelines
 
+- For all protocol-related changes, including specifications, Profiles, white papers, examples, indexes, and related validation scripts/tests, finish the edits and necessary checks, then present the change summary and verification results for user review. Wait for explicit user approval before committing or pushing that change set. Do not commit or push automatically, and do not carry approval for a previous change set forward to later modifications. Approval may cover both commit and push when the user explicitly authorizes both for the reviewed change set.
 - Commit messages are short and imperative, commonly `add ...`, `update ...`, or `docs: ...`.
 - PRs should include a clear description of the change and link related issues if any.
 - For content updates, mention affected document paths and provide before/after context.

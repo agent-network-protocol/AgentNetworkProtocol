@@ -228,7 +228,7 @@ links, and interfaces.
 
 ## Copyright Notice
 
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 
 This file is released under the [Apache License 2.0](../LICENSE). You are free
 to use and modify it under the terms of that license, but you must retain this

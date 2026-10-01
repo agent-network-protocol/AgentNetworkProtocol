@@ -126,5 +126,5 @@ Contact us:
 - Website: [https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
 - GitHub: [https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

@@ -111,5 +111,5 @@ did:wba's security is founded on modern cryptography, utilizing asymmetric encry
 
 Its fundamental principle remains rooted in the robust security of asymmetric encryption. At the infrastructure level, it relies on existing mature systems like DNS, Public Key Infrastructure, and HTTPS protocols rather than introducing new infrastructure. 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

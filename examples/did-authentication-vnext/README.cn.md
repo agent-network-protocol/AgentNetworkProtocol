@@ -1,10 +1,10 @@
-# ANP-02 与混合 DID 方法草案向量
+# ANP 1.2：ANP-02 与混合 DID 方法向量
 
-状态：离线候选夹具与协议场景设计；不宣称 SDK 或产品已符合规范。
+状态：离线夹具与协议场景设计；不宣称 SDK 或产品已符合规范。
 
 [English](README.md)
 
-这些产物支持 [ANP-02](../../chinese/vnext/02-ANP-基于DID的身份认证协议.md)、WBA/Web 绑定和方法无关的[消息草案集](../../chinese/message/vnext/README.md)。身份均使用保留的示例域名。密钥是确定性派生的公开测试材料，不是运行凭据。没有注册身份，也没有向后端发送请求。
+这些产物支持 [ANP-02](../../chinese/02-ANP-基于DID的身份认证协议.md)、WBA/Web 绑定和方法无关的[Messaging 1.2 规范集](../../chinese/message/README.md)。身份均使用保留的示例域名。密钥是确定性派生的公开测试材料，不是运行凭据。没有注册身份，也没有向后端发送请求。
 
 | 产物 | 内容与证据边界 |
 |---|---|
@@ -12,7 +12,7 @@
 | [byte-vectors.json](byte-vectors.json) | 精确请求组件、payload/JCS 字节、签名基串、Ed25519 签名、E1/Object Proof 哈希与签名，以及 P5 ChaCha20-Poly1305 AAD/密文，附显式篡改输入。 |
 | [scenario-vectors.json](scenario-vectors.json) | 阶段 A/B 的 setup/action/expected-outcome 输入，覆盖认证、WNS、消息/E2EE、扩展、连续性与准入。每个场景都明确标为尚未在 SDK 或产品上执行。 |
 | [manifest.json](manifest.json) | 文件哈希、生成/检查命令与数量。数量表示产物数量，不是 SDK 测试通过数。 |
-| [验证职责](../../chinese/message/vnext/02-身份与发现.md#method-validation) | DID 方法验证与消息 Profile 的身份、密钥用途和设备资格规则。 |
+| [验证职责](../../chinese/message/02-身份与发现.md#method-validation) | DID 方法验证与消息 Profile 的身份、密钥用途和设备资格规则。 |
 
 ## 1. 复现与检查
 
@@ -43,7 +43,7 @@ node scripts/generate-anp02-vectors.mjs --write
 
 本组夹具有意选用 Ed25519、Multikey 和 JWK，以演示相应能力下的互操作；这不新增 ANP-02 的通用最低算法或表示要求。按实现已声明支持的能力选择适用场景。JWT 的 issuer/audience/scope 场景明确选择了示例 Token 策略及错误映射；只有实现采用该策略时才适用，不要求所有 ANP-02 实现使用这些字段或策略。WBA E1 与所选 E2EE Profile 的既有密码学要求仍有效。
 
-认证相关场景已标注 `applicability: illustrative-implementation-policy-not-additional-anp02-conformance`。其中的重放边界、缓存、Resolver、凭据选择、错误映射、摘要及 Token 策略是示例选择，不补充 ANP-02 的规范要求，也不要求现有实现改变行为。存在未被原文规定的具体条件时，应按原 ANP-03 vNext 和实现既有策略解释，不用场景预期结果反推协议。正文原样提取也保留原 JWT 日期字符串示例；本目录 NumericDate 夹具属于选定 JWT 示例，不通过测试向量强制修改现有 Token。
+认证相关场景已标注 `applicability: illustrative-implementation-policy-not-additional-anp02-conformance`。其中的重放边界、缓存、Resolver、凭据选择、错误映射、摘要及 Token 策略是示例选择，不补充 ANP-02 的规范要求，也不要求现有实现改变行为。存在未被原文规定的具体条件时，应按ANP-02 1.2 和实现既有策略解释，不用场景预期结果反推协议。正文原样提取也保留原 JWT 日期字符串示例；本目录 NumericDate 夹具属于选定 JWT 示例，不通过测试向量强制修改现有 Token。
 
 每个场景包含：
 
@@ -58,6 +58,8 @@ node scripts/generate-anp02-vectors.mjs --write
 WNS 场景分别沿用原方案：WBA 保留同域限制、公开精确 Handle 和私密 Provider 确认；Web 保留正向 DID 与 HTTPS Provider 域声明检查，不强制反向端点解引用或弱绑定迁移。示例中的 `legacy-domain-binding-accepted` 只是测试预期标签，不是新增 wire 结果，也不表示精确 Handle 已验证。普通 API 夹具有意省略 Handle、service 和设备 Manifest。完整消息场景覆盖 WBA→WBA、WBA→Web、Web→WBA、Web→Web 的私聊、群聊、P5/P6、普通/加密私聊及群聊附件、普通/加密 Mention，并独立改变服务身份与 caller anchor 的方法。
 
 SDK/产品 runner 应在其自有证据中记录真实结果，不把本目录的设计状态改写为运行通过。方法解析、TLS/缓存、并发、持久化、撤销、MLS、对象存储和用户可见行为仍由阶段 A/B 执行。未启用方法负例有意拒绝 WebVH，不代表已有 WebVH 实现。
+
+> 目录保留 `-vnext` 名称以兼容既有路径。引用已指向 1.2 文档；P6 仍为候选，稳定版仍待完成 MLS ExtensionType 注册发布门槛。
 
 ## 版权声明
 

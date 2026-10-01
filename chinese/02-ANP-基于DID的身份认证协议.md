@@ -1,9 +1,10 @@
 # ANP 基于 DID 的身份认证协议
 
-- 文档编号：ANP-02-vNext
-- 状态：草案 / 未发布
+- 文档编号：ANP-02
+- 状态：已发布
+- 版本：1.2
 - 语言：中文
-- 英文镜像：[ANP DID Authentication Protocol](../../vnext/02-anp-did-authentication-protocol-specification.md)
+- 英文镜像：[ANP DID Authentication Protocol](../02-anp-did-authentication-protocol-specification.md)
 
 <a id="scope"></a>
 ## 1. 范围
@@ -517,4 +518,4 @@ WBA 身份材料和请求认证的方法约束由 [ANP-03](03-did-wba方法规�
 ## 版权声明
 
 Copyright (c) 2024 ANP 开源社区
-本文件依据 [Apache License 2.0](../../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
+本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

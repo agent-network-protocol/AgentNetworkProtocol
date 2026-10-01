@@ -221,5 +221,5 @@ If you're interested in agent communication protocols or have similar needs, fee
 Welcome to join our agent communication protocol discussion group, possibly the first dedicated group for discussing agent communication protocols:
 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

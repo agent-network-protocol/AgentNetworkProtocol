@@ -1,9 +1,10 @@
 # ANP DID Authentication Protocol
 
-- Document ID: ANP-02-vNext
-- Status: Draft / not released
+- Document ID: ANP-02
+- Status: Released
+- Version: 1.2
 - Language: English
-- Chinese mirror: [ANP 基于 DID 的身份认证协议](../chinese/vnext/02-ANP-基于DID的身份认证协议.md)
+- Chinese mirror: [ANP 基于 DID 的身份认证协议](chinese/02-ANP-基于DID的身份认证协议.md)
 
 <a id="scope"></a>
 ## 1. Scope
@@ -517,4 +518,4 @@ Other W3C DID Core methods may supply identity and authentication-key material t
 ## Copyright Notice
 
 Copyright (c) 2024 ANP Open Source Community
-This file is released under the [Apache License 2.0](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.
+This file is released under the [Apache License 2.0](LICENSE). You are free to use and modify it, but you must retain this copyright notice.

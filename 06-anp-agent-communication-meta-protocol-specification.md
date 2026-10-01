@@ -3,7 +3,7 @@
 - Document ID: ANP-06
 - Title: ANP Agent Communication Meta-Protocol Specification
 - Status: Draft
-- Version: 2.0-draft
+- Version: 1.2
 - Language: English
 - Applicability: This specification applies to semantic meta-protocol negotiation, interface selection, Profile selection, security-profile selection, schema selection, and negotiation-result reuse between ANP agents.
 
@@ -128,7 +128,7 @@ When Agent Description, DID Document, and runtime capability results conflict, t
 
 ### 3.5 Relationship with DID:WBA and Security Mechanisms
 
-This specification does not redefine DID:WBA. When identity authentication, HTTP Message Signatures, `auth.origin_proof`, access tokens, or service-to-service identity verification are involved, implementations should follow the ANP-03 DID:WBA Method Specification and the security requirements of the relevant messaging Profiles.
+This specification does not redefine DID methods or authentication. Common request authentication, HTTP Message Signatures, and access tokens follow [ANP-02](02-anp-did-authentication-protocol-specification.md); WBA method validation follows [ANP-03](03-did-wba-method-design-specification.md), while other DIDs follow their own methods. `auth.origin_proof` and messaging service-to-service verification follow P1/P2 and the owning Profile's security requirements. Document version 1.2 does not change this specification's draft status or its `anp.meta.negotiation.v1` wire identifier.
 
 The negotiation result of `anp.negotiate` is not an identity credential, authorization credential, access token, Verifiable Credential, or human-authorization result.
 

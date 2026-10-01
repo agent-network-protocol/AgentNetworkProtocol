@@ -304,6 +304,6 @@ AI 智能体不需要图形界面，不受注意力限制，不在乎管理私�
 
 ## 版权声明
 
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 本文件依据 [MIT 许可证](../../../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
 

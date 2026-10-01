@@ -160,5 +160,5 @@ If you're also interested in agent communication protocols or the Agentic Web, f
 
 **Finally**, I've always believed that, if we don't consider scalability, web3 is truly the most suitable Internet form for AI. If you're working on web3+AI, we welcome discussions with you as well. 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang  
+Copyright (c) 2024 ANP Community  
 This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.

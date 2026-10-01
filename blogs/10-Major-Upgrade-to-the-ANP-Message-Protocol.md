@@ -516,5 +516,5 @@ If the previous design solved the problem of “building agent communication,”
 If needed, this material can be further condensed into a 10-minute presentation script.
 
 ## Copyright Notice
-Copyright (c) 2024 GaoWei Chang
+Copyright (c) 2024 ANP Community
 This file is released under the [MIT License](../LICENSE). You are free to use and modify it, but you must retain this copyright notice.

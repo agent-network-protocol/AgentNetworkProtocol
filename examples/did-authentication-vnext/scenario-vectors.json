@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "protocol-design-not-sdk-product-results",
   "source_commit": "b7ba3ff8b628529ec88eef9625b0148fdeb9b994",
-  "scope": "Authentication-related setups/actions/outcomes are illustrative implementation-policy examples, not additional conformance requirements. The extracted original ANP-03 vNext text is authoritative. Static validation does not execute scenarios.",
+  "scope": "Authentication-related setups/actions/outcomes are illustrative implementation-policy examples, not additional conformance requirements. The ANP-02 1.2 authentication text is authoritative. Static validation does not execute scenarios.",
   "fixture_capabilities": {
     "request_signature_algorithm": "Ed25519",
     "request_key_formats": [
@@ -35,7 +35,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -57,9 +57,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -67,7 +67,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-JWK",
@@ -88,9 +88,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -98,7 +98,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -120,9 +120,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -130,7 +130,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -152,9 +152,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -162,7 +162,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -184,9 +184,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -194,7 +194,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -217,9 +217,9 @@
         "mutation_value": "did:wba:different.example:other"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -227,7 +227,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -249,9 +249,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -259,7 +259,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -281,9 +281,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -291,7 +291,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -313,9 +313,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -323,7 +323,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -345,9 +345,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -355,7 +355,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -377,9 +377,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -387,7 +387,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -409,9 +409,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -419,7 +419,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -441,9 +441,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -451,7 +451,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -473,9 +473,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -483,7 +483,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -505,9 +505,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -515,7 +515,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -537,9 +537,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -547,7 +547,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -569,9 +569,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -579,7 +579,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -601,9 +601,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -611,7 +611,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -633,9 +633,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -643,7 +643,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -665,9 +665,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -675,7 +675,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-JWK",
@@ -691,8 +691,8 @@
         "outcome": "authenticated"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding"
       ]
     },
     {
@@ -700,7 +700,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-NONCELESS",
@@ -718,7 +718,7 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -726,7 +726,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "JSON-wba-POST",
@@ -744,7 +744,7 @@
         "outer_auth_in_payload_digest": false
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -752,7 +752,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "JSON-wba-POST",
@@ -769,7 +769,7 @@
         "public_error": "invalid_content_digest"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -777,7 +777,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "JSON-wba-POST",
@@ -793,7 +793,7 @@
         "reason": "no-authenticated-component-source"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -801,7 +801,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -816,7 +816,7 @@
         "outcome": "accepted-without-token"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -824,7 +824,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "issuer_fixture": "service-web",
@@ -869,7 +869,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -877,7 +877,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "issuer_fixture": "service-web",
@@ -922,7 +922,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -930,7 +930,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "issuer_fixture": "service-web",
@@ -975,7 +975,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -983,7 +983,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "issuer_fixture": "service-web",
@@ -1028,7 +1028,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -1036,7 +1036,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1058,9 +1058,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1068,7 +1068,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1090,9 +1090,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1100,7 +1100,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1122,9 +1122,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1132,7 +1132,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1154,9 +1154,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1164,7 +1164,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1186,9 +1186,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1196,7 +1196,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1219,9 +1219,9 @@
         "mutation_value": "did:web:different.example:other"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1229,7 +1229,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1251,9 +1251,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1261,7 +1261,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1283,9 +1283,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1293,7 +1293,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1315,9 +1315,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1325,7 +1325,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1347,9 +1347,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1357,7 +1357,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1379,9 +1379,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1389,7 +1389,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1411,9 +1411,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1421,7 +1421,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1443,9 +1443,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1453,7 +1453,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1475,9 +1475,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1485,7 +1485,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1507,9 +1507,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1517,7 +1517,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1539,9 +1539,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1549,7 +1549,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1571,9 +1571,9 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1581,7 +1581,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1603,9 +1603,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1613,7 +1613,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1635,9 +1635,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1645,7 +1645,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1667,9 +1667,9 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1677,7 +1677,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-JWK",
@@ -1693,8 +1693,8 @@
         "outcome": "authenticated"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding"
       ]
     },
     {
@@ -1702,7 +1702,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-NONCELESS",
@@ -1720,7 +1720,7 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -1728,7 +1728,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "JSON-web-POST",
@@ -1746,7 +1746,7 @@
         "outer_auth_in_payload_digest": false
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -1754,7 +1754,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "JSON-web-POST",
@@ -1771,7 +1771,7 @@
         "public_error": "invalid_content_digest"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -1779,7 +1779,7 @@
       "category": "json-carriage",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "JSON-web-POST",
@@ -1795,7 +1795,7 @@
         "reason": "no-authenticated-component-source"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#json-carriage"
+        "../../02-anp-did-authentication-protocol-specification.md#json-carriage"
       ]
     },
     {
@@ -1803,7 +1803,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -1818,7 +1818,7 @@
         "outcome": "accepted-without-token"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -1826,7 +1826,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "issuer_fixture": "service-web",
@@ -1871,7 +1871,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -1879,7 +1879,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "issuer_fixture": "service-web",
@@ -1924,7 +1924,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -1932,7 +1932,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "issuer_fixture": "service-web",
@@ -1977,7 +1977,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -1985,7 +1985,7 @@
       "category": "token",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "issuer_fixture": "service-web",
@@ -2030,7 +2030,7 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#access-tokens"
+        "../../02-anp-did-authentication-protocol-specification.md#access-tokens"
       ]
     },
     {
@@ -2038,7 +2038,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "did": "did:example:alice",
         "enabled_methods": [
@@ -2056,7 +2056,7 @@
         "public_error": "invalid_did"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#method-template"
+        "../../02-anp-did-authentication-protocol-specification.md#method-template"
       ]
     },
     {
@@ -2064,7 +2064,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST"
@@ -2080,7 +2080,7 @@
         "public_error": "invalid_did"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#wba-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#wba-binding"
       ]
     },
     {
@@ -2088,7 +2088,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "DOCUMENT-api-wba"
@@ -2104,7 +2104,7 @@
         "public_error": "invalid_did"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#wba-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#wba-binding"
       ]
     },
     {
@@ -2112,7 +2112,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "alternative_key": "#assertion-only"
@@ -2127,7 +2127,7 @@
         "reason": "binding-thumbprint-mismatch"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#wba-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#wba-binding"
       ]
     },
     {
@@ -2135,7 +2135,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST"
@@ -2150,7 +2150,7 @@
         "wba_document_proof_required": false
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#web-binding"
+        "../../02-anp-did-authentication-protocol-specification.md#web-binding"
       ]
     },
     {
@@ -2158,7 +2158,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -2177,8 +2177,8 @@
         "invalidate_key_cache": true
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#web-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#web-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -2224,7 +2224,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -2270,7 +2270,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -2316,7 +2316,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -2362,7 +2362,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -2408,7 +2408,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -2454,7 +2454,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -2500,8 +2500,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -2547,8 +2547,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -2594,8 +2594,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -2641,8 +2641,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -2742,8 +2742,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/09-message-mentions.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -2843,8 +2843,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/09-message-mentions.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -2874,8 +2874,8 @@
         "business_sender_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/08-federation-and-cross-domain.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -2899,7 +2899,7 @@
         "outcome": "accept-valid-p5-ciphertext"
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -2945,7 +2945,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -2991,7 +2991,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -3037,7 +3037,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3083,7 +3083,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3129,7 +3129,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3175,7 +3175,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3221,8 +3221,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -3268,8 +3268,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -3315,8 +3315,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3362,8 +3362,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3463,8 +3463,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/09-message-mentions.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -3564,8 +3564,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/09-message-mentions.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3595,8 +3595,8 @@
         "business_sender_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/08-federation-and-cross-domain.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -3620,7 +3620,7 @@
         "outcome": "accept-valid-p5-ciphertext"
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3666,7 +3666,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -3712,7 +3712,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -3758,7 +3758,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3804,7 +3804,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -3850,7 +3850,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3896,7 +3896,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -3942,8 +3942,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -3989,8 +3989,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -4036,8 +4036,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -4083,8 +4083,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -4184,8 +4184,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/09-message-mentions.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -4285,8 +4285,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/09-message-mentions.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -4316,8 +4316,8 @@
         "business_sender_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/08-federation-and-cross-domain.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -4341,7 +4341,7 @@
         "outcome": "accept-valid-p5-ciphertext"
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -4387,7 +4387,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -4433,7 +4433,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -4479,7 +4479,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -4525,7 +4525,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -4571,7 +4571,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -4617,7 +4617,7 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -4663,8 +4663,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -4710,8 +4710,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -4757,8 +4757,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -4804,8 +4804,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -4905,8 +4905,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/09-message-mentions.md",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -5006,8 +5006,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/09-message-mentions.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -5037,8 +5037,8 @@
         "business_sender_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/08-federation-and-cross-domain.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -5062,7 +5062,7 @@
         "outcome": "accept-valid-p5-ciphertext"
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -5088,8 +5088,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5115,8 +5115,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5142,8 +5142,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5169,8 +5169,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5195,8 +5195,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5221,8 +5221,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5247,8 +5247,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5273,8 +5273,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5299,8 +5299,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5325,8 +5325,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5351,8 +5351,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5377,8 +5377,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5407,9 +5407,9 @@
         "other_current_device_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/02-identity-and-discovery.md",
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -5433,8 +5433,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -5458,8 +5458,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -5481,7 +5481,7 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -5504,7 +5504,7 @@
         "no_membership_created": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -5512,7 +5512,7 @@
       "category": "capability",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba"
       },
@@ -5529,8 +5529,8 @@
         "no_endpoint_inferred_from_domain": true
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md",
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../02-anp-did-authentication-protocol-specification.md",
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -5552,8 +5552,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/02-identity-and-discovery.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -5561,7 +5561,7 @@
       "category": "admission",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "account_id": "victim-account",
@@ -5579,8 +5579,8 @@
         "outcome": "authentication-does-not-grant-local-account-or-device-permissions"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#method-template",
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../02-anp-did-authentication-protocol-specification.md#method-template",
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -5602,7 +5602,7 @@
         "no_key_disclosure": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md"
+        "../../message/07-attachments-and-object-transfer.md"
       ]
     },
     {
@@ -5628,9 +5628,9 @@
         "no_unprotected_fallback": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -5671,7 +5671,7 @@
         "outcome": "reject-invalid-inner-payload"
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md"
+        "../../message/09-message-mentions.md"
       ]
     },
     {
@@ -5693,9 +5693,9 @@
         "unconditional_acceptance": false
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/09-message-mentions.md"
+        "../../message/01-core-binding.md",
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/09-message-mentions.md"
       ]
     },
     {
@@ -5721,8 +5721,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5748,8 +5748,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5775,8 +5775,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5802,8 +5802,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5828,8 +5828,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5854,8 +5854,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5880,8 +5880,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5906,8 +5906,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5932,8 +5932,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5958,8 +5958,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -5984,8 +5984,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -6010,8 +6010,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/02-identity-and-discovery.md#method-validation"
       ]
     },
     {
@@ -6040,9 +6040,9 @@
         "other_current_device_unchanged": true
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/02-identity-and-discovery.md",
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -6066,8 +6066,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -6091,8 +6091,8 @@
         "no_state_commit": true
       },
       "normative_refs": [
-        "../../message/vnext/06-group-end-to-end-encryption.md",
-        "../../message/vnext/01-core-binding.md"
+        "../../message/06-group-end-to-end-encryption.md",
+        "../../message/01-core-binding.md"
       ]
     },
     {
@@ -6114,7 +6114,7 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -6137,7 +6137,7 @@
         "no_membership_created": true
       },
       "normative_refs": [
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -6145,7 +6145,7 @@
       "category": "capability",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web"
       },
@@ -6162,8 +6162,8 @@
         "no_endpoint_inferred_from_domain": true
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md",
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../02-anp-did-authentication-protocol-specification.md",
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -6185,8 +6185,8 @@
         "no_silent_downgrade": true
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md"
+        "../../message/02-identity-and-discovery.md",
+        "../../message/05-direct-end-to-end-encryption.md"
       ]
     },
     {
@@ -6194,7 +6194,7 @@
       "category": "admission",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "account_id": "victim-account",
@@ -6212,8 +6212,8 @@
         "outcome": "authentication-does-not-grant-local-account-or-device-permissions"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#method-template",
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../02-anp-did-authentication-protocol-specification.md#method-template",
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -6235,7 +6235,7 @@
         "no_key_disclosure": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md"
+        "../../message/07-attachments-and-object-transfer.md"
       ]
     },
     {
@@ -6261,9 +6261,9 @@
         "no_unprotected_fallback": true
       },
       "normative_refs": [
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/05-direct-end-to-end-encryption.md",
-        "../../message/vnext/06-group-end-to-end-encryption.md"
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/05-direct-end-to-end-encryption.md",
+        "../../message/06-group-end-to-end-encryption.md"
       ]
     },
     {
@@ -6304,7 +6304,7 @@
         "outcome": "reject-invalid-inner-payload"
       },
       "normative_refs": [
-        "../../message/vnext/09-message-mentions.md"
+        "../../message/09-message-mentions.md"
       ]
     },
     {
@@ -6326,9 +6326,9 @@
         "unconditional_acceptance": false
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/07-attachments-and-object-transfer.md",
-        "../../message/vnext/09-message-mentions.md"
+        "../../message/01-core-binding.md",
+        "../../message/07-attachments-and-object-transfer.md",
+        "../../message/09-message-mentions.md"
       ]
     },
     {
@@ -6365,7 +6365,7 @@
         "outcome": "exact-handle"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6402,7 +6402,7 @@
         "outcome": "reject-hostname-mismatch"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md"
+        "../../04-anp-did-wba-name-space-specification.md"
       ]
     },
     {
@@ -6439,7 +6439,7 @@
         "exact_handle_authorized": false
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6476,7 +6476,7 @@
         "exact_handle_authorized": false
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6515,7 +6515,7 @@
         "outcome": "unverified-or-rejected"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6554,7 +6554,7 @@
         "outcome": "unverified-or-rejected"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6593,7 +6593,7 @@
         "outcome": "unverified-or-rejected"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6632,7 +6632,7 @@
         "outcome": "unverified-or-rejected"
       },
       "normative_refs": [
-        "../../vnext/04-anp-did-wba-name-space-specification.md#binding-verification"
+        "../../04-anp-did-wba-name-space-specification.md#binding-verification"
       ]
     },
     {
@@ -6666,7 +6666,7 @@
         "reverse_fetch_required": false
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6700,7 +6700,7 @@
         "reverse_fetch_required": false
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6734,7 +6734,7 @@
         "reverse_fetch_required": false
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6768,7 +6768,7 @@
         "reverse_fetch_required": false
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6801,7 +6801,7 @@
         "outcome": "reject-legacy-domain-binding"
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6834,7 +6834,7 @@
         "outcome": "reject-legacy-domain-binding"
       },
       "normative_refs": [
-        "../../vnext/appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
+        "../../appendix-b-compatibility-with-native-did-web.md#legacy-web-handle"
       ]
     },
     {
@@ -6856,7 +6856,7 @@
         "outcome": "no-automatic-group-role-attachment-grant-or-e2ee-inheritance"
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -6864,7 +6864,7 @@
       "category": "continuity",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "alice-wba",
         "successor_fixture": "bob-wba"
@@ -6879,8 +6879,8 @@
         "verified_edge_cache_unchanged": true
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#wba-binding",
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../02-anp-did-authentication-protocol-specification.md#wba-binding",
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -6900,7 +6900,7 @@
         "automatic_e2ee_state_copy": false
       },
       "normative_refs": [
-        "../../message/vnext/02-identity-and-discovery.md"
+        "../../message/02-identity-and-discovery.md"
       ]
     },
     {
@@ -6908,7 +6908,7 @@
       "category": "future-method",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "did": "did:webvh:example-scid:identity.example:alice",
         "enabled_methods": [
@@ -6926,7 +6926,7 @@
         "no_implicit_web_fallback": true
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#webvh-design"
+        "../../02-anp-did-authentication-protocol-specification.md#webvh-design"
       ]
     },
     {
@@ -6934,7 +6934,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-NONCELESS",
@@ -6957,7 +6957,7 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -6965,7 +6965,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -6986,7 +6986,7 @@
         "outcome": "invalid-request-does-not-consume-authenticated-challenge-valid-request-accepted-once"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -6994,7 +6994,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7012,8 +7012,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7021,7 +7021,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7038,8 +7038,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7047,7 +7047,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7065,8 +7065,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7074,7 +7074,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7091,8 +7091,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7100,7 +7100,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7117,8 +7117,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7126,7 +7126,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST"
@@ -7143,7 +7143,7 @@
         "outcome": "reject-ambiguous-key-no-first-or-last-entry-fallback"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input"
       ]
     },
     {
@@ -7151,7 +7151,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-NONCELESS",
@@ -7174,7 +7174,7 @@
         "side_effect_count": 1
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -7182,7 +7182,7 @@
       "category": "authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7203,7 +7203,7 @@
         "outcome": "invalid-request-does-not-consume-authenticated-challenge-valid-request-accepted-once"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#challenge-errors"
+        "../../02-anp-did-authentication-protocol-specification.md#challenge-errors"
       ]
     },
     {
@@ -7211,7 +7211,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7229,8 +7229,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7238,7 +7238,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7255,8 +7255,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7264,7 +7264,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7282,8 +7282,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7291,7 +7291,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7308,8 +7308,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7317,7 +7317,7 @@
       "category": "resolution-security",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7334,8 +7334,8 @@
         "authenticated_side_effects": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#security-privacy"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input",
+        "../../02-anp-did-authentication-protocol-specification.md#security-privacy"
       ]
     },
     {
@@ -7343,7 +7343,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST"
@@ -7360,7 +7360,7 @@
         "outcome": "reject-ambiguous-key-no-first-or-last-entry-fallback"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input"
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input"
       ]
     },
     {
@@ -7382,8 +7382,8 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/01-core-binding.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -7391,7 +7391,7 @@
       "category": "message-authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "byte_vector": "ORIGIN-wba-wba",
         "actual_http_method": "POST",
@@ -7406,9 +7406,9 @@
         "outcome": "reject-cross-context-signature"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../message/01-core-binding.md",
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -7430,8 +7430,8 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/01-core-binding.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -7439,7 +7439,7 @@
       "category": "message-authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "byte_vector": "ORIGIN-wba-web",
         "actual_http_method": "POST",
@@ -7454,9 +7454,9 @@
         "outcome": "reject-cross-context-signature"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../message/01-core-binding.md",
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -7478,8 +7478,8 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/01-core-binding.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -7487,7 +7487,7 @@
       "category": "message-authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "byte_vector": "ORIGIN-web-wba",
         "actual_http_method": "POST",
@@ -7502,9 +7502,9 @@
         "outcome": "reject-cross-context-signature"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../message/01-core-binding.md",
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -7526,8 +7526,8 @@
         "public_error": "anp.unauthorized"
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/03-direct-messaging-base-semantics.md"
+        "../../message/01-core-binding.md",
+        "../../message/03-direct-messaging-base-semantics.md"
       ]
     },
     {
@@ -7535,7 +7535,7 @@
       "category": "message-authentication",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "byte_vector": "ORIGIN-web-web",
         "actual_http_method": "POST",
@@ -7550,9 +7550,9 @@
         "outcome": "reject-cross-context-signature"
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#http-binding",
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/08-federation-and-cross-domain.md"
+        "../../02-anp-did-authentication-protocol-specification.md#http-binding",
+        "../../message/01-core-binding.md",
+        "../../message/08-federation-and-cross-domain.md"
       ]
     },
     {
@@ -7577,9 +7577,9 @@
         "group_authentication_relationship_required": false
       },
       "normative_refs": [
-        "../../message/vnext/01-core-binding.md",
-        "../../message/vnext/02-identity-and-discovery.md#method-validation",
-        "../../message/vnext/04-group-messaging-base-semantics.md"
+        "../../message/01-core-binding.md",
+        "../../message/02-identity-and-discovery.md#method-validation",
+        "../../message/04-group-messaging-base-semantics.md"
       ]
     },
     {
@@ -7587,7 +7587,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-wba",
         "byte_vector": "HTTP-wba-POST",
@@ -7607,8 +7607,8 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#wba-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input"
+        "../../02-anp-did-authentication-protocol-specification.md#wba-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input"
       ]
     },
     {
@@ -7616,7 +7616,7 @@
       "category": "method-evidence",
       "execution_status": "design-only-not-run-against-sdk-or-product",
       "applicability": "illustrative-implementation-policy-not-additional-anp02-conformance",
-      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The verbatim ANP-03 vNext authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
+      "policy_note": "Expected results illustrate the selected fixture policy, including error mapping and boundary handling. The ANP-02 1.2 authentication text remains authoritative; these scenarios do not mandate new replay, cache, resolver, credential-selection, algorithm, or token behavior.",
       "input": {
         "identity_fixture": "api-web",
         "byte_vector": "HTTP-web-POST",
@@ -7637,8 +7637,8 @@
         "side_effect_count": 0
       },
       "normative_refs": [
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#web-binding",
-        "../../vnext/02-anp-did-authentication-protocol-specification.md#identity-input"
+        "../../02-anp-did-authentication-protocol-specification.md#web-binding",
+        "../../02-anp-did-authentication-protocol-specification.md#identity-input"
       ]
     }
   ]

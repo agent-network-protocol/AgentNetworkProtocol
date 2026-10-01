@@ -17,7 +17,7 @@ In the OAuth Profile, an Agent uses its own DID-backed key to authenticate as an
 
 The OAuth Profile's normative baseline is **OAuth 2.0 plus published extensions**, including RFC 6749 and RFC 9700. OAuth 2.1 draft-16 and JWT client-authentication update draft-11 are informative design references, not published RFC dependencies. The VC Profile's normative baseline is the W3C VC Data Model 2.0, VC Data Integrity 1.0 with its EdDSA cryptosuites, and Bitstring Status List 1.0. Capitalized MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY use BCP 14 meanings. The restrictions below are this Profile's rules, not amendments to the referenced specifications.
 
-**ANP-05 v1 defines two independent authorization paths: DID-backed OAuth for resource-side access authorization, and holder-bound VC presentation for portable delegation, role and qualification claims. V1 does not define conversion from VC/VP to OAuth access tokens.**
+**ANP-05 v1 defines two independent authorization paths: DID-backed OAuth for resource-side access authorization, and holder-bound VC presentation for portable delegation and organization-role credentials. V1 does not define conversion from VC/VP to OAuth access tokens. Standalone qualification or attribute credential profiles are not defined by this version.**
 
 Document structure: Section 1 states the authorization problem and roadmap; Section 2 covers the relationship to ANP-02 and when to use OAuth or VC; Sections 3–10 define the OAuth Profile; Section 11 defines the VC Profile; Sections 12–14 are the shared error-handling, security and conformance requirements.
 
@@ -29,7 +29,7 @@ The central question is not only “which Agent holds this key?” but **“who 
 | Requirement | Problem that must be solved | v1 boundary |
 | --- | --- | --- |
 | Human-to-Agent delegation | Record the authorizing user, intended Agent, resource, permitted actions, duration, and withdrawal; a natural-language task is not itself a resource grant. | OAuth: authorization code with user consent or valid existing authorization; distinct user and client subjects, scopes, expiry and revocation. VC: a user or organization issues a single-level delegation credential (Section 11) as a portable mandate: any verifier can check its signatures independently, but accepting it still requires a fresh status check; the verifier still decides authority independently. |
-| Organization authorizing an Agent to act for it | A company appoints an Agent as its HR Agent or purchasing Agent to deal on the company's behalf with recruiting platforms, suppliers or peer Agents not known in advance; the counterparty must confirm that this Agent really represents the company, what it may do, and its limits. | VC: the organization issues a role credential (Section 11.2) listing functions and constraints by business action rather than by resource address; the counterparty confirms the issuer is that organization, maps the actions to its own operations, and decides whether to accept. No cross-counterparty cumulative budget and no authority over third parties' personal data. |
+| Organization authorizing an Agent to act for it | A company appoints an Agent as its HR Agent or purchasing Agent to deal on the company's behalf with recruiting platforms, suppliers or peer Agents not known in advance; the counterparty must confirm that this Agent really represents the company, what it may do, and its limits. | VC: the organization issues a role credential (Section 11.2) listing functions and constraints by business action rather than by resource address; the counterparty confirms the issuer is that organization, maps the actions to its own operations, and decides whether to accept. No cross-counterparty cumulative budget and no automatic authority over third parties' personal data. |
 | One Agent serving a user across multiple services | Each service controls its own resources, account identity and policy; permissions and consent at one service are not accepted everywhere. | OAuth: repeat the flow with the same Agent DID for each resource and accepted AS; keep independent grants and target-limited tokens. VC: one credential may list resources at several services; each verifier uses only its own entries and independently confirms the issuer's authority over them. No single global consent or cross-AS account equivalence. |
 | Multi-level redelegation | A delegates to B and B to C without expanding authority or losing user/actor attribution; revocation and shared limits must propagate. | Not defined. The VC Profile accepts only credentials issued to the Agent directly by a principal the verifier independently recognizes; issuing authority cannot be derived from a delegation credential, role credential or access token the issuer itself holds, so a credential re-issued by an Agent holding someone else's delegation is rejected. No token, credential or private-key forwarding as implicit delegation. |
 | Per-operation approval for high-risk actions | Bind a person's approval to the exact payee, amount/currency, data disclosure or deletion target, expiry and one-time operation identifier. | No generic transaction-approval credential. A delegation credential expresses a scope granted in advance and is not a per-operation approval either. A service requiring separate approval must verify its own explicit operation approval or block the action. Login, a broad scope, a DID signature, or DPoP alone is not that approval. |
@@ -47,7 +47,7 @@ A basic consent record and a VC delegation credential both already delegate limi
 
 **Use VC to carry authority that originates outside the resource side.** The basis for much agent authorization is not held by the resource side: a company appoints an Agent as its purchasing representative, a user gives an Agent a mandate it can show to several merchants, or an institution attests which organization an Agent belongs to or what qualification it has. An OAuth consent record lives inside each AS; it cannot be carried to another service or verified by a peer that has no AS. W3C VC 2.0 lets the authorizing party sign a statement under its own DID; the Agent holds it and presents it to any verifier that trusts that issuer. Verification only requires resolving the issuer and holder DIDs and checking a status list, with no prior integration between verifier and issuer. ANP already uses Data Integrity eddsa-jcs-2022 for did:wba document proofs and the messaging binding; the VC Profile reuses that proof mechanism rather than adding another signature stack. VC has costs too: revocation depends on a status list and has cache latency; each verifier must maintain its own policy on which issuers it trusts for which claims; and once presented, a credential's contents are visible to the verifier.
 
-**VC and OAuth have separate roles and do not replace each other.** In v1 they are independent authorization paths. OAuth is used when authorization is managed by the resource side and represented through an OAuth grant and access token. VC is used when authority or qualification originates outside the resource side and needs to be carried by the Agent and independently verified by another party. An OAuth authorization decision may also use roles, qualifications, organization identity or other verified information. A future extension may define how externally issued credentials can be used as input to an OAuth authorization decision; v1 does not define VC-to-access-token exchange. Section 2.2 explains when to choose which. Standards proposed for later phases are evaluation targets, not current conformance requirements.
+**VC and OAuth have separate roles and do not replace each other.** In v1 they are independent authorization paths. OAuth is used when authorization is managed by the resource side and represented through an OAuth grant and access token. The v1 VC Profile carries external delegation or organization-role credentials for independent verification; qualification or attribute credentials can only be supplementary evidence explicitly requested by the verifier under separately agreed rules. An OAuth authorization decision may also use roles, qualifications, organization identity or other verified information. A future extension may define how externally issued credentials can be used as input to an OAuth authorization decision; v1 does not define VC-to-access-token exchange. Section 2.2 explains when to choose which. Standards proposed for later phases are evaluation targets, not current conformance requirements.
 
 <a id="v1-scope"></a>
 ### 1.3 What v1 delivers
@@ -91,7 +91,7 @@ An ANP-02 authentication-cache token is not automatically an ANP-05 OAuth author
 | --- | --- | --- |
 | Authenticate a direct API request or communication peer; receiver applies its existing local policy | ANP-02 | Its optional token reuses the receiver's authenticated context under that API's policy; it does not establish a standardized user-delegation grant. |
 | Obtain restricted access on behalf of a user, or use an AS-managed client grant, resource audience, consent, expiry and revocation | ANP-05 OAuth Profile | The AS issues an OAuth access token for a specific grant and resource. |
-| Present authority that originates outside the resource side, such as an organizational appointment, a user mandate or a qualification, for the verifier to validate directly and decide whether to accept | ANP-05 VC Profile | A statement signed by the issuer; the verifier decides under its own policy whether to accept it, and the credential itself is not an access token. |
+| Present an external delegation or organizational appointment, with separately agreed qualification evidence when requested, for direct verification and acceptance by the verifier | ANP-05 VC Profile | A statement signed by the issuer; the verifier decides under its own policy whether to accept it, and the credential itself is not an access token. |
 
 A service may offer several mechanisms on clearly separated routes or declared policies. The presence of a JWT, signed JSON or the word “token” does not make them interchangeable. ANP-05 does not require an ANP-02 token first, and ANP-02 clients are not required to adopt an AS for every ordinary authenticated message. An RS MUST NOT accept a raw VC or VP as a Bearer access credential.
 
@@ -100,7 +100,7 @@ A service may offer several mechanisms on clearly separated routes or declared p
 
 The two answer different questions. **OAuth answers “does the resource side allow this client to perform this operation on this resource now?”**: an AS trusted by the resource side evaluates local policy, user authorization, roles, qualifications, organization identity or other verified information, then issues a target-limited access token. **VC answers “which issuer made what verifiable statement about this Agent?”**: the Agent can carry an external issuer's statement to different third parties, and each verifier decides whether to trust the issuer and allow the operation. Roles and qualifications can also inform OAuth decisions; the need for a portable, independently verifiable external statement is what motivates VC.
 
-| Aspect | OAuth access token | VC delegation or attribute credential |
+| Aspect | OAuth access token | VC delegation or organization-role credential |
 | --- | --- | --- |
 | Issuer | An AS trusted by the resource side | The source of the authority: a user, organization or accrediting body |
 | Authorization decision | Made by the AS before issuing the token; enforced by the RS | Made by each verifier when the credential is directly presented |
@@ -123,7 +123,7 @@ The two answer different questions. **OAuth answers “does the resource side al
 - An organization appoints an Agent to a functional role. For example, the company's HR Agent publishes positions on recruiting platforms and schedules interviews with candidates' Agents on the company's behalf, and its purchasing Agent requests quotes from and places orders with new suppliers. Counterparties often do not know the Agent beforehand, and the company cannot list every counterparty's address in advance; a role credential states by business action “what this Agent does for our company and up to what limit”, see Section 11.9.
 - The same authority must be shown to several services that are not integrated with each other. For example, a user issues one delegation credential allowing an Agent to compare and book several hotels; each hotel verifies it independently and the user does not sign in to each one.
 - The counterparty exposes a VC-capable interface, including peer-to-peer collaboration independently of whether an OAuth AS exists. In that flow, the peer needs to confirm which user or organization an Agent represents and what it may do.
-- What must be proven is an attribute rather than an access permission, such as organization membership, an industry qualification, an identity-verification result, or who operates the Agent. This version defines only two authorization types, the delegation and role credentials; attribute credential types are agreed between issuer and verifier and may reuse the Section 11 proof and status checks, but subject binding, issuer trust and authorization meaning must be agreed per type, and an attribute credential grants no access by itself.
+- Supplement an authorization credential with organization membership, an industry qualification, an identity-verification result or Agent-operator evidence explicitly requested by the verifier. This version defines only delegation and organization-role authorization credentials; supplemental attribute types, subject binding, issuer trust and acceptance rules require separate agreement, and the evidence is presented with the authorization credential under Section 11.3. This version defines no complete standalone qualification or attribute presentation binding, and an attribute credential grants no access by itself.
 
 **V1 boundary.** OAuth and VC are independent authorization entry points. A VC-capable verifier directly checks the presentation and requested operation; an OAuth-only interface still requires authorization through its supported OAuth flow and MUST NOT be bypassed through VC direct presentation. VC–OAuth composition is only a future extension direction in Section 16.
 
@@ -133,7 +133,7 @@ flowchart TD
   Q1 -->|"Yes"| P02["ANP-02 request authentication<br/>receiver applies local policy"]
   Q1 -->|"No, authorization is needed"| Q2{"Where is authorization controlled?"}
   Q2 -->|"Resource-side policy, user authorization or verified information"| OA["OAuth Profile<br/>authorization code or client credentials"]
-  Q2 -->|"A portable verifiable statement from an external issuer is needed"| DP["VC Profile<br/>direct presentation, Section 11.6"]
+  Q2 -->|"A portable delegation or role credential is needed"| DP["VC Profile<br/>delegation or role direct presentation"]
 ```
 
 ### 2.3 Trust boundaries (informative)
@@ -248,6 +248,38 @@ For authorization code, discovery and callback approval occur at `/authorize` be
 For client credentials, discovery, admission and proof can complete in the first token request. Access still requires AS policy authorizing this client for that resource; a self-published `scope` or a valid DID signature is not enough. Refresh never creates a new grant: an existing valid refresh-token/client/issuer binding remains required.
 
 Thus **no per-AS preregistration** means no mandatory advance manual enrollment or registration API call. It does not mean no admission decision, no local state, no consent, or unconditional acceptance of every DID. Pre-registered clients MAY use approved out-of-band metadata without publishing a service, but the AS MUST preserve that source choice and MUST NOT silently replace it with newly discovered metadata.
+
+**First-contact admission overview (informative).**
+
+```mermaid
+flowchart TD
+  Request["Unknown client DID<br/>self_published enabled"]
+  Precheck["1. Check request syntax,<br/>method, flow and deny records"]
+  Discover["2. Validate DID and metadata<br/>digest, client_id and Profile"]
+  Admission{"3. Admission policy accepts?"}
+  Candidate["4. Save candidate transaction<br/>not yet authenticated"]
+  Proof["5. At /token: revalidate and verify<br/>fresh assertion, then consume jti"]
+  Grant["Approve binding and check<br/>grant, consent, resource and scope"]
+  Issue["Issue target-limited access token"]
+  Reject["Reject without a token"]
+  ConsumedReject["Reject the grant<br/>the assertion remains consumed"]
+  Request --> Precheck
+  Precheck -->|"Pass"| Discover
+  Precheck -->|"Fail"| Reject
+  Discover -->|"Pass"| Admission
+  Discover -->|"Fail"| Reject
+  Admission -->|"Accept"| Candidate
+  Admission -->|"Deny"| Reject
+  Candidate --> Proof
+  Proof -->|"Pass"| Grant
+  Proof -->|"Fail"| Reject
+  Grant -->|"Approve"| Issue
+  Grant -->|"Deny"| ConsumedReject
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class Reject,ConsumedReject reject
+  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
+  class Issue allow
+```
 
 ### 4.4 Client boundaries
 
@@ -397,6 +429,33 @@ A successfully verified assertion MUST be considered consumed before grant proce
 
 Finally the AS MUST independently validate the grant, resource owner where applicable, allowed resource, requested permissions, and current policy. A valid client assertion is insufficient to issue a token. It does not sign the OAuth form body; HTTPS protects transport, and OAuth binds the grant and validates parameters. It is not a transaction-signing or human-consent proof.
 
+**Client assertion verification and replay handling (informative).**
+
+```mermaid
+flowchart TD
+  Request["Incoming token request"]
+  Checks["Parse and select client DID<br/>check Profile, method and key<br/>verify JWT signature, claims and time"]
+  BeforeReject["Reject authentication<br/>do not reserve jti"]
+  Reserve["Atomically reserve<br/>(AS issuer, client_id, jti)"]
+  ReplayReject["Reject replay or replay-store failure<br/>no token"]
+  Consumed["Assertion consumed<br/>retain record until exp + skew"]
+  Grant["Check independent grant and owner<br/>resource, permissions and policy"]
+  GrantReject["Reject grant<br/>retry needs a fresh assertion and jti"]
+  Issue["Issue access token for the approved grant"]
+  Request --> Checks
+  Checks -->|"Fail"| BeforeReject
+  Checks -->|"Pass"| Reserve
+  Reserve -->|"No"| ReplayReject
+  Reserve -->|"Yes"| Consumed
+  Consumed --> Grant
+  Grant -->|"Deny"| GrantReject
+  Grant -->|"Approve"| Issue
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class BeforeReject,ReplayReject,GrantReject reject
+  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
+  class Issue allow
+```
+
 <a id="authorization-flows"></a>
 ## 7. Authorization flows
 
@@ -489,6 +548,24 @@ The RS need not resolve a DID merely to accept an AS-issued token if its existin
 An Agent acting as both RS and downstream client MUST keep the two authorizations separate. A token issued for Agent A MUST NOT be forwarded to service B as B's resource credential. A obtains a separate B-targeted token under B's accepted AS and grant rules. Its own client-only permissions MUST NOT substitute for missing user-delegated permissions, and possession of an A-targeted user token alone is not authority to mint a B token.
 
 This version defines no token-exchange or multi-hop delegation flow. A client lacking the required independent authorization MUST obtain it through a supported authorization flow or refuse the affected operation.
+
+**Separate inbound and downstream resource authorization (informative).**
+
+```mermaid
+flowchart LR
+  Caller["Upstream caller"]
+  Agent["Agent A<br/>inbound RS and downstream client"]
+  Server["Authorization server accepted by B<br/>independent B grant and policy"]
+  Resource["Service B<br/>validate audience and permissions"]
+  Reject["B rejects an A-targeted token<br/>no token exchange in v1"]
+  Caller -->|"A-targeted token"| Agent
+  Agent -->|"Fresh client assertion and independent B grant"| Server
+  Server -->|"B-targeted access token"| Agent
+  Agent -->|"B-targeted token and permitted operation"| Resource
+  Agent -->|"Forwarding an A-targeted token to B"| Reject
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class Reject reject
+```
 
 ### 8.3 Incremental authorization and execution
 
@@ -714,6 +791,28 @@ A changed DID, including a WBA successor, MUST NOT automatically inherit an OAut
 
 DID key revocation does not itself revoke an already issued AS token. Deployments MUST define and document grant/token expiry and revocation behavior, using short-lived access, trusted status checks, or another supported revocation mechanism. RFC 7009 token revocation and RFC 7662 introspection MAY be supported; their endpoint authentication policy MUST be separately configured rather than assumed from token-endpoint support. Revoking a grant MUST prevent new issuance and refresh under that grant.
 
+**Runtime-key rotation, identity change and compromise handling (informative).**
+
+```mermaid
+flowchart TD
+  Change{"What changed?"}
+  Same["Binding key and DID unchanged<br/>revalidate current keys, metadata and policy"]
+  Retain["Eligible records/grants MAY remain under policy<br/>removed-key assertions fail once observed"]
+  New["New client DID<br/>no automatic inheritance of records or grants"]
+  Rebind["Obtain an approved new binding/authorization<br/>migration needs verified continuity and AS decision"]
+  Block["Invalidate affected caches<br/>apply deployment policy for binding, issuance and revocation"]
+  Reject["Reject new assertions<br/>do not fall back to stale or unvalidated keys"]
+  Change -->|"Authorized runtime-key rotation only"| Same
+  Same -->|"Current checks pass and policy permits"| Retain
+  Same -->|"Compromise is detected"| Block
+  Same -->|"Validation fails"| Reject
+  Change -->|"e1_ binding key or client DID changes"| New
+  New --> Rebind
+  Change -->|"Compromise"| Block
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class Block,Reject reject
+```
+
 <a id="vc-authorization"></a>
 ## 11. VC-based authorization
 
@@ -778,14 +877,14 @@ Before issuing, the issuer SHOULD show the authorizing person the Agent DID, eve
 
 Action URI semantics are determined by the domain protocol or public vocabulary that defines them; this version does not standardize specific actions. A verifier may map an action URI to its own concrete operation or scope only through a documented correspondence; an action without such a correspondence MUST be treated as unknown and its entry rejected.
 
-A role credential cannot grant rights the organization itself does not have. An organization can authorize an Agent to place orders, publish positions and schedule interviews on its behalf, but cannot authorize it to read candidates' or employees' personal data held by third parties: that needs the data subject's own consent and should use OAuth or a delegation credential issued by the data subject. Who may approve issuing a role credential is a matter of the organization's internal governance; the issuing organization SHOULD define it explicitly and keep audit records, while verifiers verify only the organization's issuing key and the credential contents.
+A role credential cannot grant rights the organization itself does not have. An organization can authorize an Agent to place orders, publish positions and schedule interviews on its behalf, but a role credential cannot itself create access rights to candidates' or employees' personal data held by third parties. The resource side MUST independently confirm a valid basis for that access under its own rules, such as user approval or already verified enterprise-account permissions, and require the authorization flow supported by that interface. Who may approve issuing a role credential is a matter of the organization's internal governance; the issuing organization SHOULD define it explicitly and keep audit records, while verifiers verify only the organization's issuing key and the credential contents.
 
 ### 11.3 Presentation and holder binding
 
 When presenting a credential, the Agent MUST place it in a VP that the Agent signs:
 
 - `type` includes `VerifiablePresentation`; `holder` equals the Agent's bare DID.
-- `verifiableCredential` contains exactly one authorization credential, either `ANPAgentDelegationCredential` or `ANPAgentRoleCredential`; other credentials may be attached only when the verifier explicitly requests them, such as an organization identity credential issued by a trusted institution. Attached credentials are not subject to the holder-binding rule, since their subject may be an organization rather than the Agent; they grant no authority by themselves and are verified and accepted under the verifier's policy.
+- `verifiableCredential` contains exactly one authorization credential, either `ANPAgentDelegationCredential` or `ANPAgentRoleCredential`; other credentials may be attached only when the verifier explicitly requests them, such as an organization identity credential issued by a trusted institution. Attached credentials are not subject to the holder-binding rule, since their subject may be an organization rather than the Agent; they grant no authority by themselves and are verified and accepted under the verifier's policy. A qualification or attribute credential MUST NOT substitute for the authorization credential required by this Profile.
 - `proof` is a `DataIntegrityProof` with `proofPurpose` `authentication`, a `verificationMethod` in the holder's `authentication` relationship, a single-string `domain` equal to the verifier identifier, a `challenge` that is a one-time value generated and stored by the verifier, and `created` as the signing time.
 
 The verifier MUST compare `domain` and `challenge` exactly, and each `challenge` is accepted only once: the verifier atomically consumes the presentation transaction it stored (Section 11.6); reuse is rejected. `created` MUST be within 300 seconds of the verifier's current time, with allowed clock skew of at most 60 seconds. A VP is valid only for the verifier named by its `domain` and MUST NOT be passed on to another verifier. Before signing, the Agent MUST confirm that `domain` identifies the verifier it is actually dealing with: the origin of the HTTPS interface it called or the peer DID authenticated by the messaging session. It MUST NOT sign a VP for any other verifier.
@@ -796,17 +895,50 @@ Holder binding means that a stolen credential cannot be presented by a party tha
 
 A verifier MUST process a presentation in the following order, reject on any failure, and MUST NOT fall back to a weaker check:
 
-1. **Format and size.** Limit the decoded VP size; implementations MUST support at least 16 KiB and enforce a finite configured maximum. Reject JSON with duplicate member names, contexts outside the allowlist, and unsupported cryptosuites.
+1. **Format and size.** Limit the decoded VP size; implementations MUST support at least 16 KiB and enforce a finite configured maximum. Reject JSON with duplicate member names, contexts outside the allowlist, and unsupported cryptosuites. The authorization credential MUST have exactly one ANP authorization type, either `ANPAgentDelegationCredential` or `ANPAgentRoleCredential`, and that type MUST be in the stored presentation transaction's `credential_types`. A different type supported by this Profile MUST NOT substitute for the type requested in that transaction.
 2. **Presentation proof.** Resolve the holder DID as in Section 6.2, verify the VP proof, and check `domain`, `challenge` and `created`.
 3. **Holder binding.** `holder` MUST equal the DID of the requester authenticated by the carrying ANP-02 HTTP request or authenticated messaging session, and MUST equal the authorization credential's `credentialSubject.id`. Only after this check does the verifier consume the presentation transaction as Section 11.3 specifies, so a proof from another DID cannot use up the legitimate requester's challenge.
 4. **Credential proof.** Resolve the issuer DID, verify the credential proof, confirm the key is in the issuer's `assertionMethod` relationship, and confirm the issuer differs from the holder.
 5. **Validity.** Require `validFrom <= now + s` and `now < validUntil + s`, where `s` is allowed skew of at most 60 seconds.
 6. **Status.** Fetch the `statusListCredential` under the Section 13 SSRF controls; verify the status list credential's own proof, whose issuer MUST be the issuer of the presented authorization credential; the status list credential MUST carry `validUntil` and be within its validity under the step 5 rule; check the entry's `statusPurpose` and index under the Bitstring Status List validation algorithm; and check the referenced bit. Reject when revoked or suspended. Reject when status cannot be obtained; never treat it as valid. Status results MUST NOT be cached for more than 300 seconds. The cache limit bounds only how often the verifier refetches, not how old the status itself is; freshness is bounded by the status list credential's validity.
 7. **Issuer authority.** The verifier MUST confirm that the issuer DID has authority over the requested resource: it is bound through verification to a local account at the verifier, or it is accepted as a new customer under documented policy, or it is an organization the verifier trusts for that resource type. Reject when this cannot be confirmed. The credential itself cannot establish or change that correspondence. Issuing authority MUST come from the verifier's local principal binding or trust policy and MUST NOT be derived from a delegation credential, role credential, access token or execution permission the issuer itself holds; a credential re-issued by an Agent holding someone else's delegation is therefore rejected even when it is cryptographically valid, because this version does not support redelegation. For a role credential, the verifier MUST confirm that the issuer DID is the organization it will treat as the principal: the organization is already the verifier's customer with this DID bound, or the verifier admits it under a documented customer-vetting policy; that policy may require the VP to include an organization identity credential issued by a trusted institution, whose format this version does not define. For did:web, the domain proves control of that domain only, not by itself the identity of a legal entity.
-8. **Permission intersection.** For a delegation credential, the requested resource MUST exactly match one `permissions[].resource` and the requested actions MUST be a subset of that entry's `actions`. For a role credential, the requested operation MUST fall within one `capabilities[].action` under the verifier's documented correspondence. Every constraint of the accepted entry MUST be understood and enforceable by the verifier. The resulting authority does not exceed the intersection of the verifier's local policy, the credential's permissions and this request. “This request” is the presentation transaction stored under Section 11.6, not a request made when the VP arrives.
+8. **Permission intersection.** For a delegation credential, the requested resource MUST exactly match one `permissions[].resource` and the requested actions MUST be a subset of that entry's `actions`. For a role credential, the requested operation MUST fall within one `capabilities[].action` under the verifier's documented correspondence. Every constraint of the accepted entry MUST be understood and enforceable by the verifier. The resulting authority does not exceed the intersection of the verifier's local policy, the credential's permissions and this request. “This request” is the presentation transaction stored under Section 11.6, not a request made when the VP arrives. In `operation` mode, evaluate the stored concrete operation; in `session` mode, evaluate the requested resource/action bounds and the ability to enforce each constraint on subsequent operations, retaining the accepted entries and constraints without executing a business operation when the session is created.
 9. **Record.** The authorization record keeps the credential `id`, issuer, holder, status entry, accepted permissions, verification time and the confirmed local principal.
 
 A valid credential proves only that the issuer made the statement; whether to allow the operation is decided by steps 7 and 8 above and the verifier's local policy. All such decisions MUST be made by deterministic server-side policy, not inferred by an LLM from the credential text.
+
+**VC verification and authorization decision (informative).**
+
+```mermaid
+flowchart TD
+  Presentation["Authenticated request and VP"]
+  Proof["1-2. Check format, requested credential type<br/>and VP proof, domain, challenge and created"]
+  Holder["3. Match requester DID,<br/>holder and credential subject"]
+  BeforeReject["Reject<br/>challenge not consumed"]
+  Consume["Consume stored challenge<br/>single use and expiry"]
+  Credential["4-6. Check credential proof,<br/>validity and status"]
+  Authority["7. Confirm issuer authority"]
+  Permissions["8. Intersect permissions<br/>enforce all constraints"]
+  Record["9. Record and authorize<br/>only the stored transaction"]
+  Reject["Reject the operation"]
+  Presentation --> Proof
+  Proof -->|"Fail"| BeforeReject
+  Proof -->|"Pass"| Holder
+  Holder -->|"Mismatch"| BeforeReject
+  Holder -->|"Match"| Consume
+  Consume -->|"No"| Reject
+  Consume -->|"Yes"| Credential
+  Credential -->|"Fail"| Reject
+  Credential -->|"Pass"| Authority
+  Authority -->|"No"| Reject
+  Authority -->|"Yes"| Permissions
+  Permissions -->|"Deny"| Reject
+  Permissions -->|"Allow"| Record
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class BeforeReject,Reject reject
+  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
+  class Record allow
+```
 
 <a id="vc-oauth-composition"></a>
 ### 11.5 VC and OAuth composition — out of scope for v1
@@ -821,11 +953,55 @@ Future versions may define such a composition binding; see Section 16.
 Direct presentation is the authorization mechanism defined by the v1 VC Profile. A verifier may be a resource server, application service, gateway or peer Agent. The existence of an OAuth authorization server does not by itself change this VC flow. An interface requiring OAuth MUST NOT be bypassed through VC direct presentation.
 
 1. The requester first establishes its DID through ANP-02 (HTTP) or an authenticated messaging session.
-2. The verifier returns a presentation request containing at least `type` `ANPPresentationRequest`; a `profile` that MUST exactly match the supported VC Profile `anp.authorization.vc.v1-draft2`; a `challenge` with at least 128 bits of cryptographic randomness, single-use and valid for no more than 300 seconds; a `domain`, which is the origin of the called HTTPS interface or the verifier DID authenticated by the messaging session; the accepted credential types with the required resource and actions; and `mode`, either `operation` (authorizes only this operation) or `session` (establishes a short session). The verifier MUST store the challenge together with the requester DID, `profile`, `domain`, required resource and actions, `mode`, expiry and, for `operation`, the pending operation, as one presentation transaction.
-3. The requester MUST check that `profile` exactly matches a VC Profile it supports; a holder MUST NOT silently downgrade or reinterpret an unsupported Profile version. After validating the request, it signs a VP under Section 11.3 and returns it.
-4. The verifier retrieves the presentation transaction for that challenge, confirms that the DID now authenticated by ANP-02 or the messaging session is the transaction's requester, and runs Section 11.4 with it as the holder, intersecting against the resource, actions and operation stored in the transaction; it then performs or rejects only the operation in that transaction.
+2. The verifier returns a presentation request containing at least `type` `ANPPresentationRequest`; a `profile` that MUST exactly match the supported VC Profile `anp.authorization.vc.v1-draft2`; a `challenge` with at least 128 bits of cryptographic randomness, single-use and valid for no more than 300 seconds; a `domain`, which is the origin of the called HTTPS interface or the verifier DID authenticated by the messaging session; `credential_types`, a required non-empty array of ANP authorization credential types supported by this Profile and accepted for this transaction, with the required resource and actions; and `mode`, either `operation` (authorizes only this operation) or `session` (establishes a short session). The verifier MUST store the challenge together with the requester DID, `profile`, `credential_types`, `domain`, required resource and actions, `mode`, expiry and, for `operation`, the pending operation, as one presentation transaction.
+3. The requester MUST check that `profile` exactly matches a VC Profile it supports; a holder MUST NOT silently downgrade or reinterpret an unsupported Profile version. The holder MUST also confirm that its authorization credential's ANP type is in the requested `credential_types`. After validating the request, it signs a VP under Section 11.3 and returns it.
+4. The verifier retrieves the presentation transaction for that challenge, confirms that the DID now authenticated by ANP-02 or the messaging session is the transaction's requester, and runs Section 11.4 with it as the holder, intersecting against the stored credential types, resource, actions and applicable operation. In `operation` mode, it performs or rejects only the operation in that transaction; in `session` mode, it may create the bounded authorization context below and return its reference as defined by the carrying interface.
 
 The carrying interface's ANP-07 description declares VC capability, and the presentation request negotiates the exact `profile`. This version defines the minimum fields of the presentation request object (example in Section 11.8) and defines no new HTTP authentication scheme or `Authorization` header; the field or message that carries the presentation request and VP is defined by the carrying interface's ANP-07 description or the messaging application protocol. With `mode` `operation`, the authority covers only the one operation stored in the transaction; a verifier may establish a short session only when its presentation request set `mode` to `session`, and MUST NOT widen a single-operation presentation into a session after receiving the VP. One-time challenge use does not make the business operation idempotent; retries and deduplication are defined by the carrying application protocol. A session MUST NOT outlive the credential's `validUntil`, and status must be re-checked periodically under Section 11.4 step 6. If rechecking fails or the credential is expired, revoked or suspended, the verifier MUST stop authorizing operations under that session.
+
+**Session authorization context and subsequent requests.** When using `session`, the verifier MUST also apply these rules:
+
+- Retain the local principal confirmed in Section 11.4, holder DID, `profile`, authorization credential type, bound resource, accepted actions, accepted permission/capability entries with all their per-entry constraints, credential `id`, issuer and credential-proof key reference, credential validity and status references, and a fixed session expiry.
+- Each subsequent request MUST still authenticate as the holder DID bound to that context through the carrying ANP-02 HTTP request or authenticated messaging session. A session reference only selects the stored context and MUST NOT replace requester authentication.
+- For every actual operation, the verifier MUST re-evaluate the applicable permissions and all constraints against the stored resource/action bounds, current local policy, and that operation's actual targets, amount, currency and other parameters. Approval of an earlier operation does not authorize a later one and MUST NOT widen the stored permission bounds.
+- At creation, the verifier MUST set a fixed expiry under a finite local maximum lifetime, no later than the credential's `validUntil`. Subsequent use MUST NOT slide that expiry forward; renewal MUST require a new presentation request with a fresh challenge and a newly verified VP satisfying all of Section 11.4. Status rechecking still applies; once the issuer or holder DID is known to be inactive, or the credential issuing key is no longer authorized by the issuer's `assertionMethod`, the verifier MUST also stop authorizing operations under that context. Routine holder authentication-key rotation does not widen the retained permissions; subsequent requests still authenticate under the carrying interface's current authorized-key rules.
+
+The carrying interface's ANP-07 description MUST define session creation and reference-return behavior, how subsequent requests reference the context, and expiry/failure handling. This version defines no separate session-reference wire format and does not define the reference as an OAuth access token.
+
+**Single-operation and session presentation modes (informative).**
+
+```mermaid
+flowchart TD
+  Validated["Presentation transaction validated<br/>Profile, accepted type and Section 11.4 checks"]
+  Mode{"Mode stored in the presentation request?"}
+  Operation["Execute only the stored operation<br/>no implicit session"]
+  Session["MAY retain a bounded session context<br/>principal, holder and accepted permission entries"]
+  Expiry["Set fixed expiry<br/>within local maximum and credential validUntil"]
+  Authenticate["Authenticate the bound holder on each request<br/>session reference only selects the context"]
+  Check["Check session expiry<br/>and required credential/status rechecks"]
+  Permissions["For every operation check scope and actual parameters<br/>current policy, amount/currency and all constraints"]
+  Allow["Perform this approved operation"]
+  Deny["Reject that request or operation<br/>do not widen session authority"]
+  Stop["Stop authorizing under the context"]
+  Reject["Reject unsupported mode"]
+  Validated --> Mode
+  Mode -->|"operation"| Operation
+  Mode -->|"session"| Session
+  Mode -->|"Other"| Reject
+  Session --> Expiry
+  Expiry --> Authenticate
+  Authenticate -->|"Same holder authenticated"| Check
+  Authenticate -->|"Missing authentication or different DID"| Deny
+  Check -->|"Pass"| Permissions
+  Check -->|"Expired, revoked, suspended or recheck fails"| Stop
+  Permissions -->|"Permissions and every constraint satisfied"| Allow
+  Permissions -->|"Deny"| Deny
+  Allow -->|"Revalidate on the next request"| Authenticate
+  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
+  class Deny,Stop,Reject reject
+  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
+  class Operation,Allow allow
+```
 
 ### 11.7 Lifecycle and privacy
 
@@ -890,8 +1066,7 @@ After checking the exact `profile`, HTTPS interface origin, required resource an
           {
             "resource": "https://supplier.example/api/orders",
             "actions": [
-              "orders.create",
-              "orders.read"
+              "orders.create"
             ],
             "constraints": {
               "perOperationLimit": {
@@ -943,7 +1118,7 @@ Companies often want an Agent to take on a whole function rather than just acces
 
 **Purchasing Agent.** The credential can list actions such as “request a quote”, “place a purchase order” and “query order status”, with a per-order limit on placing orders. When a new supplier receives the first order, it decides under its own customer-vetting policy whether to accept the company, for example by requiring an organization identity credential from a trusted institution or an offline account-opening process first. Orders above the per-order limit are outside the credential's authority and should go back to the company's internal approval, handled by a person or another dedicated approval. A cumulative budget across suppliers cannot be enforced by any single supplier and must be controlled by the company's own systems.
 
-**HR Agent.** The credential can list actions such as “publish a job posting”, “schedule an interview” and “query application status”. It handles the company's own recruiting affairs on the company's behalf, but the company's authority does not let it read candidates' résumés on other platforms, background-check results or other personal data; that data requires the candidate's own consent and should be obtained through OAuth or a delegation credential issued by the candidate. Sending an offer or signing an employment contract is a high-risk operation; a role credential in this version cannot substitute for per-operation approval, and the receiver should require its own approval mechanism or refuse.
+**HR Agent.** The credential can list actions such as “publish a job posting”, “schedule an interview” and “query application status”. It handles the company's own recruiting affairs on the company's behalf, but the role credential alone does not authorize access to candidates' résumés on other platforms, background-check results or other personal data. The resource side independently confirms a valid basis for access, including enterprise-account permissions already verified under its own rules, and requires the authorization flow supported by that interface. Sending an offer or signing an employment contract is a high-risk operation; a role credential in this version cannot substitute for per-operation approval, and the receiver should require its own approval mechanism or refuse.
 
 | Need | Met by a role credential? | Notes |
 | --- | --- | --- |
@@ -951,7 +1126,7 @@ Companies often want an Agent to take on a whole function rather than just acces
 | Act toward counterparties not known in advance | Yes | Authority is by action URI, with no need to list counterparty addresses beforehand; each counterparty decides by its own correspondence. |
 | Per-operation amount limit | Yes | Use `perOperationLimit`, enforced by the verifier. |
 | Cumulative budget across counterparties | No | Controlled by the company's own systems; not defined in this version. |
-| Access personal data of third parties such as candidates or employees | No | Needs the data subject's own authorization. |
+| Access personal data of third parties such as candidates or employees | Not by itself | The resource side independently confirms a valid basis for access; a role credential alone is insufficient. |
 | High-risk operations such as signing a contract or sending an offer | Not by itself | Needs per-operation approval, not defined in this version. |
 | HR or purchasing operations in the company's internal systems | Usually not needed | Internal systems can keep using their existing permission model or OAuth. |
 
@@ -1047,11 +1222,11 @@ A successful VC or VP verification MUST NOT by itself create, imply, mint or aut
 
 OAuth client conformance requires native DID metadata publication/discovery, Section 6 assertions, trusted AS discovery, the declared grant flow, and token handling. AS conformance requires native DID and self-published admission implementation, explicit enabled-policy advertisement, supported method validation, replay enforcement, independent grants, and lifecycle handling. RS conformance requires the selected standard token validation and actual resource-policy enforcement. Optional features within this Profile MUST be declared and tested before use.
 
-When the VC Profile is claimed, holders implement Section 11.3 holder-bound VP creation and Section 11.6 Profile checking; verifiers implement Section 11.6 direct presentation and the complete Section 11.4 verification order, holder binding, issuer-authority confirmation, status checking, permission intersection and constraint enforcement. OAuth conformance and VC direct-presentation conformance are independent. Issuer conformance covers only correct credential format, proof and status-list publication; this version does not certify issuance interfaces or issuance protocols.
+When the VC Profile is claimed, holders implement Section 11.3 holder-bound VP creation and Section 11.6 Profile checking; verifiers implement Section 11.6 direct presentation and the complete Section 11.4 verification order, holder binding, issuer-authority confirmation, status checking, permission intersection and constraint enforcement; when session mode is used, also verify Section 11.6 identity binding, per-operation authorization and finite-lifetime rules. OAuth conformance and VC direct-presentation conformance are independent. Issuer conformance covers only correct credential format, proof and status-list publication; this version does not certify issuance interfaces or issuance protocols.
 
 The following are **required design scenarios**, not a claim that an implementation has passed them. Test applicable positive flows and all relevant rejection paths before release or public enablement; record unsupported optional features rather than reporting them as passes.
 
-Scenario identifiers are stable evidence references, not an ordered checklist. Retired IDs (03, 19, 24, 25, 28, 34–40, and 51, 52, 58 retired in 0.6) remain unused. Requirements added in 0.4 start at 41, VC scenarios added in 0.5 start at 51 (61–64 for role credentials), and new direct-presentation scenarios in 0.6 are 65–69. Numbering gaps do not waive any listed scenario.
+Scenario identifiers are stable evidence references, not an ordered checklist. Retired IDs (03, 19, 24, 25, 28, 34–40, and 51, 52, 58 retired in 0.6) remain unused. Requirements added in 0.4 start at 41, VC scenarios added in 0.5 start at 51 (61–64 for role credentials), and new direct-presentation scenarios in 0.6 are 65–75. Numbering gaps do not waive any listed scenario.
 
 | ID | Scenario and expected result |
 | --- | --- |
@@ -1103,12 +1278,18 @@ Scenario identifiers are stable evidence references, not an ordered checklist. R
 | AUTHZ-61 | A role credential issued by an organization that is confirmed as one the verifier recognizes, with the requested operation within the listed actions and constraints under a documented correspondence: accept, with the organization's local account as principal of the operation. |
 | AUTHZ-62 | A role credential containing an action URI with no correspondence at the verifier, a requested operation outside every listed action, or an amount above the per-operation limit: reject that entry or operation. |
 | AUTHZ-63 | Issuer DID cannot be confirmed as an organization the verifier recognizes, or an organization identity credential required by verifier policy is missing or untrusted: reject; the `role` name or a did:web domain alone does not pass. |
-| AUTHZ-64 | Using a role credential to read third-party personal data or in place of per-operation approval for a high-risk action: not sufficient; reject or route to the verifier's own approval mechanism. |
+| AUTHZ-64 | Using a role credential alone, without a valid basis independently confirmed by the resource side, to read third-party personal data or in place of per-operation approval for a high-risk action: not sufficient; reject or route to the verifier's own approval mechanism. |
 | AUTHZ-65 | Positive direct presentation: the carrying interface's authenticated requester DID, VP holder and authorization credential credentialSubject.id match, with valid issuer authority, status and constraints; substituting any of those DIDs is rejected. |
 | AUTHZ-66 | VP domain/challenge differs from the stored presentation transaction, or challenge expiry, reuse or concurrent consumption: reject; at most one concurrent presentation is accepted. |
 | AUTHZ-67 | Delegation revoked, suspended or expired, or status list missing, expired or unverifiable: reject the direct operation and stop credential-based sessions when status rechecks detect it. |
 | AUTHZ-68 | Direct presentation performs only the stored operation and enforces permission intersection and the 5000 CNY per-operation limit; excess amount, different currency, missing amount, broader action or unknown constraint: reject. |
 | AUTHZ-69 | Presentation request omits profile or uses an unsupported version: do not sign a VP or silently downgrade; VC/VP cannot bypass an OAuth-only interface or obtain an access token under this Profile. |
+| AUTHZ-70 | The presentation transaction accepts only a delegation credential but receives a role credential, or one credential has both ANP authorization types: reject substitution even though the individual types are supported by this Profile. |
+| AUTHZ-71 | After session creation, only a session reference is supplied or the subsequent authenticated DID differs from the bound holder: reject the request; the reference is not identity or access evidence. |
+| AUTHZ-72 | A 5000 CNY session accepts a 4200 CNY order but must still reject a later 6000 CNY order, different currency, broader target/action or unenforceable constraint; the first operation's approval cannot be reused. |
+| AUTHZ-73 | Session expiry exceeds the local maximum or credential validity, slides forward with use, or renewal omits a newly verified fresh-challenge VP: reject that creation, extension or renewal. |
+| AUTHZ-74 | Only a qualification or attribute credential is presented without the delegation/role authorization credential required by this Profile: reject; a valid qualification signature and trusted issuer do not establish this version's standalone presentation flow. |
+| AUTHZ-75 | The resource side independently confirms enterprise-account authority to access the personal data and the role presentation passes all other type, identity, permission and constraint checks: it may allow access under that basis and interface policy; absent a valid access basis, reject. |
 
 A draft or an experimental prototype may be reviewed with one complete implementation and explicit negative-test evidence, but MUST be labeled experimental. A stable interoperable v1 release claim for the OAuth Profile requires two independently developed client/AS implementations and cross-implementation tests, applicable RS tests, first-contact admission at each AS, disabled-admission behavior, metadata tampering/updates, hosted and loopback redirects when authorization-code support is claimed, method/runtime-key lifecycle, multi-resource isolation for the declared flows, and an explicit security review. When the VC Profile is claimed, it also requires cross-tests between independently implemented holders and verifiers covering direct presentation, exact Profile matching, and credential revocation. Implementation independence means independent code paths for the protocol, not two instances of the same server; deployments must document shared components. This gate does not block publishing or reviewing a draft.
 

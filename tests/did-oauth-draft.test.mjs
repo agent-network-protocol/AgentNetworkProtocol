@@ -7,6 +7,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import test from 'node:test';
+import {checkWhitePaperAuthorizationScope} from '../scripts/release-entrypoint-checks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const enFile = 'vnext/05-anp-did-authorization-protocol-specification.md';
@@ -53,8 +54,10 @@ test('bilingual sections, explicit anchors and wire examples stay synchronized',
   assert.deepEqual(wire(en), wire(cn));
   assert.equal(jsonBlocks(en).length, 11);
   const diagramKinds = text => blocks(text).filter(block => block.language === 'mermaid').map(block => block.text.split('\n')[0]);
-  assert.deepEqual(diagramKinds(en), ['flowchart TD', 'flowchart LR', 'sequenceDiagram', 'sequenceDiagram']);
+  assert.deepEqual(diagramKinds(en), ['flowchart TD', 'flowchart LR', 'flowchart TD', 'flowchart TD', 'sequenceDiagram', 'flowchart LR', 'flowchart TD', 'sequenceDiagram', 'flowchart TD', 'flowchart TD']);
   assert.deepEqual(diagramKinds(en), diagramKinds(cn));
+  const flowcharts = text => blocks(text).filter(block => block.language === 'mermaid' && block.text.startsWith('flowchart')).map(block => block.text.replace(/"[^"]*"/g, '"label"'));
+  assert.deepEqual(flowcharts(en), flowcharts(cn));
 });
 
 test('Mermaid diagrams avoid statement separators that break rendering', () => {
@@ -138,7 +141,7 @@ test('mirrors retain applicable security scenarios without reusing removed scena
   const ids = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 26, 27, 29, 30, 31, 32, 33];
   ids.push(...Array.from({length: 10}, (_, index) => index + 41));
   ids.push(...Array.from({length: 5}, (_, index) => index + 53));
-  ids.push(...Array.from({length: 11}, (_, index) => index + 59));
+  ids.push(...Array.from({length: 17}, (_, index) => index + 59));
   const expected = ids.map(id => 'AUTHZ-' + String(id).padStart(2, '0'));
   assert.deepEqual(scenarios(en), expected);
   assert.deepEqual(scenarios(cn), expected);
@@ -187,6 +190,28 @@ test('release checker validates authorization and white paper drafts without red
   assert.deepEqual(fs.readdirSync(path.join(root, 'vnext/chinese')).sort(), ['01-AgentNetworkProtocol技术白皮书.md', '05-ANP-基于DID的授权协议.md', 'README.md']);
   assert.equal(report.sdk_or_product_tests_run, false);
   assert.deepEqual(report.errors, []);
+});
+
+test('vNext white paper authorization overviews match the current ANP-05 scope', () => {
+  for (const file of ['vnext/01-agentnetworkprotocol-technical-white-paper.md', 'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md']) {
+    assert.deepEqual(checkWhitePaperAuthorizationScope({file}, read(file)), []);
+  }
+});
+
+test('white paper scope check rejects current exchange claims and permits future research', () => {
+  const file = 'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md';
+  const text = read(file);
+  const heading = text.match(/^### 8\.3[^\n]*$/m)[0];
+  const insert = sentence => text.replace(heading, heading + '\n\n' + sentence);
+  const current = insert('两者也可以组合：智能体把 VC 交给资源方的授权服务器，换发普通的访问令牌。');
+  assert(checkWhitePaperAuthorizationScope({file}, current).some(error => error.reason === 'white-paper-claims-current-vc-token-exchange'));
+  const future = insert('未来扩展可以研究将 VC 换发为 OAuth 访问令牌。');
+  assert.deepEqual(checkWhitePaperAuthorizationScope({file}, future), []);
+  const missing = text.replace('首版不定义 VC/VP 换取 OAuth 访问令牌', '首版支持 VC/VP 换取 OAuth 访问令牌');
+  assert(checkWhitePaperAuthorizationScope({file}, missing).some(error => error.reason === 'white-paper-v1-vc-exchange-boundary-missing'));
+  const english = '### 8.3 Authorization\nANP-05 v1 defines two independent authorization paths. V1 does not define conversion from VC/VP to OAuth access tokens. Future extensions may evaluate VC-to-token exchange.\n';
+  assert.deepEqual(checkWhitePaperAuthorizationScope({file: 'english'}, english), []);
+  assert(checkWhitePaperAuthorizationScope({file: 'english'}, english + 'An Agent exchanges a VC for an OAuth access token.\n').some(error => error.reason === 'white-paper-claims-current-vc-token-exchange'));
 });
 
 test('resource metadata and challenge bind to the illustrated RS and AS', () => {
@@ -588,8 +613,20 @@ test('VC direct presentation request carries a fresh challenge and a covered per
   assert.deepEqual(presentationRequest.credential_types, ['ANPAgentDelegationCredential']);
   assert.equal(presentationRequest.mode, 'operation');
   assert.equal(presentationRequest.resource, permission.resource);
+  assert.deepEqual(permission.actions, ['orders.create']);
   for (const action of presentationRequest.actions) assert(permission.actions.includes(action), action);
   assert.deepEqual(permission.constraints.perOperationLimit, {currency: 'CNY', value: '5000.00'});
+});
+
+test('examples distinguish supported role credentials from the type requested in this transaction', () => {
+  const {presentationRequest, presentation, roleCredential} = vcSamples(en);
+  const authorizationTypes = ['ANPAgentDelegationCredential', 'ANPAgentRoleCredential'];
+  const requestedType = presentation.verifiableCredential[0].type.find(type => authorizationTypes.includes(type));
+  const otherType = roleCredential.type.find(type => authorizationTypes.includes(type));
+  assert(presentationRequest.credential_types.includes(requestedType));
+  assert(authorizationTypes.includes(otherType));
+  assert(!presentationRequest.credential_types.includes(otherType));
+  for (const text of [en, cn]) assert(scenarios(text).includes('AUTHZ-70'));
 });
 
 test('organization role credential authorizes by action URI, not by resource or role name', () => {
@@ -624,7 +661,7 @@ const vcGuards = [
   ['unmapped role actions fail closed',
     /an action without such a correspondence MUST be treated as unknown and its entry rejected/,
     /没有对应关系的动作必须（MUST）视为未知，并拒绝该项/],
-  ['organizations cannot grant authority over third-party personal data',
+  ['role credentials cannot create rights the issuer does not hold',
     /A role credential cannot grant rights the organization itself does not have/,
     /角色凭证不能授予组织本身没有的权利/],
   ['role-credential issuers must be confirmed as the organization acting as principal',
@@ -662,7 +699,7 @@ const vcGuards = [
     /Agent 签署前必须（MUST）确认 `domain` 就是它实际交互的验证方/],
   ['direct presentation is bound to the stored transaction',
     /The verifier MUST store the challenge together with the requester DID[\s\S]*performs or rejects only the operation in that transaction/,
-    /验证方必须（MUST）把 challenge 与请求方 DID[\s\S]*然后只执行或拒绝该事务中的操作/],
+    /验证方必须（MUST）把 challenge 与请求方 DID[\s\S]*只执行或拒绝该事务中的操作/],
   ['a single-operation presentation cannot become a session',
     /MUST NOT widen a single-operation presentation into a session after receiving the VP/,
     /不得（MUST NOT）在收到 VP 后把单次操作扩大为会话/],
@@ -699,6 +736,33 @@ const vcGuards = [
   ['direct presentation cannot bypass an OAuth interface',
     /An interface requiring OAuth MUST NOT be bypassed through VC direct presentation/,
     /某个接口要求 OAuth 时，不得（MUST NOT）用 VC 直接出示绕过其授权要求/],
+  ['standalone qualification profiles are outside the current version',
+    /Standalone qualification or attribute credential profiles are not defined by this version/,
+    /本版本不定义独立的资质或属性凭证 Profile/],
+  ['the authorization type must be accepted by the stored presentation transaction',
+    /that type MUST be in the stored presentation transaction's `credential_types`/,
+    /该类型必须（MUST）属于本次保存的出示事务的 `credential_types`/],
+  ['a different supported credential type cannot substitute for the requested type',
+    /A different type supported by this Profile MUST NOT substitute for the type requested in that transaction/,
+    /不得（MUST NOT）仅因另一类型也受本 Profile 支持，就替代本次要求的类型/],
+  ['accepted credential types are retained with the challenge',
+    /requester DID, `profile`, `credential_types`, `domain`, required resource and actions/,
+    /请求方 DID、`profile`、`credential_types`、`domain`、所需资源与动作/],
+  ['sessions retain the accepted entries and per-entry constraints',
+    /Retain the local principal confirmed in Section 11\.4[\s\S]*accepted permission\/capability entries with all their per-entry constraints/,
+    /保存第 11\.4 节确认的本地主体[\s\S]*所采纳的权限\/能力条目及各条目的全部约束/],
+  ['every subsequent session request authenticates its bound holder',
+    /Each subsequent request MUST still authenticate as the holder DID bound to that context[\s\S]*MUST NOT replace requester authentication/,
+    /每次后续请求仍必须（MUST）[\s\S]*该上下文绑定的 holder DID[\s\S]*不得（MUST NOT）替代请求方身份认证/],
+  ['session authorization rechecks dynamic parameters on every operation',
+    /For every actual operation, the verifier MUST re-evaluate[\s\S]*actual targets, amount, currency and other parameters/,
+    /每次实际操作都必须（MUST）[\s\S]*实际对象、金额、币种等参数[\s\S]*重新执行适用的权限和全部约束检查/],
+  ['sessions have fixed finite lifetimes and renew only through a fresh presentation',
+    /fixed expiry under a finite local maximum lifetime[\s\S]*MUST NOT slide that expiry forward[\s\S]*fresh challenge and a newly verified VP/,
+    /有限的本地时长上限设置固定到期时间[\s\S]*不得（MUST NOT）滚动延长到期时间[\s\S]*带新 challenge 的出示请求，并重新验证 VP/],
+  ['personal data access requires an independently confirmed resource-side basis',
+    /The resource side MUST independently confirm a valid basis for that access under its own rules/,
+    /资源方必须（MUST）按自身规则独立确认有效的访问授权依据/],
 ];
 for (const [name, enPattern, cnPattern] of vcGuards) {
   test('VC requirement and deletion regression: ' + name, () => {

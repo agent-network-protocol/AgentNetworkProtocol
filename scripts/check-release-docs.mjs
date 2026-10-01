@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readerGuides, paymentDocuments, checkReaderGuide, checkPaymentMetadata} from './release-entrypoint-checks.mjs';
+import {readerGuides, paymentDocuments, checkReaderGuide, checkPaymentMetadata, checkWhitePaperAuthorizationScope} from './release-entrypoint-checks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
@@ -103,6 +103,7 @@ for (const file of nextVersionDrafts) {
 
 for (const guide of readerGuides) errors.push(...checkReaderGuide(guide, read(guide.file)));
 for (const document of paymentDocuments) errors.push(...checkPaymentMetadata(document, read(document.file)));
+for (const file of whitePaperDrafts) errors.push(...checkWhitePaperAuthorizationScope({file}, parsed(file).prose));
 
 const normative = [...core, ...messages.filter(name => !name.endsWith('/README.md'))];
 for (const file of normative) {

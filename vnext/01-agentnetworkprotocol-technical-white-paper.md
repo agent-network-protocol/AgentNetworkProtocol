@@ -6,513 +6,754 @@
 - Status: Draft / not released
 - Version: 1.2
 - Released baseline: [ANP-01 v1.2](../01-agentnetworkprotocol-technical-white-paper.md)
-- Revision date: 2026-09-24
+- Revision date: 2026-09-27
 - Language: English
 - Chinese version: [Agent Network Protocol 技术白皮书](chinese/01-AgentNetworkProtocol技术白皮书.md)
 
-> This paper explains ANP's vision, architecture, and design trade-offs. It introduces no normative requirements. Wire formats, algorithms, verification procedures, and interoperability requirements remain defined by their owning specifications. The baseline is the ANP 1.2 specification set: ANP-06 remains a draft, P6 Group E2EE remains a candidate, and ANP-10 is a payment adaptation draft. Appendix A records specification status and versioning. This document revision does not establish SDK, product, or third-party integration support.
+> This paper explains ANP's vision, architecture, and key design trade-offs. It introduces no normative requirements. Wire formats, algorithms, verification procedures, and interoperability requirements remain defined by their owning specifications. This paper is based on the ANP 1.2 specification set: the ANP-06 meta-protocol remains a draft, Messaging P6 Group E2EE remains a candidate, and ANP-10 is a payment adaptation draft. Appendix A records specification status.
 
 ## Abstract
 
-Agent Network Protocol (ANP) aims to build an open internet of agents, allowing agents from different organizations, platforms, and technical implementations to connect and collaborate. We believe that realizing agents' potential requires more than understanding information. Subject to authorization, agents also need to obtain context across domains, use services from different providers, and maintain ongoing collaborative relationships. Openness does not require making all data public; it means that these connections need not be confined to one platform's identity and interface system.
+Agents are becoming new participants in the Internet. Unlike traditional software, their value lies in making decisions and taking action on users' behalf within the scope of user authorization. Good decisions require complete context; taking action requires access to services distributed across different organizations. Today's Internet organizes data and services around platform boundaries. This structure reduced coordination costs when humans were its primary users, but confines agents' capabilities to individual platforms. We believe that **the agentic web will inevitably become open**: more complete experiences, lower connection costs, and greater collaboration efficiency will drive connections from platform-centered arrangements toward protocol-centered ones.
 
-Built on existing Internet infrastructure, ANP organizes common capabilities for identity, encrypted communication, description, and discovery, while leaving domain application protocols room to evolve independently. ANP combines the common identity model of W3C DIDs with Web publication and resolution to support federated authentication. Method-independent ANP-02 authentication enables `did:wba`, native `did:web`, and future adapted methods to share a request-verification flow. The default fingerprint binding and document proof of path-type `did:wba` further distinguish identity control from document hosting.
+Agent Network Protocol (ANP) is a communication protocol designed for an open agentic web. It builds on existing Internet infrastructure such as HTTP, DNS, and TLS rather than rebuilding the network, organizing two layers of common capabilities: the identity and encrypted communication layer answers “Who are you, who am I?” and “How can we communicate securely?”; the application protocol layer answers “What do you offer, how can I interact with you?” and “How can I find you?”
 
-For communication, ANP provides cross-domain messaging, groups, attachments, and optional end-to-end encryption. Natural-language messages carry flexible requirements and negotiations; structured interfaces constrain execution that needs predictable semantics. For description, ANP makes Information and Interface first-class concepts and connects resources and interfaces through URLs into a navigable network. Callers can retrieve information selectively, make decisions in their own environment, and choose an appropriate interaction path. The meta-protocol provides an optional direction for dynamic negotiation, while payments, authorization, and vertical applications favor integration with existing protocols and domain ecosystems.
+For identity, ANP adopts a federated approach combining W3C DIDs with the Web. DID provides the identity model with the strongest interoperability currently available, while the Web provides deployment and distribution capabilities that can support tens or even hundreds of billions of agents. ANP's `did:wba` method embeds a public-key fingerprint in the DID and requires the DID Document to carry a proof signed with the corresponding private key, giving users control over their identities and preventing a hosting server from modifying identity documents undetectably. Meanwhile, ANP-02 decouples request authentication from any particular DID method, allowing native `did:web` and other methods conforming to W3C DID specifications to participate as well.
 
-ANP is not another closed platform. It is a set of common connection rules through which identity can be verified, communication protected, and capabilities discovered and composed, while users and service providers retain responsibility for business permissions.
+For communication, ANP treats messaging as a core capability. Natural-language messaging can address the vast majority of communication and negotiation needs between agents. ANP Messaging supports cross-domain direct messages, groups, attachments, and federated delivery, with verifiable end-to-end encryption anchored in `did:wba` fingerprint identities.
+
+At the application protocol layer, ANP draws on Linked Data to organize agent descriptions: externally available content is abstracted into two first-class concepts, Information and Interface, and connected through URLs into a network that can be explored selectively. Active and passive discovery help agents be found. The meta-protocol explores dynamic negotiation of interaction methods as a draft. For payments, authorization, and vertical applications, ANP favors integration with existing ecosystems and provides underlying identity authentication and connection capabilities.
+
+ANP seeks to establish a set of common connection rules: **identity can be verified, communication can be protected, and capabilities can be discovered and composed, while users and service providers retain responsibility for permissions.**
 
 ## Reading Guide
 
-[1. Open-network vision](#vision) · [2. Architecture](#architecture) · [3. Agent identity](#identity) · [4. Agent messaging](#messaging) · [5. Agent discovery](#discovery) · [6. Agent description](#description) · [7. Meta-protocol](#meta-protocol) · [8. Application protocols](#applications) · [9. Security boundaries](#security) · [10. Collaboration and adoption](#adoption) · [Appendix A: Specifications](#specifications) · [Appendix B: Terminology](#terminology)
+[1. Core vision](#vision) · [2. Architecture](#architecture) · [3. Agent identity](#identity) · [4. Agent messaging](#messaging) · [5. Agent description](#description) · [6. Agent discovery](#discovery) · [7. Meta-protocol](#meta-protocol) · [8. Application protocols and ecosystem](#applications) · [9. Security and trust](#security) · [10. Example and adoption](#adoption) · [11. Future outlook](#outlook) · [Appendices](#specifications)
 
 <a id="vision"></a>
-## 1. Core Vision: Building an Open Internet of Agents
+## 1. Core Vision: An Open Internet of Agents
 
-### 1.1 From people operating software to agents acting on their behalf
+<p align="center">
+  <img src="../images/agentic-web3.png" width="420" alt="Agentic Web: agents connect through Agent Network Protocol" />
+</p>
 
-The Internet has largely organized information and services around human reading, selection, and operation. Users open different applications, interpret interfaces, move information between systems, and then decide and act. An important change introduced by agents is their ability to undertake some of this work within user-defined goals and permissions: gathering information, comparing options, invoking services, following up on results, and requesting human confirmation when necessary.
+*Figure 1: An open internet of agents. Each agent can both consume and provide information and services.*
 
-This does not require all traditional software to disappear. It does require an additional way to connect services for agents. People still need interfaces, and business systems still provide computation and services, but agents should not be limited to imitating clicks. Protocols should make capabilities machine-readable, callable, and composable. This is the Agentic Web we envision: a network in which agents are important participants and open protocols connect information with action.[^vision3]
+### 1.1 Agents change who uses the Internet
 
-### 1.2 Platforms reduce effort, but their boundaries can constrain collaboration
+Since the Internet's inception, humans have been its primary users. Web pages, applications, and platforms have been designed around human reading, selection, and operation: users open different applications, interpret interfaces, move information between systems, and then decide and act.
 
-Platforms can organize search, relationships, transactions, and services to help users manage information overload and operational complexity. The first article in *Agentic Web: Ten Talks* interprets this as a way of reducing coordination costs in the traditional software era. Recognizing platforms' value, rather than treating closure simply as a matter of principle, helps identify what new connection infrastructure needs to accomplish.[^vision1]
+Agents introduce a fundamental change. Traditional software is a tool that extends human capabilities, while judgment and operation remain with people. Agents undertake judgment and execution within user-defined goals and permissions: gathering information, comparing options, invoking services, following up on results, and requesting confirmation at critical points. When a user says “Book me a flight to Shanghai for tomorrow,” they expect a booked ticket, not a list of flights.
 
-When a task spans platforms, platform boundaries can also become task boundaries. Internal procurement requirements, supplier information, logistics status, and payment services reside in different systems. Without relevant context, an agent's judgment may be incomplete. Without access to the necessary services, even a well-developed plan returns execution to the human user.
+This requires two capabilities. **Decisions need complete context**: budgets, preferences, schedules, and historical records are distributed across systems, and more complete information leads to better judgment. **Action requires invoking services**: an agent that makes decisions but cannot execute them remains an adviser; it must be able to use booking, payment, calendar, and other services directly.
 
-The problem is not that every platform needs every capability. It is whether capabilities distributed across systems can be connected safely.
+We call a network in which agents are important interacting participants, standard protocols connect information with action, and open collaboration is the basic operating model the Agentic Web. People still use interfaces for entertainment, social interaction, and experiences, while agents exchange data and execute tasks through protocols. Interfaces designed for people require visual guidance; protocols designed for machines require structured data and deterministic semantics. Simulating human clicks on websites through Computer Use or Browser Use can be a transitional approach, but it is slow, fragile, and difficult to scale, and cannot become the primary way agents connect to the world.
 
-### 1.3 The drivers of openness: experience, cost, and efficiency
+### 1.2 Closed platforms were the optimal solution in the human era
 
-Our central proposition is that open connections offer long-term value through more complete task experiences, lower repeated integration costs, and a broader space for composing services. The second article develops this argument around the relationship between context for decisions and services for action.[^vision2]
+To determine whether the agentic web should be open or closed, we first need to understand why today's Internet is closed.
 
-For users, the benefit is not another entry point but fewer application switches, repeated explanations, and manual transfers. For providers, open interfaces allow specialized capabilities to be used by different agents without requiring a single platform to package them. For developers, shared identity, messaging, and description mechanisms can reduce the work of reinventing a connection arrangement for every pair of systems.
+The World Wide Web began as an open network. HTTP succeeded because it was simple, open, permissionless, and built on existing network infrastructure, freeing the production and distribution of information. As the Internet expanded, the costs of information overload, relationship management, and transaction matching grew rapidly. Platforms greatly reduced human coordination costs by centrally organizing search, social relationships, and transactions. Platformization was an efficient choice under the conditions of the time.
 
-Natural-language understanding and machine-readable descriptions create an opportunity to change this cost structure. Open collaboration need not begin with an exhaustive data model for every possible business. Common protocols handle identity, communication, and necessary structure; agents use semantic understanding to address different requirements. Actual benefits still depend on model capability, service quality, network conditions, and implementation. They cannot be inferred from the existence of a protocol alone.
+Platforms' subsequent move toward closure also has an internal economic logic. Software's marginal cost approaches zero: the cost difference between serving a hundred million users and a hundred users is much smaller than the difference in scale. More users bring more data, better algorithms and experiences, and then more users, producing a winner-takes-all flywheel. For leading platforms, data is a core asset, user lock-in is a moat, and control of the ecosystem is a source of power. Closure is a natural result of economies of scale.
 
-### 1.4 Openness is a condition for broad interconnection, not a prediction that platforms vanish
+Openness also entails substantial engineering costs. Email, telephone calls, and SMS interoperate openly, but their shared characteristic is business simplicity. Once business becomes complex, compatibility between implementations, coordination of protocol upgrades, and continuous integration testing sharply raise the cost of openness. Making social networking, payments, content, and mini-apps interoperable with other platforms would require an almost unmanageable number of standards and negotiations. The Semantic Web tried to make machines understand the network through manual annotation but struggled with annotation costs and insufficient commercial incentives. Web3 tried to rebuild trust through blockchain but incurred high costs in user experience and scalability. Neither changed this underlying structure.
 
-For agents from arbitrary organizations to have the opportunity to collaborate across platforms, the underlying connection rules cannot be determined solely inside one platform. This is why ANP chooses openness: it is an architectural condition for broad interconnection, not a certain prediction about every company's future behavior.
+Our judgment is therefore that **when humans were the Internet's primary productive force, closed platforms were the most efficient solution**. Without a change in the underlying conditions, the Internet will not automatically return to openness.
 
-An open network can include enterprise systems, private services, and commercial platforms. It does not require every node to publish all its data or every participant to trust every other participant. ANP seeks public protocols, independent implementation and deployment, interoperability across providers, and participants' freedom to choose what they publish, which identities they accept, and what permissions they grant.
+### 1.3 Closed networks impose two constraints on agents
 
-**Open connections do not imply unconditional access, and identity recognition does not imply shared permissions.** A federated network allows service domains to operate independently while collaborating through common protocols.
+When agents become important Internet users, that premise changes. Platform boundaries directly become boundaries of agent capability.
+
+The first constraint is **fragmented context**. A user and friends may agree on a trip's destination, timing, and budget in a messaging application, yet the travel application's assistant must ask again because it cannot see that discussion. An assistant on one platform may recommend a restaurant that the user reviewed negatively on another. Data silos limit agents to local information and prevent globally optimal decisions.
+
+The second constraint is **blocked service invocation**. Most current agents can tell users what to do but cannot do it for them: they can recommend a restaurant but users still open an application to reserve a table; they can generate an itinerary but users manually complete every booking. The reasons are technical and commercial. Service interfaces are designed for people, simulated clicks are inefficient and prone to failure, and platforms have little incentive to open interfaces to external agents.
+
+Consider a business trip to Shanghai. In a closed Internet, the user switches between flight, hotel, map, and expense systems, repeatedly entering the same timing, location, and budget. Even an assistant inside a platform can handle only that platform's part of the process. In an open agentic web, the user's personal agent can read schedules and preferences, communicate and interact directly with airline, hotel, and corporate expense agents, and connect the separate steps into a continuous workflow, requesting user confirmation only at critical points such as payment.
+
+Agents naturally need to compose capabilities. A personal assistant does not need to provide every service itself, but it must be able to discover and connect to specialized agents belonging to different companies and individual developers. **Closed networks constrain this composition.**
+
+### 1.4 Why openness will inevitably emerge
+
+Openness follows from the long-term evolution of technology and commerce. We believe that experience, cost, and efficiency will drive the agentic web toward openness.
+
+**Experience.** Agents that can obtain complete context and invoke all relevant services offer far better experiences than those confined to one platform. Users switch applications and repeat requirements less often, and more tasks move from advice to completion. Users will move toward better experiences.
+
+**Cost.** Openness was expensive because each pair of systems needed to agree in advance on complete, precise data models and interfaces. Large language models change this: agents can understand natural language and read machine-readable descriptions. Many individualized and long-tail needs can be addressed through natural-language communication; only operations requiring deterministic execution need structured interfaces. Common protocols need only handle identity, communication, and necessary structure, substantially reducing the marginal cost of open collaboration. **This is the key to making openness possible again in the agent era.**
+
+**Efficiency.** When any agent can directly invoke a specialized service, providers can be discovered and used across the network without depending on a dominant platform. Repeated manual operations can be automated, expanding the space of composable services and improving overall collaboration efficiency.
+
+This evolution will encounter resistance. Leading platforms have little short-term incentive to open their capabilities. But if existing ecosystems resist openness, new participants will use it to challenge them. Earlier productive forces gave rise to a closed Internet; new productive forces require an open one. **Agents represent advanced productive forces, and only an open Internet can match them.**
+
+### 1.5 What we mean by openness
+
+For ANP, openness first means **open protocols**: public specifications that anyone can independently implement and deploy without a platform's permission. It also means **open connections**: agents from different organizations and domains can authenticate, discover, and communicate with one another, with underlying connection rules independent of any single platform's unilateral control.
+
+Openness does not require all data to be public or all participants to trust one another. An open network can include enterprise systems, private services, and commercial platforms. Each participant decides what to publish, which identities to accept, and what permissions to grant. **Open connections do not imply unconditional access, and identity recognition does not imply shared permissions.** This resembles federated email: each organization operates its own services and interoperates externally through common protocols.
+
+### 1.6 From vision to protocol
+
+Realizing an open agentic web requires solving three problems:
+
+- **Interoperability**: how agents on different platforms and domains authenticate, find, and communicate with one another.
+- **Native interfaces**: how agents expose information and capabilities in machine-readable, callable forms, rather than imitate human website use.
+- **Efficient collaboration**: how agents use natural language for flexible negotiation and switch to efficient, deterministic structured interaction when needed.
+
+ANP's architecture and modules are designed around these three problems.
 
 <a id="architecture"></a>
-## 2. ANP Architecture and Design Principles
+## 2. ANP Architecture
 
 ### 2.1 Reusing the Internet rather than rebuilding it
 
-ANP follows the architecture in the current README: two core protocol layers built on open Internet infrastructure, with domain-specific application protocols above them. The figure below uses the same asset as the README.[^readme]
+ANP's first design choice is to build on the existing Internet. HTTP, DNS, TLS, certificate infrastructure, CDNs, and search engines have been validated over decades and provide global addressing, transport, hosting, and distribution. The additional rules the agentic web needs concern identity, communication, and capability connections for agents.
 
 <p align="center">
-  <img src="../images/anp-architecture2.png" width="760" alt="ANP architecture: open Internet infrastructure, identity and encrypted communication, the application protocol layer, and domain application protocols" />
+  <img src="../images/anp-architecture2.png" width="680" alt="ANP architecture: open Internet infrastructure, the identity and encrypted communication layer, the application protocol layer, and domain application protocols" />
 </p>
 
-*Figure 1: ANP architecture. The meta-protocol is an optional draft, not a mandatory layer of the currently released architecture. Domain capabilities shown in the figure do not imply that all corresponding standards have been released or integrated.*
+*Figure 2: ANP protocol architecture.*
 
-**Open Internet infrastructure.** Existing facilities such as HTTP, DNS, TLS, certificate authorities, CDNs, and search provide addressing, transport, hosting, and distribution. These are reusable capabilities, not a requirement for every deployment to use a CDN or search service, and they do not all perform the same trust function.
+ANP's architecture consists of four parts, from bottom to top:
 
-**Identity and encrypted communication layer.** W3C DIDs and the Web provide the identity foundation, while ANP-02 defines common request authentication. Messaging specifications define DID addressing, cross-domain interaction, business-message semantics, and optional device-bound E2EE. Authentication and messaging can be adopted independently; combinations follow the dependencies of the relevant specifications.
+**Open Internet infrastructure.** Existing facilities such as HTTP, CA, DNS, CDN, Search, and TLS provide addressing, transport, secure channels, hosting, and distribution. ANP reuses them without requiring new network infrastructure.
 
-**Application protocol layer.** Description and discovery make capabilities publishable, locatable, and understandable. Agent application protocols use these connection mechanisms to organize business interactions. Payment, authorization, transaction, and vertical protocols can evolve independently rather than all becoming part of the ANP core.
+**Identity and encrypted communication layer.** This foundation for agent interconnection uses W3C DIDs as the common identity model and contains two core modules: agent identity supplies cross-platform identification and authentication, answering “Who are you, who am I?”; end-to-end messaging supplies cross-domain communication and content protection, answering “How can we communicate securely?”
+
+**Application protocol layer.** This layer makes agents' capabilities understandable, discoverable, and usable. Agent descriptions publish information and interfaces in machine-readable form; agent discovery makes agents locatable; agent application protocols organize concrete interactions on these foundations.
+
+**Domain application protocols.** Payments, authorization, authentication, transactions, and vertical protocols build on the application protocol layer. Their respective ecosystems can design and evolve them independently without incorporating every protocol into the ANP core.
+
+The meta-protocol, ANP-06, remains a draft. It provides optional description-based negotiation and is not a mandatory step in the released architecture. Section 7 introduces it separately.
 
 ### 2.2 How the modules work together
 
-Identity establishes which subject is participating. Messaging exchanges intent, information, and results. Discovery locates candidate collaborators and their entry points. Description explains what information is available and how to interact. Domain protocols define business objects, operations, and rules. The meta-protocol is optional when participants need an additional agreement about the interaction method.
+Each module has a clear responsibility: identity establishes who participates; messaging carries intent, negotiation, and results; description explains available information and interfaces; discovery helps find collaborators; domain protocols define business objects and rules.
 
-These responsibilities do not define a fixed execution sequence. A caller may discover and read public material before authenticating for a protected interface. Existing contacts can use messaging directly. A known interface can be called without search or meta-protocol negotiation. Layering also does not require all application data to pass through an ANP messaging service.
+These capabilities can be composed as needed rather than forming a fixed pipeline. A typical first collaboration might proceed as follows:
 
-### 2.3 Shared design principles
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Agent A (caller)
+    participant S as Search agent or target domain
+    participant B as Agent B (service provider)
+    A->>S: Agent discovery: search, or read .well-known/agent-descriptions
+    S-->>A: Return Agent Description (AD) URLs
+    A->>B: Read AD and selectively follow links to Information
+    Note over A: Decide locally using the user's context
+    A->>B: Invoke Interface with a DID signature (ANP-02 authentication)
+    Note over B: Resolve and validate A's DID Document; evaluate permissions independently
+    B-->>A: Return result
+    A->>B: Continue through ANP messages (optional E2EE)
+```
 
-**Open interoperability.** External connections are not tied to a particular model, product, or operating platform. Participants use common specifications and identify their actual support scope.
+*Figure 3: How discovery, description, authentication, invocation, and messaging work together in a collaboration (schematic).*
 
-**Web reuse.** Existing infrastructure and standard interfaces are preferred, avoiding unnecessary deployment prerequisites for ordinary connections.
+Actual interactions can be simpler: agents that are already contacts can message directly; a known interface can be invoked directly; public information can be read without authentication; and sufficient existing interfaces require no meta-protocol negotiation. Layering does not require all higher-level data to pass through an ANP messaging service.
 
-**Composability.** Identity, messaging, description, discovery, and domain semantics retain distinct responsibilities so that adoption can be incremental.
+### 2.3 Design principles
 
-**Natural language alongside structured expression.** Natural language handles open-ended intent and individualized requirements; structured protocols constrain verifiable and repeatable execution.
+**AI-native.** ANP is designed for direct interaction between agents. It combines structured data, semantic descriptions, and natural language so agents can understand, discover, and collaborate without simulating human operations.
 
-**Minimum trust and minimum disclosure.** Authentication, authorization, content validation, and business judgment remain separate. Only the information and permissions necessary for the task should be exposed or granted.
+**Web reuse.** ANP prioritizes mature Web infrastructure and standard interfaces. Identity publication, agent-description retrieval, and messaging can all be deployed on existing Web services, lowering adoption barriers.
 
-The purpose is not to remove every source of complexity, but to assign it to the appropriate module.
+**Composability.** Identity authentication, messaging, description, and discovery can be adopted independently or combined. An existing HTTP API can adopt DID authentication alone; an information service can publish descriptions alone; participants can adopt ANP incrementally.
+
+**Natural language alongside structured expression.** Natural language handles open-ended intent, individualized requirements, and unforeseen situations; structured protocols constrain verifiable, repeatable, high-frequency execution. The two complement each other.
+
+**Minimum trust and minimum disclosure.** Authentication, authorization, content validation, and business judgment remain separate. Agents disclose only the information and grant only the permissions necessary for a task. External content is treated as data rather than trusted instructions.
+
+### 2.4 Relationship to MCP and A2A
+
+MCP primarily connects models to tools and data sources, extending agents' internal capabilities. A2A organizes task delegation and result exchange between agents around Task. For identity, both commonly reuse mechanisms such as OAuth and API keys managed by deployment operators.
+
+ANP focuses on interconnection between agents from different organizations on the open Internet. W3C DIDs provide cross-domain identities independent of any platform; federated messaging provides persistent cross-domain communication; Information and Interface organize an explorable capability network. The three protocols address different layers and can complement one another: ANP authentication can supply cross-platform identity for other protocols, while MCP services or task-delegation interfaces can be published as Interfaces in agent descriptions.
 
 <a id="identity"></a>
-## 3. Agent Identity: The Starting Point for Cross-Platform Connections
+## 3. Agent Identity: Who Are You, Who Am I?
 
-### 3.1 Why identity is foundational
+### 3.1 Identity is the first problem in agent interconnection
 
-Understanding a sentence does not tell an agent who said it. When receiving a quote, file, or operation request, participants first need to determine which identity the other party uses, whether an authorized key produced the request, and whether that identity is consistent with an existing relationship. Without this foundation, permissions, contacts, group membership, messaging keys, and audit records cannot retain clear meaning across systems.
+When two agents from different platforms meet, their first question is: **Who are you? Who am I?**
 
-ANP distinguishes subject identity, service address, and business permission. A DID identifies a subject, a URL locates a resource or service, and authorization policy determines permitted actions. Names and avatars support presentation but do not replace cryptographic identity verification. A platform forwarding a request is not necessarily its business initiator.[^anp02][^anp09]
+Understanding a sentence does not tell an agent who said it. When receiving a quote, file, or operation request, the recipient needs to establish which subject it came from, whether a key authorized by that subject produced it, and whether it is consistent with an existing relationship. Without verifiable identity, participants cannot establish contacts, determine group membership, grant permissions, encrypt for the correct recipient, or audit afterward. **Identity is the starting point for every connection.**
 
-Reusable identity means that an agent can use the same DID to authenticate to multiple services that support its DID method and ANP authentication, rather than establishing a new proprietary authentication mechanism for every connection. Services may still require business enrollment, subscription, approval, or other admission conditions. Reusing an identity neither means reusing one access token nor grants Internet-wide access.
+On the human Internet, identities are almost entirely isolated within platforms. An account on one platform cannot be used on another; cross-platform interaction requires users to register accounts, obtain keys, and complete authorization at every service. This is already cumbersome for people and cannot scale for agents that need to move freely among many services. If every new agent connection requires manual registration and configuration, agents cannot fulfill their purpose of reducing users' burden.
 
-### 3.2 Why W3C DIDs
+ANP's goal is that **an agent can use the same identity to prove itself to any service supporting ANP, without establishing a proprietary authentication relationship for every connection.** Each service still independently decides whether to admit the agent and what permissions to grant, but “Who are you?” has a common answer.
 
-W3C DID provides common identifier syntax, a DID Document model, and verification relationships, allowing different identity systems to organize interoperability around consistent identity material. DID methods specify how that material is created, resolved, updated, and deactivated. DID Core does not require all methods to depend on the same infrastructure or on a blockchain.[^didcore]
+ANP therefore strictly distinguishes three things: a DID identifies a subject, a URL locates resources and services, and authorization policy determines permitted operations. Names and avatars support presentation but cannot replace cryptographic verification. A platform forwarding a request is not necessarily its business initiator.
 
-ANP chooses DID because this model suits a common representation of cross-platform identity. Organizations can retain their internal account systems while providing DIDs for subjects participating externally. Users can also hold private keys, separating identity control from a particular application's interface. This follows the interoperability goal of ANP's early identity articles, while current specifications remain the authority for authentication and security rules.[^identity-rationale]
+### 3.2 Why existing approaches are insufficient
 
-DID is not, by itself, a complete login, authorization, or reputation system. Common syntax produces practical interoperability only when combined with consistent resolution, verification, algorithm support, and request authentication. ANP-02 separates the shared request-authentication mechanism from individual DID methods.[^anp02]
+When designing ANP's identity approach, we compared the major identity technologies already used on the Internet.
 
-### 3.3 DID and the Web as a basis for federation
+**OAuth and OpenID Connect** are widely used for single sign-on and delegated authorization. Their design goals focus on authentication and authorization within established trust frameworks, rather than direct identity interoperability between any two previously unacquainted systems. **API keys** are straightforward, but each service requires its own key, manual application, and configuration, and they cannot express the identity semantics of “Who is calling?” **Email** has the federated, decentralized structure we seek, but was designed for email services and cannot directly reuse the Web ecosystem as a general-purpose identity system. **Blockchain-based identity approaches** offer a high degree of decentralization, but face scalability, performance, and cost challenges that make it difficult to support the everyday use of tens or even hundreds of billions of agents.
 
-ANP's Web-based approach publishes identity material at HTTPS-accessible locations operated by independent organizations. A counterpart retrieves and validates that material under the DID method, then verifies requests. Domains can retain their own accounts and management arrangements without a single network-wide identity-account center.
+We need an identity approach that simultaneously provides cross-platform interoperability, no prior registration requirement, user control of identity, and deployment at Internet scale.
 
-Operationally, this resembles federated email: internal administration can be centralized while external protocols interoperate. The analogy concerns federation only; ANP uses its own authentication and messaging rules, not email wire formats.
+### 3.3 Why W3C DID: The identity standard with the strongest interoperability
 
-ANP does not make on-chain identity a common prerequisite. This avoids making ordinary identity publication and cross-domain authentication depend on a shared ledger, transaction fees, or consensus confirmation, while using established Web deployment and distribution capabilities. It is a trade-off about dependencies, deployment at scale, and operations, not a blanket performance judgment about blockchain identity. Ledger-based methods can still enter the common authentication framework through separate adaptation.
+W3C Decentralized Identifiers (DIDs) became a W3C Recommendation in 2022. Their design goals address identity centralization and interoperability, closely matching agents' interconnection needs. After analyzing existing identity technologies, we consider DID the identity standard best suited to agents today; designing a new identity standard would be unlikely to improve on it.
 
-The Web approach retains dependencies on DNS, HTTPS, certificates, and hosting availability. Federation does not automatically remove a domain operator's or identity provider's control. ANP therefore distinguishes the trust models of different DID methods.[^anp02][^web]
+**DID provides the common identity model with the strongest interoperability.** DID Core defines common identifier syntax, a DID Document model, and verification relationships. Different identity systems can exchange and verify identity material through this model. Resolving a DID returns a DID Document declaring which public keys can be used for authentication, which for key agreement, and which service endpoints are available. Any conforming verifier can understand it in the same way.
 
-### 3.4 did:wba: Separating identity control from document hosting
+**DID is decoupled from underlying infrastructure.** DID Core requires neither blockchain nor any specific infrastructure. Individual DID methods define how identifiers are created, resolved, updated, and deactivated. This allows us to choose the implementation approach best suited to agents while letting identities from different approaches interoperate through a common model.
 
-`did:wba` targets agent identity on the Web. Its default path-type `e1_` scheme places the fingerprint of an Ed25519 binding public key in the DID's final path segment. The following illustrates structure only: `<fingerprint>` is a placeholder, not a directly usable DID.[^anp03]
+**DID can bridge existing identity systems.** Existing centralized account systems and federated identity systems can retain their current arrangements. By creating DIDs for subjects participating in external collaboration, they can interoperate with other systems, substantially lowering adoption costs.
+
+<p align="center">
+  <img src="../images/did-as-identity-bridge.png" width="480" alt="DID bridges centralized, federated, and natively decentralized identity systems" />
+</p>
+
+*Figure 4: DID establishes interoperability between centralized, federated, and natively decentralized identities.*
+
+**DID gives users control of their identities.** Control comes from private keys rather than an application's account database. Identity is separated from a particular application's interface, and users can carry the same identity across services.
+
+DID answers “Who are you?”, not “What can you do?” DID is not, by itself, a complete login, authorization, or reputation system. A common identity model produces practical interoperability only when combined with consistent resolution, verification, and request-authentication rules. This is what ANP-02 and `did:wba` address.
+
+### 3.4 Why the Web rather than blockchain
+
+DID has multiple implementation approaches, and many DID methods use blockchain. ANP chooses the Web as the primary foundation for agent identity, chiefly because of **scalability**.
+
+Agents will far outnumber human users, with very frequent identity creation, updates, and key rotation. Blockchain-based methods typically write identity state through consensus and transactions. Throughput, confirmation latency, and transaction fees make it difficult to support frequent use by tens or even hundreds of billions of agents, while introducing new infrastructure dependencies for ordinary developers. Web-based approaches directly use HTTPS, DNS, and CDNs. Publishing and resolving a DID Document is as lightweight as accessing a web page, with global distribution and caching capabilities already available. Any organization with a domain and a Web service can immediately provide identities for its agents.
+
+ANP therefore forms a **Web-based federated identity approach**. Each organization independently hosts and operates agent identities under its own domain and can retain its internal accounts and management arrangements. Externally, organizations verify one another through common DID resolution and authentication rules. There is no single network-wide identity center and no requirement for one identity provider trusted by every participant.
+
+```mermaid
+flowchart LR
+    subgraph OA["Organization A (a.example)"]
+        direction TB
+        A1["Agent Alice"]
+        A2["DID Document<br/>Hosted by Organization A"]
+        A1 -.- A2
+    end
+    subgraph OB["Organization B (b.example)"]
+        direction TB
+        B1["Agent Bob"]
+        B2["DID Document<br/>Hosted by Organization B"]
+        B1 -.- B2
+    end
+    subgraph OC["Individual developer (c.example)"]
+        direction TB
+        C1["Agent Carol"]
+        C2["DID Document<br/>Hosted by the developer"]
+        C1 -.- C2
+    end
+    OA <-->|"Mutual DID authentication"| OB
+    OB <-->|"Mutual DID authentication"| OC
+```
+
+*Figure 5: Federated identity. Organizations host agent identities under their own domains and verify one another through common DID resolution and authentication rules, without a network-wide identity center.*
+
+This choice is a trade-off involving dependencies, deployment at scale, and operational costs, and does not deny the value of blockchain identity. The Web approach depends on DNS, HTTPS certificates, and hosting availability, and federation alone does not automatically remove domain operators' control over identity documents. **Giving users, rather than servers, real control of identity while retaining Web hosting** is the starting point for ANP's `did:wba` design. On-chain DID methods can also enter ANP's common authentication framework through separate adaptation.
+
+We do not deny the value of blockchain. It remains valuable for preserving agent DID change records and receipts for transactions between agents where tamper resistance is required, and can provide verifiable histories and audit evidence for agent identities in high-trust settings.
+
+### 3.5 did:wba: Giving users real control of their identities
+
+Web-based DIDs present a fundamental problem: DID Documents are hosted on servers. If a server can arbitrarily replace the document's public keys, the server controls the identity. Native `did:web` relies on the domain and its hosting operator for document correctness. This is reasonable when organizational domains are the trust root, but insufficient where users need control of their identities and end-to-end encryption.
+
+ANP designed the `did:wba` (Web-Based Agent) method to address this. It retains all the conveniences of Web deployment while **embedding the public-key fingerprint in the DID itself**. For the default path-type `e1_` scheme, the DID's final path segment is the fingerprint of an Ed25519 binding public key (`<fingerprint>` is a placeholder):
 
 ```text
 did:wba:example.com:user:alice:e1_<fingerprint>
 ```
 
-The verification model connects three distinct steps.
+On this foundation, `did:wba` uses three interlocking bindings to form a complete verification chain:
 
-**Binding the DID to a public key.** The verifier recomputes the binding key's fingerprint and checks it against the expected DID. Replacing the key changes its fingerprint; the binding identity cannot be silently replaced while retaining the same DID.
+**First, bind the DID to a public key.** The verifier recomputes the binding public key's fingerprint from the DID Document and requires it to match the fingerprint in the DID. Replacing the public key changes the DID, making silent replacement of the bound key impossible while retaining the same DID.
 
-**Binding the public key to the document.** An active default `e1_` DID requires a valid document-wide `DataIntegrityProof`, produced with the binding key using `eddsa-jcs-2022`. The verifier checks the proof and fingerprint relationship, rather than merely finding a plausible public key. Document contents, including service endpoints, authorized keys, and device declarations, are therefore subject to the corresponding integrity verification.
+**Second, bind the public key to the document.** An active `e1_` DID requires a document-wide `DataIntegrityProof`, signed with the binding key using `eddsa-jcs-2022`. The verifier establishes that the private key bound to the DID signed the document, rather than merely finding a plausible public key in it. Service endpoints, authentication keys, and device declarations are therefore protected for integrity.
 
-**Binding a request to private-key control.** A requester must also sign using an authentication key authorized by the document. The fingerprint identifies the expected public key; the document proof establishes its authorized signing; the request signature establishes use of the relevant private key for that request. None substitutes for the others.
+**Third, bind requests to private-key control.** Every request is signed with an authentication key authorized by the document, proving that the private-key holder produced that request.
 
-Given an established expected DID, uncompromised private keys, valid cryptographic assumptions, and correct verification, a hosting provider cannot make an unauthorized modification to an active `e1_` document pass verification. This adds protection compared with a model relying only on the hosting location to publish keys. It does not mean that the server cannot edit a file.
+```mermaid
+flowchart TB
+    DID["DID: did:wba:example.com:user:alice:e1_fingerprint"]
+    PK["Binding public key (Ed25519)"]
+    DOC["DID Document: authentication keys, service endpoints, device declarations"]
+    REQ["Signature on each request"]
+    PK -->|"Binding 1: the public-key fingerprint must match the DID"| DID
+    PK -->|"Binding 2: sign the document-wide DataIntegrityProof"| DOC
+    DOC -->|"Binding 3: authorize authentication keys to sign requests"| REQ
+    HOST["Hosting server"] -.->|"Cannot produce a valid proof for a modified document without the binding private key"| DOC
+```
 
-The host can still withhold service, return old state, or influence initial identity presentation. Bare-domain WBA, historical non-fingerprint forms, and compatibility extensions have their own rules; the full default `e1_` guarantee must not be generalized to them.[^anp03]
+*Figure 6: The three bindings of `did:wba`.*
 
-### 3.5 Supporting methods rather than requiring migration to WBA
+Each binding has a distinct responsibility: the fingerprint establishes the expected public key, the document proof establishes authorized signing of the document, and the request signature establishes private-key use for the particular request. Together, they deliver two key results:
 
-`did:web` suits deployments in which an organization's domain and Web administration provide the identity trust basis. Its path is not bound to a particular public key, so keys can normally be updated in the document without changing the DID; protection of document updates is a deployment responsibility. Default path-type WBA adds fingerprint binding and mandatory document proofs, with the corresponding need to handle DID changes when the binding key changes. These are different control and lifecycle trade-offs.[^web][^anp03]
+- **Users can prove that they control the identity.** Only the binding private-key holder can produce a valid document proof and valid request signatures.
+- **The hosting server cannot modify a DID Document undetectably.** Given an established expected DID, uncompromised private keys, and correct verification, a server cannot produce a proof that passes verification for an unauthorized modified document.
 
-ANP 1.2 defines common-authentication integration for `did:wba` and native `did:web`. Native Web need not be converted to WBA and must not be forced to adopt WBA fingerprint, document-proof, or transition requirements.[^anp02]
+This is the core security improvement of `did:wba` over `did:web`: **identity control is separated from document hosting**. The server hosts and distributes; the user controls. The host can still refuse service, return an old document, or influence first identity presentation, but it cannot forge a valid new document. This property also underpins verifiable ANP end-to-end encryption (see Section 4.4).
 
-`did:webvh`, which adds verifiable history to a Web-based method, is a direction for further adaptation. The existence of its upstream specification does not mean ANP adaptation is complete: ANP-02 currently provides an informative integration description only.[^webvh][^anp02]
+The trade-off is that changing the binding key creates a new DID. `did:wba` defines a stable subject path: the path preceding the fingerprint remains unchanged during key rotation and serves as a continuity reference. It also defines verifiable transition evidence so a verifier can start from a previously trusted DID and establish whether the new DID is its legitimate direct successor. Stable, readable names are provided by WNS (see Section 3.8).
 
-ANP remains open to methods such as BID. Further adaptations need to identify the method revision, resolution and state verification, verification-method types, algorithms, and supported ANP capabilities. DID Core conformance is a common foundation, not a guarantee that every implementation automatically supports every method. Connecting with an existing DID also does not make different DIDs equivalent subjects.
+### 3.6 Open compatibility: Supporting multiple W3C DID-conforming methods
 
-### 3.6 ANP-02: Common request authentication and separate authorization
+`did:wba` is ANP's recommended identity method, but ANP does not require every identity to migrate to `did:wba`. Other DID methods have their own advantages in particular settings.
 
-ANP-02 uses HTTP Message Signatures to authenticate requests and binds request-body contents through a digest when a body is present. A verifier validates the DID Document under its method, then checks authentication-key purpose, signature coverage, time, and replay conditions. Business access permissions are evaluated separately. The specification also defines JSON authentication-metadata carriage and optional access tokens.[^anp02]
+`did:web` suits situations where an organization's domain and Web administration provide the identity trust basis. Its DID path is not bound to a particular public key, so document keys can change while the DID remains the same, providing a simpler lifecycle for enterprise services with established domain trust. `did:webvh` adds a verifiable history log to the Web approach and suits settings requiring a complete audit of identity evolution. Methods based on blockchain or other infrastructure also have suitable ecosystems.
 
-An ordinary HTTP API can adopt this mechanism independently of Messaging, WNS, or a Device Manifest. Authentication material can accompany a business request, but document retrieval, challenges, or cache refreshes can still add network interactions. The design does not promise zero additional requests in every situation.
+| Method | Trust basis | Suitable scenarios | Status in ANP 1.2 |
+| --- | --- | --- | --- |
+| `did:wba` | Domain hosting, public-key fingerprint, and document proof | User-held keys, protection against host tampering, E2EE | Released; fully supported |
+| `did:web` | Domain and its Web administration | Organizational domain as trust root; key rotation without changing the DID | ANP-02 authentication binding defined |
+| `did:webvh` | Web and verifiable history log | Auditable identity history | Informative integration guidance; adaptation in progress |
+| Other methods | Defined by each method | Their respective ecosystems | Open to adaptation as needed |
 
-In the current common HTTP flow, the client authenticates the server's domain through TLS, while the server authenticates the client through its DID request signature. This does not automatically provide a server DID response proof to the client. Mutual DID authentication is a further extension direction, not a released capability introduced by this paper.
+To accommodate these methods, ANP-02 decouples common request authentication from any particular DID method. Authentication depends on resolving and validating the DID Document under the method's rules; the remaining flow is the same for all methods. **In principle, any W3C DID-conforming method can integrate with ANP if its resolution and state-verification rules, verification-method types, and signature algorithms are specified.** Native `did:web` need not be converted to `did:wba` or forced to adopt `did:wba` fingerprint and transition rules. Existing DID identities can participate directly in the ANP network.
 
-DID authentication and OAuth authorization can perform complementary roles. ANP does not replace OAuth. Binding DID-control proofs to OAuth clients, authorization flows, tokens, and resource access requires separate design and validation. Simply using both technologies is not evidence of completed interoperability.[^oauth]
+Different methods provide different security guarantees. DID Core conformance is a common foundation, but does not mean every implementation automatically supports every method or inherits `did:wba` fingerprint guarantees. Implementations should accurately declare their supported methods.
 
-### 3.7 Naming, key changes, and lasting relationships
+### 3.7 ANP-02: Cross-platform identity authentication
 
-Identity needs to be verifiable and usable. WNS/Handles provide human-readable name-to-DID resolution, while complete DIDs serve authentication and business addressing. These are different responsibilities.[^anp04]
+ANP-02 defines request authentication independent of DID methods. It uses the IETF standards HTTP Message Signatures (RFC 9421) and Content-Digest (RFC 9530), allowing any HTTP service to verify a requester's DID identity directly.
 
-Changing a default WBA binding key creates a new complete DID. The stable subject path preceding the fingerprint supports continuity assessment, but matching paths do not prove equivalence. Verifiers start from a previously trusted DID and validate direct-successor relationships and evidence according to the method.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Agent A's client
+    participant S as Agent B's server
+    participant H as Agent A's DID hosting service
+    C->>S: First HTTP request: Signature-Input, Signature, Content-Digest
+    S->>H: Resolve A's DID Document under its method
+    H-->>S: DID Document
+    Note over S: Validate document (did:wba requires fingerprint and document-proof checks)
+    Note over S: Check signature coverage, key purpose, time, and replay protection
+    Note over S: Evaluate business permissions independently
+    S-->>C: Respond and return an access token through Authentication-Info
+    C->>S: Subsequent requests carry the access token
+```
 
-Current rules distinguish original-binding-key proofs, proofs from previously authorized recovery keys, authenticated provider assertions, and unverified hints. These have different assurance. A provider assertion cannot be relabeled as cryptographic transition proof from the previous key holder. Name mappings, `alsoKnownAs`, or HTTP hints cannot independently authorize permission inheritance.[^anp03]
+*Figure 7: ANP-02 cross-platform identity authentication.*
 
-The business system uses the actual assurance to decide which relationships may continue. Even where a relationship is allowed to continue, an old DID's encrypted sessions and private state cannot simply be copied into sessions for the new DID.[^p5]
+In its first request, the client signs with an authentication key authorized by the DID Document and binds any request body through a digest. The server resolves and validates the DID Document under its method, checks covered components, key purpose, signature time, and replay conditions, then independently evaluates business permissions. It may return an access token through `Authentication-Info` for subsequent requests. If the server requires a signature over a server-issued nonce, it can first return a `401` challenge, adding one interaction at the implementer's discretion.
+
+This design has three important characteristics. First, **no prior registration**: the agent supplies verifiable identity in its first request, and the service need not allocate an account or key in advance. Second, **independent adoption**: an ordinary HTTP API needs only ANP-02 and a DID method, without implementing messaging, naming, or other ANP modules. Third, **complementary authorization**: DID authentication answers “Who are you?”, while OAuth and other authorization mechanisms answer “What are you allowed to do?” ANP does not replace OAuth; the two can work together within their respective responsibilities.
+
+In the current common HTTP flow, the client validates the server's domain through TLS, while the server validates the client through its DID signature. Mutual authentication in which the server proves its DID identity to the client is a direction for future extension.
+
+### 3.8 Naming and lasting identity
+
+Identity needs to be both verifiable and usable. A fingerprint-bearing DID suits machine verification but is difficult for people to remember and share. WNS (ANP-04) resolves readable Handles to DIDs. Complete DIDs remain responsible for authentication and addressing, a separate role from naming.
+
+Agent relationships may last months or years while keys rotate and devices change. `did:wba` distinguishes continuity evidence of different strengths: transition proofs signed with the original binding key, proofs from previously authorized recovery keys, authenticated hosting-provider assertions, and unverified hints. Business systems should use the actual assurance to decide which relationships may continue. Name mappings or other hints alone cannot establish equivalence between old and new DIDs or authorize permission inheritance.
+
+### 3.9 Authorization and privacy
+
+**Authentication is not authorization, and neither is human approval.** A request signature proves that the private-key holder produced the request, not that the user reviewed and approved that particular operation. ANP allows agents to perform low-risk operations autonomously within authorization policy, such as retrieving public information. For high-risk operations such as payment or sensitive-data disclosure, an interface can declare `humanAuthorization: true` in its agent description. The applicable business protocol verifies the object, scope, and validity of approval. DID Documents do not define a dedicated human-authorization verification relationship; human-authorization semantics belong to higher-level authorization policy. Section 8.3 explains how agents obtain authorization, including the respective roles of OAuth and verifiable credentials.
+
+**Multiple DIDs reduce correlation risk.** Reusing one DID across services helps preserve relationships but can make activity easier to correlate. Users can use separate DIDs and keys for different contexts: one for lasting social relationships and separate, periodically replaced DIDs for shopping or food orders. The protocol does not automatically associate these DIDs or create permission inheritance between them. Public mappings, network characteristics, and business data can still reconnect them, and the protocol does not guarantee anonymity.
 
 <a id="messaging"></a>
-## 4. Agent Messaging: A General Communication Basis for Open Collaboration
+## 4. Agent Messaging: A General Medium for Open Collaboration
 
 ### 4.1 Why messaging matters
 
-Open collaboration cannot consist only of predefined standard requests. Clarifying requirements, discussing options, changing conditions, reporting progress, and handling exceptions require participants to exchange context. Messaging provides a persistent carrier for this interaction, and natural language supplies a common medium for expressing requirements across domains.
+If identity is the foundation of agent interconnection, messaging is the main channel for agent collaboration.
 
-ANP treats messaging as a core capability because agents can use natural language for many open-ended communications without jointly implementing a specialized interface for every business detail before first contact. This is a design motivation, not an unmeasured percentage of tasks covered.
+Most collaboration on an open network cannot be specified in advance as standard interfaces. Clarifying requirements, discussing options, changing conditions, reporting progress, and handling exceptions require repeated exchanges of context. People use language for these exchanges; in the agentic web, large language models allow agents to understand and generate natural language as well. **Natural-language messaging can address the vast majority of communication and negotiation needs between agents.** Two agents that have never integrated can explain requirements, discuss conditions, and reach agreement through messages without first developing a dedicated interface together. This is why ANP treats messaging as a core module.
 
-Messages support more than a single invocation. They can maintain ongoing contacts, multi-party collaboration, and asynchronous working relationships. Completion of one task need not terminate the relationship between its participants.
+Messaging is also valuable for its persistence. An interface invocation ends when it returns, while messages can maintain lasting contacts, multi-party collaboration, and asynchronous working relationships. After one task ends, the parties can continue discussing later needs; multiple agents can form a group to advance a complex task together. Messaging creates a continually evolving collaboration network.
 
-### 4.2 Flexible communication alongside predictable execution
+### 4.2 Natural-language negotiation and structured execution
 
-Natural language can express conditions such as split deliveries or a constrained budget with a fixed deadline. It does not by itself guarantee agreement about quantities, prices, or the scope of execution. ANP therefore does not require messaging to replace every API.
+Natural language can express complex conditions such as split deliveries or a limited budget with an immovable deadline, but cannot alone guarantee identical understanding of quantities, prices, and execution scope. ANP therefore assigns messages and interfaces complementary roles: discuss requirements through messages, confirm key points through structured parameters, execute through business interfaces, and report progress or exceptions through messages. Structured interfaces suit repeated, high-frequency, or strictly validated operations; natural language complements them for individualized needs and cases outside existing interfaces. This is consistent with agent descriptions supporting both natural-language and structured interfaces (see Section 5).
 
-A natural combination is to discuss through messages, confirm through structured parameters, execute through the applicable business interface, and report progress or exceptions through messages. Existing structured interfaces are often preferable for repeated, high-frequency, or strictly validated operations. Natural-language interfaces complement them for individualized requirements and uncovered cases. ADP describes both kinds.[^anp07]
+Receiving a message does not mean the business operation has completed or that a user has approved payment or data disclosure. Messaging transport semantics and domain-specific completion conditions remain separate.
 
-Receiving a message does not mean the receiver has completed the business operation, nor that a user approved a payment or disclosure. Messaging transport and acceptance semantics remain distinct from domain-specific completion conditions.[^anp09]
+### 4.3 Federated messaging architecture
 
-### 4.3 Federated messaging capabilities
+ANP Messaging (ANP-09) uses a federated architecture. Each service domain hosts its own agents, much as each organization operates its own email server. Messages are delivered across service domains without a single network-wide messaging center. Regardless of the underlying number of devices and services, business addressing always uses an Agent DID or Group DID.
 
-ANP Messaging defines cross-domain direct messaging, groups, mentions, attachments, and object transfer. Profiles combine base semantics with security mechanisms. The business subject remains an Agent DID or Group DID, rather than a device number.[^anp09]
-
-Different service domains can host their respective agents. For direct messages, cross-domain success is anchored in acceptance by the target agent's ingress service. For groups, the Group Host organizes membership and event order. A relay does not become a universal business authority or reinterpret application content.
-
-Attachments use a manifest carried in a message, with object contents retrieved through a separate HTTP(S) channel. Large objects need not traverse the messaging relay path. Where confidentiality is required, object-level encryption can be used and its key conveyed through protected messages. Group membership, attachment access control, and content encryption retain separate responsibilities.[^anp09]
-
-Base messaging may use transport protection alone or an E2EE overlay. Service advertisement and runtime selection must reflect actual support; encryption failure must not silently switch the interaction to plaintext or a weaker mode.
-
-### 4.4 From verifiable identity to verifiable communication keys
-
-End-to-end encryption concerns not only how content is encrypted, but to whom. Without verification of the communication public key, an intermediary could try to substitute its own key for the recipient's.
-
-ANP connects verification of identity material, device eligibility, and communication keys. For an active default WBA `e1_` identity, the conceptual chain is:
-
-```text
-Expected DID
-  → fingerprint-matched binding public key
-  → verified DID Document
-  → document-authorized devices and communication keys
-  → establishment material and sessions verified under the E2EE Profile
-  → authenticated encrypted messages
+```mermaid
+flowchart TB
+    subgraph DA["Service domain a.example"]
+        direction TB
+        Alice["Agent Alice"]
+        MA["Messaging Service A"]
+        Alice --> MA
+    end
+    subgraph DB["Service domain b.example"]
+        direction TB
+        MB["Messaging Service B"]
+        Bob["Agent Bob"]
+        MB --> Bob
+    end
+    subgraph DC["Service domain c.example"]
+        GH["Group Host<br/>Maintains membership and orders group events"]
+    end
+    MA -->|"Discover messaging service from Bob's DID; deliver direct messages across domains"| MB
+    MA <-->|"Group operations and messages"| GH
+    MB <-->|"Group operations and messages"| GH
 ```
 
-Fingerprint binding and document proofs reduce the scope for silent key substitution by a host. Device and E2EE rules verify the concrete cryptographic endpoints participating in a session. The complete mechanism is jointly defined by the DID method, P2 Identity and Discovery, and the relevant E2EE Profile. Checking only one link is insufficient.[^anp03][^p2][^p5]
+*Figure 8: Federated messaging architecture. Service domains operate independently and deliver messages across domains through common protocols.*
 
-Direct E2EE uses X3DH-like asynchronous establishment and Double Ratchet-like message protection. Group E2EE uses MLS and connects DID, device, and application-group state to cryptographic state. These choices do not establish independent security audits of every ANP implementation or wire compatibility with other products using similar algorithms. P6 retains candidate status.[^anp09][^mls]
+For direct messaging, cross-domain delivery succeeds when the target agent's service domain accepts the message. For groups, the Group Host maintains membership, orders events, and issues a verifiable `group_receipt` proving that a group operation or message was accepted and recorded in group state. Relays deliver messages without reinterpreting application content or becoming a center for all business relationships.
 
-Native `did:web` can also compose with the corresponding E2EE Profiles, but its identity material is validated under Web method rules and retains that hosting trust boundary. WBA's fingerprint-based guarantees do not automatically transfer to every method.
+ANP Messaging 1.2 organizes capabilities into Profiles. Base business semantics, security mechanisms, object transfer, and federation rules can evolve independently while sharing the same outer binding:
 
-### 4.5 Multiple devices and the limits of encryption
+| Profile | Capability |
+| --- | --- |
+| P1 Core Binding | Common JSON-RPC 2.0 messaging binding, capability negotiation, idempotency, and error model |
+| P2 Identity and Discovery | Discover messaging services from DIDs; declare devices required for device-addressed E2EE |
+| P3 Direct Base Semantics | Sending, content model, and acceptance semantics for one-to-one messages |
+| P4 Group Base Semantics | DID-based membership, group lifecycle, policies, and event ordering |
+| P5 Direct E2EE | Asynchronous establishment and per-message protection between devices |
+| P6 Group E2EE | MLS-based group encryption (candidate status) |
+| P7 Attachments and Object Transfer | Messages carry attachment manifests; objects use a separate HTTP(S) channel and may be encrypted individually |
+| P8 Federation and Cross-Domain Delivery | Discovery, forwarding, and delivery across service domains |
+| P9 Message Mentions | Message mention extension |
 
-One business DID can correspond to several cryptographic device endpoints. For device-addressed E2EE, the DID Document's Device Manifest declares current endpoints and key references. Direct messaging establishes separate sessions for concrete device pairs; groups can maintain distinct MLS leaves for several devices belonging to one member DID. Devices do not share private keys, Ratchet state, or other private session state.[^p2][^anp09]
+Attachments use manifests carried in messages and independently transferred objects, keeping large files out of the message relay path. Where confidentiality is required, objects can be encrypted separately and their keys conveyed through protected messages. Each request explicitly declares its security mode through `security_profile`. Base messages may use transport protection alone or add E2EE. Implementations must accurately advertise supported modes and must not silently downgrade encryption failures to plaintext or weaker modes.
 
-Ordinary non-E2EE messaging remains DID-addressed and does not require a Device Manifest. The number of devices does not change the number of business group members. Separating business identity from cryptographic endpoints avoids turning multi-device support into multiple sets of contacts or membership relationships.
+### 4.4 Verifiable end-to-end encryption
 
-E2EE confidentiality depends on verification, private-key custody, state updates, and secure endpoints. It cannot stop a recipient from forwarding plaintext, protect an already compromised endpoint, or automatically hide metadata such as communication relationships. If an agent submits decrypted content to a remote model service, that subsequent plaintext processing lies across a separate data-protection boundary.
+The challenge of end-to-end encryption concerns **who receives the encrypted content**, as well as how it is encrypted.
 
-<a id="discovery"></a>
-## 5. Agent Discovery: Finding Collaborators on the Network
+In most instant-messaging systems, servers distribute users' public keys. If a server, or an attacker who compromises it, replaces a recipient's public key with its own, it can decrypt messages and then re-encrypt them with the real key for delivery without either party noticing. This is a man-in-the-middle attack. Users must either trust the server or compare security codes manually through an offline channel. The effectiveness of end-to-end encryption in these systems ultimately depends on server behavior that users cannot verify.
 
-### 5.1 Common entry points without a single directory
+ANP connects `did:wba` fingerprint identity with end-to-end encryption to make it **verifiable**. For an active `e1_` identity, the sender's verification chain is:
 
-An open network allows organizations to publish agents independently. It needs common discovery conventions, not mandatory registration of every node with one platform. ANP-08 helps callers and search services locate public Agent Description documents.[^anp08]
-
-Searching for a suitable agent, obtaining its description, and resolving a messaging service from a known DID are related but different operations. Discovery returns entry points; DID resolution supplies identity and associated service material; runtime capability confirmation determines what is currently available.
-
-### 5.2 Active and passive discovery
-
-**Active discovery** starts with a known domain and reads its public description catalog through the following conventional entry point:
-
-```text
-https://{domain}/.well-known/agent-descriptions
+```mermaid
+flowchart TB
+    S1["Expected recipient DID (containing the public-key fingerprint)"]
+    S2["Fingerprint-matched binding public key"]
+    S3["DID Document verified through DataIntegrityProof"]
+    S4["Document-authorized devices and communication keys (Device Manifest)"]
+    S5["Establishment material and sessions verified under the E2EE Profile"]
+    S6["Messages decryptable only by recipient devices"]
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    SRV["Messaging server"] -.->|"Key substitution at any link causes verification to fail"| S3
 ```
 
-The discovery document uses a JSON-LD collection page, lists description URLs, and links additional pages through `next`. This distributes catalogs across domains and supports pagination. Knowing one domain does not automatically discover the entire Internet.[^anp08]
+*Figure 9: The verification chain from DID to encrypted session.*
 
-**Passive discovery** allows agents to submit their description URLs to search services. A search service exposes a registration interface in its own description, then manages indexing and retrieval. ANP does not require one global search provider or define a common ranking, charging, or quality-assessment algorithm.
+The sender can independently verify every link: the DID fingerprint identifies the binding public key; the document proof signed by that key protects the integrity of device declarations and communication keys; the E2EE Profile verifies the actual cryptographic endpoints in the session. The server delivers messages but cannot forge any link. **Given the correct recipient DID, the sender can cryptographically establish that only devices authorized by that recipient can decrypt the message.** ANP E2EE thus becomes a verifiable mechanism independent of trust in the server.
 
-Callers can also obtain description URLs from existing contacts, organizational directories, or other trusted channels. A restricted network is not required to expose a public discovery entry point.
+Direct E2EE (P5) uses X3DH-like asynchronous establishment and Double Ratchet-like per-message protection, allowing a sender to establish a session without waiting for the recipient to come online and providing properties such as forward secrecy. Group E2EE (P6) uses the IETF MLS standard (RFC 9420), binding DID, device, and application-group state to MLS cryptographic group state. The Group Host orders events and, by default, does not hold plaintext group messages. P6 remains a candidate; stable release depends on formal registration of the relevant MLS extension type.
 
-### 5.3 Discovery does not replace verification
+Native `did:web` can also compose with E2EE Profiles, but its identity material is validated under Web method rules. Key trust remains dependent on domain hosting, without the protection against tampering provided by `did:wba` fingerprints.
 
-Indexing does not prove capability claims, a search result does not establish business trust, and a URL in a description is not an access grant. Callers separately assess identity, resource provenance, interface security conditions, and actual capabilities.
+### 4.5 Multiple devices and encryption boundaries
 
-Deployments should distinguish public from private information and consider stale indexes, malicious registration, and request rates. ANP supplies shared discovery mechanisms, not a promise that every search service indexes every agent or a universal reputation endorsement for results.[^anp08]
+One business identity often spans several devices: a phone, a computer, and cloud runtime instances. ANP separates business identity from cryptographic endpoints. For device-addressed E2EE, the DID Document's Device Manifest declares current devices and key references. Direct messaging establishes sessions for concrete device pairs, while groups maintain separate MLS leaves for several devices belonging to one member DID. Devices do not share private keys or session state, so compromising one device does not directly expose other devices' sessions. Ordinary unencrypted messages remain DID-addressed, and device count does not change contact or group-member counts.
+
+E2EE protects message contents in transit and storage. It cannot stop a recipient from forwarding plaintext, protect an already compromised endpoint, or automatically hide metadata such as communication relationships and timing. If an agent submits decrypted content to a remote model service, that data enters a separate boundary requiring its own protection.
 
 <a id="description"></a>
-## 6. Agent Description: A Linked Network of Information and Interfaces
+## 5. Agent Description: A Network of Information and Interfaces
 
-### 6.1 An AD is an entry point, not the whole context
+### 5.1 Core idea: Linked Data
 
-An Agent Description (AD) is the agent's external description entry point, analogous to a website home page. It explains the subject, capabilities, information resources, interfaces, and security requirements so a caller can choose what to visit next. It does not require downloading everything about the agent at once.[^anp07]
+The World Wide Web succeeds by connecting documents distributed around the world through URLs and hyperlinks. Anyone can publish pages independently, link to others' content, and let readers follow links to the information they need. Tim Berners-Lee's Linked Data extends this idea to data: each resource has an accessible URL, links express relationships, and users retrieve related content as needed.
 
-A supplier may have many products, technical documents, and business interfaces. The root description needs to provide a useful overview for further exploration. Callers can follow relevant links without placing unrelated material into model context. This organizes a resource network rather than merely presenting a single capability card.
+ANP's Agent Description Protocol (ANP-07) uses this approach to organize externally available content. An Agent Description (AD) is an agent's external entry point, analogous to a website home page. It explains who the agent is, which subject it belongs to, its information and interfaces, and its security requirements, linking to detailed resources through URLs. **An agent description organizes an explorable resource network rather than a static capability card.**
 
-### 6.2 Two first-class concepts
+Current ANP-07 expresses agent descriptions in JSON, with natural-language explanations in its fields. It draws on Linked Data's resource-and-link organization without requiring a full RDF or OWL Semantic Web stack. This reflects lessons from the Semantic Web: manual annotation was costly, while large language models can directly understand natural-language descriptions, removing the need for exhaustive ontologies for every item of content.
 
-**Information** means externally available information resources, including text, structured material, images, audio, video, and other data. It answers what information can be retrieved.
+### 5.2 Two first-class concepts: Information and Interface
 
-**Interface** means an interaction entry point, whether structured or natural-language based. It answers how interaction can take place. An interface definition can itself be retrieved as a linked resource before the applicable protocol is used to invoke it.[^anp07]
+ANP abstracts everything an agent exposes externally into two first-class concepts.
 
-This separation preserves a boundary between reading and acting. Reading a product specification is not placing an order. Finding a booking interface grants no permission to call it. A natural-language description also does not replace parameter, error, or state contracts.
+**Information** means externally available information resources, including text, structured data, product specifications, service explanations, images, audio, and video. It answers “What can I read from this agent?”
 
-### 6.3 Linked Data ideas with lightweight representation
+**Interface** means an external interaction entry point. **Structured interfaces** use explicit protocols and formats such as OpenRPC and JSON-RPC and suit deterministic, high-frequency, strictly validated operations. **Natural-language interfaces** let callers express requirements in natural language and suit individualized, open-ended tasks. Interface answers “How can I interact with this agent?” A structured interface that meets the need should be preferred, with natural-language interaction used when structured interfaces cannot cover it.
 
-ANP draws on Linked Data's approach to organizing information through identifiable resources and links. Resources can be published independently, descriptions help explain link purposes, and callers follow links to relevant material.[^linkeddata]
+This abstraction differs fundamentally from A2A's Task-centered model. A2A focuses on asking a counterpart to complete a task: the caller describes the task, and a remote agent executes it and returns results. ANP focuses on available information and interfaces: the caller reads information, makes decisions in its own environment, and then chooses an interface or decides whether to delegate a task. Task delegation can itself be published as an Interface. **In ANP, decision-making remains with the caller.**
 
-A URL is therefore more than a string in a list: it connects an overview to detailed material and interface definitions. The network can be hierarchical while also allowing several entry points to reference the same resource. It does not require copying all data into a central directory.
+The Information/Interface distinction also preserves the boundary between reading and acting: obtaining a product description is not placing an order; finding a booking interface grants no permission to invoke it; and an interface's natural-language description does not replace its parameter, error, and state contracts.
 
-Current ANP-07 defines AD using ordinary JSON, with natural-language descriptions inside structured fields. It does not require a complete RDF or OWL reasoning system. ANP-08 discovery collections still use JSON-LD. Adopting linked-resource ideas and requiring one serialization for every document are different choices. Exact field names and formats remain defined by the owning specifications.[^anp07][^anp08]
+### 5.3 Connecting an agent data network through URLs
 
-### 6.4 Selective retrieval, local decisions, and interface execution
+Information and Interface are linked through URLs in agent descriptions. An Information resource can link to more detailed resources or related interfaces, forming a progressively explorable network with AD as its entry point.
 
-A caller starts from an AD, selects Information or interface definitions relevant to its task, obtains enough material to decide, and then chooses whether to act. This illustrates information organization, not new AD fields or wire formats:
+<p align="center">
+  <img src="../images/anp-information-interact.png" width="640" alt="An agent follows URLs from an agent description to documents, images, videos, and interfaces" />
+</p>
 
-```text
-Supplier AD
-  ├─ Information: product-catalog URL
-  │    └─ relevant product → technical specifications and delivery links
-  ├─ Information: service and support information URL
-  └─ Interface: definition URL for quotation, ordering, or conversation
+*Figure 10: Agents start from an agent description and follow URL links to documents, images, videos, and interfaces.*
+
+A supplier agent's description can provide only an overview: an Information link to a product catalog, an Information link to after-sales guidance, a structured quotation and ordering interface, and a natural-language inquiry interface. Each catalog product links to its technical specifications and delivery information. A procurement agent follows only task-relevant links to obtain the information needed for a decision without downloading everything the supplier provides.
+
+When thousands of agents publish information and interfaces in this way and cross-reference them through links, they collectively form a data network for agents.
+
+<p align="center">
+  <img src="../images/ai-native-network.png" width="720" alt="An AI-native data network of personal, search, and service agents built on Web infrastructure" />
+</p>
+
+*Figure 11: An AI-native data network. Personal, search, and service agents connect through descriptions and links on existing Web infrastructure.*
+
+Agents interact with this network much as a search-engine crawler visits pages: start from an AD, selectively visit links relevant to the task, follow further links until enough information is available, then integrate it locally, form a strategy, and choose interfaces for execution. The human Internet is a page network designed for reading; this is a data network designed for agents to understand and invoke.
+
+### 5.4 Benefits of this design
+
+**Hierarchical, selective retrieval.** Agents need not download everything about a counterpart at once. The root description provides an overview, and the caller follows task-relevant links step by step, avoiding irrelevant content in bandwidth use and model context. A service with a vast number of products and documents can expose them through the same lightweight entry point.
+
+**Local decisions and privacy.** The caller combines private context such as budget, preferences, and internal constraints in its chosen trusted environment and submits only the information needed for the interaction. Compared with handing the entire task and all context to a remote agent, this substantially reduces disclosure to business counterparts.
+
+**Natural decentralization.** Resources can be distributed across domains and servers, independently published and maintained by different organizations, and cross-referenced through links without a central directory. This follows the same principle that allows the Web to grow without permission.
+
+**Web ecosystem reuse.** Public resources are ordinary Web resources that can use HTTP caching, CDN acceleration, and search-engine indexing, with low publication and maintenance costs.
+
+**Description and implementation evolve independently.** Information and interfaces can be updated separately, and several entry points can reference the same resource without duplicate maintenance. Interfaces can use different protocols, and new interface types can be added over time.
+
+**The caller chooses the interaction path.** It may only read, invoke a structured interface, communicate through natural language, or delegate a task. Links place these paths in one capability network without prescribing a single workflow.
+
+These benefits must be balanced against additional requests, network latency, and information freshness. Callers should bound traversal depth, size, and time, check resource types and provenance, and treat external content as data rather than commands overriding their own instructions.
+
+<a id="discovery"></a>
+## 6. Agent Discovery: Finding Collaborators on the Network
+
+Agents on an open network are distributed across organizations and domains. They need a common way to be found without registering every agent with one platform. Agent Discovery (ANP-08) defines two complementary mechanisms, both returning Agent Description URLs.
+
+```mermaid
+sequenceDiagram
+    participant C as Caller agent
+    participant D as Target domain
+    participant P as Service provider agent
+    participant S as Search agent
+    Note over C,D: Active discovery
+    C->>D: GET /.well-known/agent-descriptions
+    D-->>C: CollectionPage: AD URLs (paginated through next)
+    Note over P,S: Passive discovery
+    P->>S: Invoke registration interface and submit its AD URL
+    S->>P: Retrieve AD and build index
+    C->>S: Search for required capabilities
+    S-->>C: Return matching AD URLs
 ```
 
-A procurement agent can read only relevant product and delivery details, combine them with budget, preferences, and internal constraints in its own trusted environment, and send only necessary information to the supplier. ANP does not require disclosure of all internal context or delegation of the complete task to a remote agent.
+*Figure 12: Active and passive discovery.*
 
-“Local” means the processing environment selected by the caller, not necessarily a physical device owned by the user. This pattern can reduce disclosure to a business counterpart, but it does not eliminate privacy risks from remote models, access logs, or other processors. Task delegation remains an available interaction option.[^anp07]
+**Active discovery** uses the Web's `.well-known` convention. An agent that knows a domain can access `https://{domain}/.well-known/agent-descriptions` to obtain that domain's public AD list. The list uses a JSON-LD CollectionPage and pagination through `next` to support many agents. Active discovery distributes catalogs across domains, consistent with the decentralized structure of DNS and the Web.
 
-### 6.5 Benefits and costs of the linked network
+**Passive discovery** resembles submitting a site to a search engine. Search-service agents publish a registration interface in their own descriptions. Other agents invoke it to submit their AD URLs; the search agent periodically retrieves descriptions, indexes them, and offers search. ANP does not require one global search service. Providers independently decide ranking, charging, and quality assessment, and different search agents can compete.
 
-Selective retrieval can reduce irrelevant transfer and context use. Hierarchical descriptions can organize many resources, and sharing a resource link across entry points can reduce duplication and update effort. Independently published public resources can also use appropriate HTTP caching, CDNs, and indexing rather than being regenerated in every conversation.
+The mechanisms complement each other: active discovery relies on distributed domain catalogs, while passive discovery uses search agents to aggregate indexes. Newly participating agents can be found by other network nodes by publishing or registering their descriptions rather than becoming new information silos. Callers can also obtain AD URLs from existing contacts, organizational directories, or other trusted channels.
 
-More importantly, the caller retains a choice of interaction path: read before deciding whether to delegate, use an existing structured interface, or discuss an uncovered requirement through natural language. Links place these paths in the same capability network without prescribing a single workflow.[^anp07]
-
-These benefits must be balanced against additional requests, latency, freshness, and navigation costs. Clients should bound retrieval depth, size, and time, inspect resource types and provenance, and treat external material as data rather than trusted commands that override their own instructions. A link neither proves resource integrity nor guarantees permanent availability.
-
-### 6.6 Relationship to task-centered models
-
-ANP's description model organizes retrievable resources and interaction entry points around Information and Interface. A2A uses objects such as Task, Message, and Artifact to organize task execution and result exchange. These are differences in modeling emphasis, not mutually exclusive capabilities. Current A2A permits a direct Message response for simple interactions without creating a Task.[^a2a]
-
-ANP can also expose task delegation or another protocol through an Interface. Its distinct emphasis is on following links, obtaining information, retaining the caller's decision process, and selecting a subsequent execution path. Listing a third-party interface in a description does not establish tested end-to-end interoperability with that protocol.
+**Discovery is not trust.** Being found does not establish trustworthiness, and URLs in a description do not grant access. Discovery supplies entry points, identity verification establishes trust, and authorization determines permissions. Restricted networks need not expose public discovery entry points.
 
 <a id="meta-protocol"></a>
-## 7. Meta-Protocol: Optional Dynamic Interaction Negotiation
+## 7. Meta-Protocol: Negotiating Interaction Methods as Needed (Draft)
 
-### 7.1 Why some interactions need additional negotiation
+### 7.1 Why a meta-protocol is needed
 
-Identity, messaging, discovery, and description support many ordinary interactions. However, an intent can correspond to multiple interfaces, and runtime conditions can differ from static descriptions. An interface may be unavailable, participants may support different security modes, or a caller may impose special input or execution constraints.
+Identity, messaging, description, and discovery already support most interactions. On an open network, however, interaction methods themselves may need negotiation: one intent may correspond to several interfaces, participants may support different security modes, data formats, or Profiles, and actual runtime capabilities may differ from static descriptions.
 
-The meta-protocol addresses how this interaction should take place, rather than performing the business task. When needed, it helps select an interface, Profile, security mode, schema, or other explicit execution conditions. ANP-06 remains an optional draft, not a prerequisite for every call.[^anp06]
+The meta-protocol addresses “How should this interaction take place?” When needed, agents combine natural-language flexibility with structured capability declarations to negotiate a mutually supported interface, Profile, security mode, or schema before efficient, deterministic business interaction. This direction draws on research such as Agora that combines natural-language flexibility with structured-protocol efficiency.
 
-### 7.2 From description to a negotiated result
+### 7.2 Negotiation based on agent descriptions
 
-The current draft uses a `MetaProtocolInterface` in the AD to identify the negotiation entry point, `anp.get_capabilities` to confirm runtime capabilities, and `anp.negotiate` to select the subsequent interaction:
+The current ANP-06 draft positions the meta-protocol as a description-based semantic negotiation layer. A caller locates the negotiation entry point through `MetaProtocolInterface` in the AD, confirms runtime capabilities through `anp.get_capabilities`, and determines the subsequent interaction through `anp.negotiate`.
 
-```text
-Discovery and description → capability confirmation when needed
-  → negotiation when needed → selected interface, Profile, security mode,
-    or schema → business interaction
+```mermaid
+sequenceDiagram
+    participant A as Agent A
+    participant B as Agent B
+    A->>B: Read AD and locate MetaProtocolInterface
+    A->>B: anp.get_capabilities
+    B-->>A: Currently supported interfaces, Profiles, security modes, and schemas
+    A->>B: anp.negotiate: propose an interaction plan and constraints
+    B-->>A: Accept or propose an alternative
+    A->>B: Perform business interaction under the negotiated result
 ```
 
-The draft reuses existing binding and authentication mechanisms. It does not create a new transport layer, encrypted format, or identity system. It draws on Agora's research direction of combining natural-language flexibility with structured-protocol efficiency, adapted to ANP's description and communication architecture.[^anp06][^agora]
+*Figure 13: Description-based meta-protocol negotiation (draft).*
 
-### 7.3 Negotiation does not replace authorization or implementation
+The draft reuses ANP's existing authentication and transport mechanisms without introducing separate identity, encryption, or transport systems. It does not require automatic code generation, remote code loading, or executable exchange.
 
-Natural-language discussion expresses intent; meta-protocol negotiation selects an interaction method; authorization determines permitted conduct. Successful negotiation does not issue an access token, prove human approval, or make an unimplemented capability available.
+### 7.3 Negotiation boundaries
 
-Suitable results can be reused while their validity conditions hold. Capability, policy, or security changes require renewed checks. The draft does not mandate code generation, remote code loading, or executable exchange, and does not make global protocol consensus or incentives part of current interoperability requirements.[^anp06]
+The meta-protocol is optional: sufficient existing interfaces require no negotiation. Natural-language discussion expresses intent, the meta-protocol agrees on interaction methods, and authorization determines permitted behavior. These roles cannot substitute for one another. Successful negotiation does not issue an access token, prove human approval, or make an unimplemented capability available. Results can be reused while their validity conditions hold; capability, policy, or security changes require renewed confirmation. ANP-06 remains a draft and will continue to evolve with implementation feedback.
 
 <a id="applications"></a>
-## 8. Application Protocols and Ecosystem Extensions
+## 8. Application Protocols and Ecosystem
 
-### 8.1 Common foundations do not mean one model for every business
+### 8.1 Common foundations rather than one model for every business
 
-ANP seeks clear common connection capabilities, rather than placing every industry's objects and workflows in its core. Payments, orders, authorization, transactions, and other domains have their own business rules that belong to their specialized protocols and ecosystems.
+ANP keeps its core small, defining only the shared capabilities needed for agent interconnection: identity, messaging, description, and discovery. Application protocols cover many domains, including payments, orders, authorization, transactions, and individual industries, each with complex business rules and often existing or emerging specialized protocols. ANP favors **integration rather than replacement**: domain protocols can use ANP identities to authenticate participants, descriptions to publish interfaces, discovery to find services, and messaging as needed. These capabilities can be adopted independently; an ANP-authenticated business interface need not wrap all data in ANP messages.
 
-Domain protocols can authenticate participants with ANP, publish interfaces through AD, discover services, and optionally use messaging. These choices can be adopted separately. An interface using ANP authentication need not wrap all its data as ANP messages.
+### 8.2 Payments: Integration with existing protocols
 
-### 8.2 Payments and authorization: Integration with explicit boundaries
+Payments involve participant identities, orders, approval to pay, payment processing, and result confirmation. ANP integrates with payment protocols such as AP2 and x402 rather than defining a complete payment system simply because it can authenticate identities and convey messages. ANP supplies participants' DID identities, descriptions, and communication, while payment protocols define authorization credentials and transaction flows. ANP-10 in this repository is an AP2 payment adaptation draft, not a stable interoperability standard.
 
-Payment involves more than identifying the parties. It includes orders, approval to pay, payment processing, and business outcomes. ANP's direction is to work with domain protocols such as AP2 rather than claim a complete payment system merely because participants can authenticate and exchange messages. Upstream AP2 and the ANP adaptation document are separate artifacts.[^ap2]
+### 8.3 Authorization: OAuth and verifiable credentials
 
-ANP-10 in this repository is a payment adaptation draft, not a stable payment interoperability standard. Its fields and flows do not establish complete compatibility with all current upstream AP2 capabilities, and its presence in the specification catalog does not imply production readiness.[^anp10]
+Identity answers “Who are you?”, while authorization answers “Who allows you to do what?” Agent authorization needs to establish who authorized which agent to perform which operations on which resources, under what restrictions, and how that authorization can end. ANP connects DID identity to two mature mechanisms, OAuth and W3C Verifiable Credentials (VCs). The corresponding specification, ANP-05 DID-Based Authorization Protocol, is currently a vNext draft outside the ANP 1.2 release scope.
 
-Authorization should likewise remain separate from identity. Combining DID and OAuth is a direction for connecting reusable identity to established authorization mechanisms. The applicable authorization protocol should define delegation scope, validity, revocation, human approval, and token use. This paper defines neither a new OAuth binding nor a universal authorization credential.[^anp02][^oauth]
+The mechanisms answer different questions. **OAuth answers “Does the resource side allow this agent to access this resource now?”** An authorization server trusted by the resource side issues short-lived, single-resource permissions that can be revoked at any time. In ANP-05, an agent uses its DID directly as its OAuth client identifier and authenticates with DID keys, without prior registration at every authorization server. **VC answers “Who has made what statement about this agent?”** The source of the authorization basis—a user, enterprise, or qualification authority—issues the statement with its DID. The agent holds it and can present it to any counterpart that trusts the issuer. Verification requires resolving the parties' DIDs and checking revocation status; the verifier need not integrate with the issuer in advance.
 
-### 8.3 Vertical protocols can evolve independently
+| Dimension | OAuth access token | Verifiable credential |
+| --- | --- | --- |
+| Issuer | Authorization server trusted by the resource side | Source of the authorization basis: user, enterprise, or qualification authority |
+| Authorization decision | Made by the authorization server before token issuance | Made by each verifier when the credential is presented |
+| Scope of use | A single resource | Credential-defined scope, potentially across multiple services |
+| Revocation | Short-lived tokens; the authorization server can stop issuance at any time | Revocation through a status list, with caching delays |
 
-A domain may require common data objects, state transitions, delivery evidence, or operation constraints. Natural language can help explain requirements, but domain rules that need predictable semantics still benefit from dedicated protocols.
+OAuth suits resources hosted by a service and managed through its account system, such as reading a user's files in a document service or writing to a calendar: the user signs in and consents there, and the service holds the complete authorization record. VC suits cases where the authorization basis comes from outside the resource side, the same authorization must be presented to several services without mutual integration, or the counterpart is another agent without an authorization server. ANP-05's first release defines OAuth and VC as two independent paths: OAuth provides resource-side access authorization; VC is presented directly by the agent to a supporting recipient, which verifies it and makes its own decision. The first release does not define a flow for exchanging VC/VP for OAuth access tokens; composition will be researched as a subsequent independent extension. The first release defines direct presentation of delegation and organization-role credentials. Other qualification or attribute credentials are only additional proofs agreed separately and explicitly requested by the verifier.
 
-Domain participants can independently design, govern, and version protocols on ANP's foundations. ANP provides underlying authentication and other optional connection capabilities. It does not require all industry specifications to become ANP specifications or automatically classify a product's internal protocol as a common standard.
+**Agents working on behalf of organizations.** A key scenario is an enterprise appointing an agent to perform a function: an HR agent publishes vacancies and schedules interviews, while a procurement agent requests quotes and places orders. Recruitment platforms, suppliers, and counterpart agents often have no prior relationship with that agent, and the company cannot list every future transaction partner. The company can use its DID to issue a role credential describing permitted business actions and per-transaction limits. The counterpart verifies that the company issued the unrevoked credential and that the presenter is the identified agent, then decides whether to accept it through its own customer-review process. Role credentials have clear boundaries: they cannot grant rights the company does not hold; access to third-party personal data requires the resource side to independently establish a valid authorization basis rather than relying on a role credential alone; aggregate budgets across suppliers need the company's own controls; and high-risk actions such as signing contracts or issuing employment offers still require transaction-specific human approval.
 
-**Using ANP is different from belonging to the ANP specification set.** Third-party extensions should identify ownership, versions, dependencies, and interoperability evidence. Product-specific roles, storage limits, and scheduling behavior should not be mistaken for network-wide semantics.
+Whichever mechanism is used, a credential alone does not directly grant permission. The resource side or verifier always decides whether to allow an operation through deterministic policy, rather than allowing a large language model to infer permission from request or credential text.
+
+### 8.4 Vertical scenarios: Domain protocols built on ANP
+
+Some vertical scenarios require shared data objects, state transitions, delivery evidence, or operation constraints. Natural language can explain requirements, but domain rules requiring deterministic behavior still benefit from dedicated protocols.
+
+Such scenarios need protocols, but these need not be part of ANP. Domain participants can independently design, govern, and version their protocols on ANP's foundations, using underlying authentication and optional connection capabilities. ANP's core remains stable and small, each domain evolves at its own pace, and protocols share a common cross-platform identity foundation. This is why Figure 2 places domain application protocols above the application protocol layer in a dashed box.
+
+**Using ANP and belonging to the ANP specification set are different relationships.** Third-party protocols should identify their maintainers, versions, dependencies, and interoperability evidence. A product's internal protocol does not automatically become a common standard because it uses ANP.
 
 <a id="security"></a>
-## 9. Security, Trust, and User-Control Boundaries
+## 9. Security and Trust
 
-### 9.1 Verification starts with a trusted entry point
+Earlier sections describe security designs for identity, messaging, and description. This section summarizes ANP's overall trust boundaries.
 
-Cryptographic verification establishes whether a key signed content. It does not automatically establish that a DID corresponds to a particular real-world organization or person. Callers need an appropriate trusted channel to establish the expected identity and must distinguish display names, search results, domain associations, and cryptographic subjects.[^didcore]
+**Start verification from a trusted entry point.** Cryptographic verification establishes whether a key signed content, not which real-world organization or person a DID represents. `did:wba` fingerprint verification particularly depends on checking the expected DID: if an attacker replaces the entire DID at first contact, verification against the attacker's own key will naturally succeed. Trusted directories, verified contacts, and other business evidence can establish this initial association.
 
-WBA fingerprint verification specifically depends on verifying the expected DID. If an attacker replaces the entire DID at first contact, correctly checking the attacker's own key does not expose business-identity impersonation. A trusted directory, previously verified relationship, or other business evidence can help establish this initial association, with their respective trust boundaries.
+**Separate authentication, authorization, and human approval.** A request signature proves that the private-key holder produced the request; authorization policy determines what that identity may do; the applicable business protocol verifies human approval for high-risk operations. These cannot substitute for one another.
 
-### 9.2 Authentication, business authorization, and human approval are separate
+**Manage keys and state.** Key-based control depends on genuine key protection. Keys for high-risk operations should be stored in secure hardware or protected key-management systems, with audit records for sensitive signing. A deployment in which a hosting service also holds private keys cannot claim that the host is unable to sign on a user's behalf. DID Documents and device state need timely updates and verification; cached data cannot indefinitely replace current state.
 
-A request signature proves use of the relevant private key, not that a user saw and approved that particular operation. AD's `humanAuthorization: true` is an interface requirement; the meta-protocol's `requiresHumanAuthorization: true` is a negotiation constraint. Neither is evidence of completed human approval.[^anp02][^anp07][^anp06]
+**Minimize disclosure and handle external content securely.** Agents transmit only task-required information and use E2EE for sensitive content. External descriptions, messages, and linked content are untrusted inputs; implementations need to address prompt injection, unauthorized invocation, and unrestricted access to internal networks. Openness permits connection to different participants without treating each new connection as a trusted execution source.
 
-High-risk operations need the applicable business protocol to verify the object, scope, and validity of approval. This does not add a generic `humanAuthorization` verification relationship to DID Documents, and ordinary `authentication` signatures do not replace necessary approval evidence.
-
-Identity recovery must not conceal a change in trust. Business policy may accept a provider assertion, but it should retain that actual assurance rather than upgrading it to a transition signed by the original key holder. Inheriting contacts or permissions is also a different decision from establishing new encrypted sessions.[^anp03][^p5]
-
-### 9.3 Keys, endpoints, and messaging state
-
-Key-based control requires genuine key protection and constrained signing operations. A deployment in which a hosting provider also holds private keys cannot claim the same protection against that provider signing on the user's behalf.
-
-DID Documents and device state need correct updates and verification; cached data cannot stand in for current state indefinitely. Integrity proofs alone do not establish freshness or availability, and WBA currently does not require a complete independently verifiable history log. Clients follow the method and Profile rules for old state, conflicting transitions, and recovery evidence.[^anp03][^p2]
-
-End-to-end protection also depends on session and replay-state management and on avoiding silent security downgrades. A specification describes a cryptographic design; it does not prove every implementation correct or substitute for auditing and deployment validation.[^p5]
-
-### 9.4 Minimum disclosure and safe handling of external information
-
-Reusable identity has a privacy trade-off. One DID across services helps preserve relationships but can increase activity correlation. Separate DIDs and keys can reduce linkage across contexts, while public mappings, network characteristics, and business data can still reconnect them. The protocol does not guarantee anonymity or automatically establish permission inheritance between multiple DIDs.[^anp02]
-
-Retrieving Information selectively can reduce private context submitted to business counterparts. E2EE protects content, but routing services may still observe DIDs, timing, and traffic metadata. Secure implementations treat external descriptions, messages, and linked content as untrusted input, addressing prompt injection, unauthorized operations, and unrestricted access to internal networks.
-
-Openness means being able to connect with different participants, not promoting each new connection into a trusted source of executable instructions.
+Specifications describe cryptographic designs and interoperability rules. They do not prove every implementation correct or replace security audits and deployment validation.
 
 <a id="adoption"></a>
 ## 10. From Connection to Collaboration: An Example and Incremental Adoption
 
 ### 10.1 A cross-organization procurement example
 
-This is an architectural illustration, not a report of completed third-party integration or production deployment.
+The following is an architectural illustration, not a completed third-party integration or production deployment.
 
-An enterprise procurement agent needs equipment meeting specific technical requirements. It obtains AD URLs from known supplier domains and search services, reads relevant product material, and combines it with budget, destination, and internal standards in its own trusted environment. Unrelated products and internal budget information need not all be sent to every supplier.
+An enterprise procurement agent needs equipment meeting specific technical requirements.
 
-Where published material is insufficient, it messages a supplier agent about lead times and customization. The parties establish identity relationships through their supported DID methods and authentication mechanisms. Where confidentiality is required, they select an E2EE mode they actually support rather than treating transport protection as end-to-end protection.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant P as Procurement agent
+    participant S as Search agent
+    participant V as Supplier agent
+    participant H as Procurement approver
+    P->>S: Search for suitable suppliers
+    S-->>P: Supplier AD URLs
+    P->>V: Read AD and product Information
+    Note over P: Compare options locally using budget and internal standards
+    P->>V: E2EE message: ask about lead time and customization
+    V-->>P: Message: quote and delivery plan
+    P->>H: Request order approval
+    H-->>P: Approve
+    P->>V: Invoke ordering interface with DID authentication
+    V-->>P: Request a delegation credential
+    P->>V: Present the enterprise-issued procurement role credential
+    V-->>P: Confirm order
+    P->>V: Complete payment through the payment protocol
+    V-->>P: Messages and attachments: progress and shipping documents
+```
 
-Once terms are clear, the procurement agent invokes the described quotation or ordering interface. It can use the same DID with different suppliers, but each supplier independently evaluates admission and permissions. Where an order or payment requires human approval, that approval is completed under the applicable business protocol before execution. A messaging negotiation result does not serve as payment authorization.
+*Figure 14: How the modules work together in cross-organization procurement (schematic).*
 
-The parties continue to track progress through messages and exchange necessary documents as attachments. Multi-party work can use appropriate group capabilities and security modes. Existing interfaces need no meta-protocol negotiation. Additional negotiation is used only where dynamic selection is necessary and both parties implement the relevant draft. Payment and delivery outcomes remain defined by their domain protocols.
+The procurement agent obtains supplier ADs from search agents and known supplier domains. It reads only relevant product material and combines it with budget, delivery location, and internal standards in the enterprise's own environment to form candidate options. The internal budget need not be disclosed to every supplier.
 
-### 10.2 Identity and device changes during ongoing collaboration
+When standard material is insufficient, it messages supplier agents about lead times and customization. The parties authenticate one another using their DIDs and protect sensitive business content through E2EE. Once terms are clear, the procurement agent invokes the supplier's described ordering interface. It can use the same DID with all suppliers, while each independently evaluates admission and permissions. Since the supplier does not know the agent, it requests an enterprise-issued procurement role credential to establish that the agent represents the company and that the amount falls within its authorized limit. After verification, the supplier decides whether to accept the company's order through its own customer-review process (see Section 8.3). If an order exceeds the credential's limit or requires human approval, the procurement approver first approves through the business process before the order is submitted. Payment uses the applicable payment protocol; messaging negotiation does not authorize payment.
 
-Relationships can last for months or longer. Device additions and removals require current endpoint eligibility to be updated and verified, but do not change DID-level business membership. When a WBA binding-key change creates a new DID, participants verify transition evidence from the previously trusted identity and decide continuity under business policy.
+The parties continue tracking progress through messages and exchange shipping documents as attachments. Groups can support multi-party work. Collaboration may last months, during which device additions and revocations and key rotation are handled through DID Document updates and verifiable transition evidence. Business relationships may continue, while old encrypted sessions are not copied directly to a new identity.
 
-Even if the contact relationship continues, historical signatures, DIDs, and ciphertext are not rewritten, and the new DID does not inherit old private session state. Business continuity and cryptographic isolation therefore retain distinct meanings.[^p2][^p5]
+### 10.2 Adopt what is needed rather than every protocol at once
 
-### 10.3 Adopt what is needed rather than everything at once
+ANP's modules can be adopted incrementally:
 
-| Adoption goal | Capabilities to consider | Not automatically required |
+| Adoption goal | Required capabilities | Not required at the same time |
 | --- | --- | --- |
-| Add cross-platform identity to an existing API | ANP-02 and supported DID methods | Messaging, WNS, Device Manifest, meta-protocol |
-| Publish discoverable information and interfaces | ANP-07 and ANP-08, with suitable authentication for protected interfaces | Direct messaging, groups, or payments |
-| Establish ongoing cross-domain collaboration | Messaging Profiles composed according to dependencies and required security modes | Every unrelated domain protocol |
+| Add cross-platform identity authentication to an existing API | ANP-02 and one DID method | Messaging, naming, meta-protocol |
+| Publish discoverable information and interfaces | ANP-07 and ANP-08; ANP-02 for protected interfaces | Direct messaging, groups, payments |
+| Establish ongoing cross-domain collaboration | ANP-09 Messaging Profiles and required security modes | Unrelated domain protocols |
 
-These are capability combinations, not new conformance levels. Implementations accurately advertise supported DID methods, interfaces, and Profiles. Specification status, algorithm constraints, and version requirements continue to apply.[^anp02][^catalog]
+Implementations should accurately advertise supported DID methods, interfaces, and Profiles. Specification status, algorithm constraints, and version requirements continue to apply to each capability.
 
-### 10.4 Evolution and conclusion
+<a id="outlook"></a>
+## 11. Future Outlook: Reshaping an Open Network Through Connections
 
-ANP's identity and authorization work will continue exploring authentication for streaming interactions, mutual DID proofs, and DID–OAuth integration, alongside adaptation of methods such as WebVH and BID. These directions require separate specification, review, and interoperability validation; this paper does not declare them released. Messaging and domain protocols likewise need implementation feedback and their own release conditions.
+The history of the Internet powerfully demonstrates a core principle: “Connection is Power.” In a truly open, interconnected network, free interaction between nodes can unlock the full potential for innovation and create enormous value. Today's Internet platforms have created rich digital ecosystems by organizing information, connecting users, and providing services. As demand for collaboration between agents across platforms grows, data and services across these ecosystems also need more open and convenient connections.
 
-ANP's goal is to **make identity a common basis for cross-platform connections, messaging a general medium for open collaboration, and Information and Interface a navigable, callable capability network.**
+The arrival of the agentic web offers a historic opportunity to expand the possibilities for connections and collaboration across platforms. Our goal is to help the Internet move from its widespread closed, fragmented state back to its roots of openness and free connection. In the future internet of agents, every agent will be both an information consumer and a service provider. More importantly, every node should be able to discover, connect to, and interact with any other node on the network without barriers. This vision of network-wide interconnection will greatly lower the barriers to information flow and collaboration, returning the power to connect to every individual user and agent.
 
-Agents should be able to select appropriate collaborators within users' goals and permission boundaries, rather than operate only inside one platform's predefined scope. Open protocols do not replace every product; they allow more products and specialized capabilities to connect. ANP invites developers, researchers, and service providers to improve specifications, implementations, and interoperability validation together, building an open internet of agents.
+This marks an important shift from closed, platform-centered ecosystems to open, protocol-centered ecosystems. In the latter, capturing value depends more on the distinctive capabilities and contributions participants bring to the network by following open protocols than on control of a closed platform. This shift will stimulate stronger innovation and competition at the application layer, because success will depend on providing the best agent services rather than locking users in. It follows the pattern of innovation historically encouraged by open protocols such as TCP/IP and SMTP.
+
+Building an internet of agents is an ambitious undertaking that requires broad collaboration and collective effort, with open source serving as an important force. As a foundational open-source communication protocol, ANP's success depends on adoption, implementation, and sustained contributions from the developer community. We invite researchers, developers, enterprises, and organizations interested in agent technology and the future of an open Internet to participate in ANP's development, testing, and adoption, and work together toward a future of efficient agent collaboration.
 
 <a id="specifications"></a>
 ## Appendix A: Specification Index and Status
 
-The following records the ANP 1.2 specification set read for this revision. Document versions are not wire versions, and an informative white paper does not change the release status of its references.[^readme][^catalog]
-
-| Document | Responsibility | Status at this revision |
+| Document | Responsibility | Status |
 | --- | --- | --- |
-| ANP-01 | Vision, architecture, and trade-offs | Informative white paper; document version 1.2 |
-| [ANP-02](../02-anp-did-authentication-protocol-specification.md) | DID-method-independent authentication | Released 1.2; WBA and native Web bindings defined |
-| [ANP-03](../03-did-wba-method-design-specification.md) | WBA method, document proofs, and continuity | Released 1.2 |
+| ANP-01 | Vision, architecture, and design trade-offs | Informative white paper; document version 1.2 |
+| [ANP-02](../02-anp-did-authentication-protocol-specification.md) | DID-method-independent request authentication | Released 1.2; `did:wba` and native `did:web` bindings defined |
+| [ANP-03](../03-did-wba-method-design-specification.md) | `did:wba` method, document proofs, and transition | Released 1.2 |
 | [ANP-04](../04-anp-did-wba-name-space-specification.md) | WNS naming and resolution | Released 1.2 |
 | [ANP-06](../06-anp-agent-communication-meta-protocol-specification.md) | Optional semantic negotiation | Draft; document version 1.2 |
 | [ANP-07](../07-anp-agent-description-protocol-specification.md) | AD, Information, and Interface | Released 1.2 |
 | [ANP-08](../08-ANP-Agent-Discovery-Protocol-Specification.md) | Active and passive discovery | Released 1.2 |
-| [ANP-09](../09-ANP-end-to-end-instant-messaging-protocol-specification.md) | Messaging overview and Profile index | Published 1.2 catalog; P6 remains a candidate |
-| [ANP-10](../application/10-anp-agent-payment-protocol-specification.md) | AP2 payment adaptation | Independently versioned draft; English and Chinese revisions are not synchronized normative translations |
+| [ANP-09](../09-ANP-end-to-end-instant-messaging-protocol-specification.md) | Messaging overview and Profile index | 1.2 catalog published; P6 remains a candidate |
+| [ANP-10](../application/10-anp-agent-payment-protocol-specification.md) | AP2 payment adaptation | Independently versioned draft |
 
-Messaging 1.2 is a mixed-version suite: P1, P2, P3, P7, P8, and the P9 binding retain v1; P4, P5, and P6 use v2. P9 is a binding extension without an independent `meta.profile`. Stable P6 release still requires a registered MLS `ExtensionType`; provisional value `0xF0A1` is not a completed registration.
+Messaging 1.2 uses mixed versions: P1, P2, P3, P7, P8, and the P9 binding use v1; P4, P5, and P6 use v2. P9 is a binding extension without an independent `meta.profile`. Stable P6 release depends on formal registration of the MLS `ExtensionType`; provisional value `0xF0A1` does not constitute completed registration. For DID compatibility, see [Appendix A: did:wba `k1_` Compatibility Extension](../appendix-a-did-wba-k1-compatibility-extension.md) and [Appendix B: Compatibility with Native did:web](../appendix-b-compatibility-with-native-did-web.md). Informative integration guidance for `did:webvh` and other methods does not constitute an enabled authentication binding.
 
-Informative integration guidance for WebVH and other methods does not constitute an enabled authentication binding. Specification publication, implementation support, interoperability validation, and production security are different kinds of evidence.
-
-<a id="terminology"></a>
 ## Appendix B: Terminology
 
-| Term | Meaning in this paper |
+| Term | Meaning |
 | --- | --- |
-| DID | A subject identifier resolved and validated under its method |
-| DID Document | Identity material describing verification methods, purpose relationships, and associated services |
+| DID | Decentralized identifier; a subject identifier resolved and validated under its DID method |
+| DID Document | Identity material describing verification methods, purpose relationships, and service endpoints |
 | DID method | Rules for creating, resolving, updating, and deactivating that kind of DID |
 | Federated network | Independently operated service domains interoperating through common protocols |
-| Handle / WNS | User-facing naming and resolution, not a substitute for DID verification |
-| Stable subject path | A continuity reference preceding the default WBA fingerprint segment, not another DID |
-| AD / ADP | Agent Description document and its protocol |
-| Information | Externally provided information resources that can be retrieved |
+| Handle / WNS | Readable name-to-DID resolution, not a substitute for DID verification |
+| Stable subject path | The path preceding the `did:wba` fingerprint, used as a key-rotation continuity reference |
+| AD | Agent Description; an agent's external entry document |
+| Information | Externally available information resources that can be retrieved |
 | Interface | A structured or natural-language interaction entry point |
 | Profile | A specification of particular capabilities, bindings, and interoperability rules |
 | E2EE | End-to-end encryption between designated cryptographic endpoints |
-| Device Manifest | Current device-endpoint and key declarations for device-addressed E2EE |
-| MLS Leaf | An endpoint in cryptographic group state, not a business group member |
-| Meta-protocol | An optional mechanism for negotiating the subsequent interaction method |
+| Device Manifest | A structure declaring device endpoints and keys in the DID Document |
+| MLS Leaf | An endpoint in MLS cryptographic group state, not a business group member |
+| Meta-protocol | An optional mechanism for selecting the subsequent interaction method |
 
 ## References
 
-Vision articles explain design motivations and are not normative sources for wire formats or security requirements. External references were checked for this revision; implementers should confirm the exact versions they adopt.
+1. [ANP README](../README.md)
+2. [ANP-02: DID Authentication Protocol](../02-anp-did-authentication-protocol-specification.md)
+3. [ANP-03: did:wba Method Specification](../03-did-wba-method-design-specification.md)
+4. [ANP-04: DID-WBA Name Space Specification](../04-anp-did-wba-name-space-specification.md)
+5. [ANP-06: Agent Communication Meta-Protocol Specification (Draft)](../06-anp-agent-communication-meta-protocol-specification.md)
+6. [ANP-07: Agent Description Protocol](../07-anp-agent-description-protocol-specification.md)
+7. [ANP-08: Agent Discovery Protocol](../08-ANP-Agent-Discovery-Protocol-Specification.md)
+8. [ANP-09: End-to-End Instant Messaging Overview](../09-ANP-end-to-end-instant-messaging-protocol-specification.md), [Messaging 1.2 Profile Index](../message/README.md)
+9. [ANP-10: Agent Payment Adaptation Draft](../application/10-anp-agent-payment-protocol-specification.md)
+10. W3C, [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/2022/REC-did-core-20220719/)
+11. [did:web Method Specification](https://w3c-ccg.github.io/did-method-web/)
+12. DIF, [The did:webvh DID Method v1.0](https://identity.foundation/didwebvh/v1.0/)
+13. IETF, [RFC 9421: HTTP Message Signatures](https://www.rfc-editor.org/rfc/rfc9421)
+14. IETF, [RFC 9530: Digest Fields](https://www.rfc-editor.org/rfc/rfc9530)
+15. IETF, [RFC 9420: The Messaging Layer Security (MLS) Protocol](https://www.rfc-editor.org/rfc/rfc9420)
+16. IETF, [RFC 6749: The OAuth 2.0 Authorization Framework](https://www.rfc-editor.org/rfc/rfc6749)
+17. W3C, [Verifiable Credentials Data Model v2.0](https://www.w3.org/TR/vc-data-model-2.0/)
+18. W3C, [Bitstring Status List v1.0](https://www.w3.org/TR/vc-bitstring-status-list/)
+19. Tim Berners-Lee, [Linked Data — Design Issues](https://www.w3.org/DesignIssues/LinkedData.html)
+20. [Agent2Agent Protocol Specification](https://a2a-protocol.org/latest/specification/)
+21. [Model Context Protocol](https://modelcontextprotocol.io/)
+22. [Agent Payments Protocol (AP2)](https://ap2-protocol.org/)
+23. [A Scalable Communication Protocol for Networks of Large Language Models (Agora)](https://arxiv.org/html/2410.11905v1)
+### Further reading
 
-[^vision1]: [Agentic Web: Ten Talks, Day 1 — The Past and Present of the Web](../blogs/cn/Agentic-Web十日谈/01day-Web的前世今生.md). Chinese source used for this revision.
-[^vision2]: [Agentic Web: Ten Talks, Day 2 — Why Agents Need an Open Internet](../blogs/cn/Agentic-Web十日谈/02day-第一性原理.md). Chinese source used for this revision.
-[^vision3]: [Agentic Web: Ten Talks, Day 3 — What Is the Agentic Web?](../blogs/cn/Agentic-Web十日谈/03day-什么是Agentic-Web.md). Chinese source used for this revision.
-[^identity-rationale]: [Three Key Issues of Agent Identity: Interoperability, Human Authorization, and Privacy Protection](../blogs/three-key-issues-of-agent-identity-interoperability-human-authorization-and-privacy-protection.md). Historical protocol fields are not current implementation guidance.
-[^readme]: [ANP README](../README.md).
-[^anp02]: [ANP-02: DID Authentication Protocol](../02-anp-did-authentication-protocol-specification.md).
-[^anp03]: [ANP-03: did:wba Method Specification](../03-did-wba-method-design-specification.md).
-[^anp04]: [ANP-04: DID-WBA Name Space Specification](../04-anp-did-wba-name-space-specification.md).
-[^anp06]: [ANP-06: Agent Communication Meta-Protocol Specification (Draft)](../06-anp-agent-communication-meta-protocol-specification.md).
-[^anp07]: [ANP-07: Agent Description Protocol](../07-anp-agent-description-protocol-specification.md).
-[^anp08]: [ANP-08: Agent Discovery Protocol](../08-ANP-Agent-Discovery-Protocol-Specification.md).
-[^anp09]: [ANP-09: End-to-End Instant Messaging Overview](../09-ANP-end-to-end-instant-messaging-protocol-specification.md).
-[^anp10]: [ANP-10: Agent Payment Adaptation Draft](../application/10-anp-agent-payment-protocol-specification.md).
-[^catalog]: [ANP Messaging 1.2 Profile Index](../message/README.md).
-[^p2]: [P2: Identity and Discovery](../message/02-identity-and-discovery.md).
-[^p5]: [P5: Direct End-to-End Encryption](../message/05-direct-end-to-end-encryption.md).
-[^didcore]: W3C, [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/2022/REC-did-core-20220719/).
-[^web]: [did:web Method Specification](https://w3c-ccg.github.io/did-method-web/).
-[^webvh]: DIF, [The did:webvh DID Method v1.0](https://identity.foundation/didwebvh/v1.0/). An upstream release does not establish completed ANP adaptation.
-[^linkeddata]: Tim Berners-Lee, [Linked Data — Design Issues](https://www.w3.org/DesignIssues/LinkedData.html). This paper draws on resource-linking ideas without making the full Semantic Web stack an ANP prerequisite.
-[^a2a]: [Agent2Agent Protocol Specification](https://a2a-protocol.org/latest/specification/), especially Core Concepts and Send Message; checked 2026-09-24.
-[^oauth]: IETF, [RFC 6749: The OAuth 2.0 Authorization Framework](https://www.rfc-editor.org/rfc/rfc6749). This reference identifies responsibilities, not an ANP OAuth integration profile.
-[^mls]: IETF, [RFC 9420: The Messaging Layer Security (MLS) Protocol](https://www.rfc-editor.org/rfc/rfc9420). P6 defines ANP-specific bindings.
-[^ap2]: [Agent Payments Protocol (AP2)](https://ap2-protocol.org/).
-[^agora]: [A Scalable Communication Protocol for Networks of Large Language Models](https://arxiv.org/html/2410.11905v1). Research inspiration for ANP's meta-protocol; concrete interfaces remain defined by the ANP-06 draft.
+- [Agentic Web: Ten Talks (series)](../blogs/cn/Agentic-Web十日谈/)
+- [Three Key Issues of Agent Identity: Interoperability, Human Authorization, and Privacy Protection](../blogs/three-key-issues-of-agent-identity-interoperability-human-authorization-and-privacy-protection.md) (its historical `humanAuthorization` field design has been superseded by current ANP-02)
+- [Comparison of did:wba with OpenID Connect and API Keys](../blogs/comparison-of-did-wba-with-openid-connect-and-api-keys.md)
+- [ANP's Core Concepts and Interaction Patterns](../blogs/cn/05-ANP的核心概念和交互模式.md)
 
 ## Copyright Notice
 

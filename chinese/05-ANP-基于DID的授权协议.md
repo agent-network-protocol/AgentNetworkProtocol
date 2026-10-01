@@ -79,7 +79,7 @@ VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两�
 <a id="anp-boundary"></a>
 ## 2. 与 ANP 的关系及机制选择
 
-使用当前 [ANP-02 身份材料规则](../../chinese/02-ANP-基于DID的身份认证协议.md#identity-input)、[ANP-03 WBA 绑定](../../chinese/03-did-wba方法规范.md#wba-auth-binding)和 [ANP-02 原生 Web 绑定](../../chinese/02-ANP-基于DID的身份认证协议.md#web-binding)。本文件旁的历史 ANP-02 快照不是本草案的规范性基线。
+使用当前 [ANP-02 身份材料规则](02-ANP-基于DID的身份认证协议.md#identity-input)、[ANP-03 WBA 绑定](03-did-wba方法规范.md#wba-auth-binding)和 [ANP-02 原生 Web 绑定](02-ANP-基于DID的身份认证协议.md#web-binding)。Git 历史中的发布前快照不是本草案的规范性基线。
 
 ANP-02 定义 HTTP/JSON 请求认证。ANP-05 复用其 DID 验证与认证密钥授权模型，**不复用**其 HTTP 签名序列化、挑战或可选的令牌响应头。OAuth 令牌端点使用 `client_assertion` 和标准 OAuth JSON 令牌响应，不得（MUST NOT）要求再附加一份 ANP-02 HTTP 签名才能满足本 Profile。需要将 HTTP Message Signatures 作为另一种 OAuth 认证方式的部署，应另行定义明确的绑定。
 
@@ -360,7 +360,7 @@ flowchart TD
 
 
 
-[ANP-07 智能体描述](../../chinese/07-ANP-智能体描述协议规范.md)可以（MAY）链接到接口文档，说明其 OAuth 要求及 RFC 8414/RFC 9728 元数据位置。本版本不重定义 ANP-07 的 `securityDefinitions`，不要求在其中增加新的 `scheme` 值，也不在公开描述中放置凭据。描述与发现不是授权。
+[ANP-07 智能体描述](07-ANP-智能体描述协议规范.md)可以（MAY）链接到接口文档，说明其 OAuth 要求及 RFC 8414/RFC 9728 元数据位置。本版本不重定义 ANP-07 的 `securityDefinitions`，不要求在其中增加新的 `scheme` 值，也不在公开描述中放置凭据。描述与发现不是授权。
 
 <a id="client-assertion"></a>
 ## 6. 基于 DID 的 JWT 客户端认证
@@ -1224,7 +1224,7 @@ OAuth 客户端一致性要求实现原生 DID 元数据发布/发现、第 6 �
 
 声明 VC Profile 时，持有者须实现第 11.3 节的持有者绑定 VP 签署和第 11.6 节的 Profile 检查；验证方须实现第 11.6 节的直接出示、第 11.4 节的完整验证顺序、持有者绑定、签发方权限确认、状态检查、权限求交与约束执行；使用 session 时，还须验证第 11.6 节的绑定身份、逐次授权与有限期限规则。OAuth 一致性与 VC 直接出示一致性相互独立。签发方一致性只要求凭证格式、证明与状态列表发布正确，本版不认证签发界面或签发协议。
 
-发布或公开启用前，应验证适用正向流程及全部相关拒绝路径；未实现的可选能力应记录为不支持，不能报告为通过。详细场景清单、稳定证据标识及编号维护说明见[ANP-05 实现验证指南](../../docs/chinese/anp-05-validation-guide.md)及其[英文镜像](../../docs/anp-05-validation-guide.md)。
+发布或公开启用前，应验证适用正向流程及全部相关拒绝路径；未实现的可选能力应记录为不支持，不能报告为通过。详细场景清单、稳定证据标识及编号维护说明见[ANP-05 实现验证指南](../docs/chinese/anp-05-validation-guide.md)及其[英文镜像](../docs/anp-05-validation-guide.md)。
 
 草案或实验原型可以凭一套完整实现及明确的拒绝路径证据评审，但必须（MUST）标记为实验状态。宣称 OAuth Profile 稳定、可互操作的 v1 发布时，须具备两套独立开发的客户端/AS 实现及交叉实现测试、适用 RS 测试、各 AS 首次准入与关闭准入行为、元数据篡改/更新、声明授权码支持时的托管与 loopback 回调、方法/运行密钥生命周期、所声明流程的多资源隔离，以及明确的安全评审。声明 VC Profile 时，还须具备独立实现的持有者与验证方之间的交叉测试，覆盖直接出示、Profile 版本匹配，以及凭证撤销。独立性指协议代码路径的独立实现，不是同一服务器运行两个实例；须记录共享组件。该门槛不阻止发布或评审草案。
 
@@ -1279,4 +1279,4 @@ VC Profile 的规范性引用，在声明该 Profile 时适用：
 ## 版权声明
 
 Copyright (c) 2026 ANP 开源社区
-本文件依据 [Apache License 2.0](../../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。
+本文件依据 [Apache License 2.0](../LICENSE) 发布，您可以自由使用和修改，但必须保留本版权声明。

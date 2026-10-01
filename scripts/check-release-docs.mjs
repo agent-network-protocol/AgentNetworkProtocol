@@ -8,22 +8,22 @@ import {readerGuides, paymentDocuments, checkReaderGuide, checkPaymentMetadata, 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const list = dir => fs.readdirSync(path.join(root, dir)).filter(name => name.endsWith('.md')).map(name => path.posix.join(dir, name));
-const core = [...list('.'), ...list('chinese')].filter(name => /^(?:chinese\/)?(?:0[1-9]-|appendix-|附录)/.test(name));
+const authorizationDrafts = [
+  '05-anp-did-authorization-protocol-specification.md',
+  'chinese/05-ANP-基于DID的授权协议.md',
+];
+const core = [...list('.'), ...list('chinese')].filter(name => /^(?:chinese\/)?(?:0[1-9]-|appendix-|附录)/.test(name) && !authorizationDrafts.includes(name));
 const messages = [...list('message'), ...list('chinese/message')];
 const draftIndexes = ['vnext/README.md', 'vnext/chinese/README.md'];
 const obsoleteArchiveDirectories = ['chinese/vnext', 'message/vnext', 'chinese/message/vnext', 'deprecated/vnext', 'chinese/deprecated/vnext', 'vnext/message', 'vnext/chinese/message', 'vnext/deprecated'];
-const authorizationDrafts = [
-  'vnext/05-anp-did-authorization-protocol-specification.md',
-  'vnext/chinese/05-ANP-基于DID的授权协议.md',
-];
 const whitePaperDrafts = [
   'vnext/01-agentnetworkprotocol-technical-white-paper.md',
   'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md',
 ];
-const nextVersionDrafts = [...authorizationDrafts, ...whitePaperDrafts];
+const nextVersionDrafts = [...whitePaperDrafts];
 const authorizationValidationGuides = ['docs/anp-05-validation-guide.md', 'docs/chinese/anp-05-validation-guide.md'];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
-const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...authorizationValidationGuides, ...readerGuides.map(guide => guide.file)])].sort();
+const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...authorizationDrafts, ...authorizationValidationGuides, ...readerGuides.map(guide => guide.file)])].sort();
 const errors = [];
 const schematicExamples = [];
 const cache = new Map();
@@ -95,7 +95,7 @@ for (const file of documents) {
 for (const directory of obsoleteArchiveDirectories) check(!fs.existsSync(path.join(root, directory)), {directory, reason: 'obsolete-vnext-directory'});
 const actualDrafts = [...list('vnext'), ...list('vnext/chinese')].filter(name => !name.endsWith('/README.md')).sort();
 check(JSON.stringify(actualDrafts) === JSON.stringify([...nextVersionDrafts].sort()), {reason: 'unexpected-vnext-draft-inventory', actualDrafts});
-for (const file of nextVersionDrafts) {
+for (const file of [...nextVersionDrafts, ...authorizationDrafts]) {
   const text = read(file);
   check(/^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m.test(text), {file, reason: 'new-draft-status-lost'});
   const version = authorizationDrafts.includes(file) ? '0\\.6' : '1\\.2';

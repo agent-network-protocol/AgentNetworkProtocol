@@ -15,7 +15,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const en = read(enFile);
 const cn = read(cnFile);
 const profile = 'anp.authorization.oauth2.did.v1-draft4';
-const vcProfile = 'anp.authorization.vc.v1-draft1';
+const vcProfile = 'anp.authorization.vc.v1-draft2';
 const blocks = text => [...text.matchAll(/^```([^\n]*)\n([\s\S]*?)^```\s*$/gm)].map(match => ({language: match[1], text: match[2].trimEnd()}));
 const anchors = text => [...text.matchAll(/<a id="([^"]+)"><\/a>/g)].map(match => match[1]);
 const scenarios = text => [...text.matchAll(/^\| (AUTHZ-\d+) \|/gm)].map(match => match[1]);
@@ -29,7 +29,7 @@ for (const [file, text] of [[enFile, en], [cnFile, cn]]) {
   test('authorization document is an unreleased independent draft: ' + file, () => {
     assert.match(text, /^- (?:Document ID: |文档编号：)ANP-05$/m);
     assert.match(text, /^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m);
-    assert.match(text, /^- (?:Version: |版本：)0\.5$/m);
+    assert.match(text, /^- (?:Version: |版本：)0\.6$/m);
     assert(text.includes(profile));
     assert(text.includes(vcProfile));
     assert.doesNotMatch(text, /^- (?:Status: Released|状态：已发布)/m);
@@ -44,14 +44,14 @@ test('bilingual sections, explicit anchors and wire examples stay synchronized',
   assert.equal(new Set(anchors(en)).size, anchors(en).length);
   assert.equal(anchors(en).at(-1), 'future-extensions');
   assert(!anchors(en).includes('interoperability'));
-  for (const id of ['mechanism-selection', 'vc-authorization', 'vc-token-exchange', 'vc-direct-presentation', 'vc-organization-agents']) assert(anchors(en).includes(id), id);
+  for (const id of ['mechanism-selection', 'vc-authorization', 'vc-oauth-composition', 'vc-direct-presentation', 'vc-organization-agents']) assert(anchors(en).includes(id), id);
   const sections = text => [...text.matchAll(/^## (\d+)\./gm)].map(match => Number(match[1]));
   assert.deepEqual(sections(en), Array.from({length: 16}, (_, index) => index + 1));
   assert.deepEqual(sections(en), sections(cn));
   // Diagram labels are localized; every other code block must match byte for byte.
   const wire = text => blocks(text).filter(block => block.language !== 'mermaid');
   assert.deepEqual(wire(en), wire(cn));
-  assert.equal(jsonBlocks(en).length, 13);
+  assert.equal(jsonBlocks(en).length, 11);
   const diagramKinds = text => blocks(text).filter(block => block.language === 'mermaid').map(block => block.text.split('\n')[0]);
   assert.deepEqual(diagramKinds(en), ['flowchart TD', 'flowchart LR', 'sequenceDiagram', 'sequenceDiagram']);
   assert.deepEqual(diagramKinds(en), diagramKinds(cn));
@@ -134,9 +134,11 @@ test('illustrative token response remains a standard non-cacheable OAuth respons
 });
 
 test('mirrors retain applicable security scenarios without reusing removed scenario IDs', () => {
-  // Preserve established IDs; removed integration-only scenarios leave intentional gaps.
+  // Preserve established IDs; retired scenarios leave intentional gaps.
   const ids = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 26, 27, 29, 30, 31, 32, 33];
-  ids.push(...Array.from({length: 24}, (_, index) => index + 41));
+  ids.push(...Array.from({length: 10}, (_, index) => index + 41));
+  ids.push(...Array.from({length: 5}, (_, index) => index + 53));
+  ids.push(...Array.from({length: 11}, (_, index) => index + 59));
   const expected = ids.map(id => 'AUTHZ-' + String(id).padStart(2, '0'));
   assert.deepEqual(scenarios(en), expected);
   assert.deepEqual(scenarios(cn), expected);
@@ -165,8 +167,8 @@ test('root and vNext indexes expose only the current native draft scope', () => 
     assert.doesNotMatch(draftLines.join('\n'), /CIMD|MCP|A2A|mapped|projection|投影|映射/i);
   }
   for (const file of ['vnext/README.md', 'vnext/chinese/README.md']) {
-    assert.match(read(file), /v0\.5/);
-    assert.doesNotMatch(read(file), /v0\.(?:2|3|4)/);
+    assert.match(read(file), /v0\.6/);
+    assert.doesNotMatch(read(file), /v0\.(?:2|3|4|5)/);
   }
 });
 
@@ -300,7 +302,7 @@ function scopeErrors(text) {
   if (/CIMD/i.test(before) || (text.match(/CIMD/g) ?? []).length !== 1) errors.push('cimd-not-confined-to-future');
   if (/\b(?:MCP|A2A|Microsoft|Entra|VIRA|OBO)\b|modelcontextprotocol|a2a-protocol|learn\.microsoft/i.test(text)) errors.push('ecosystem-composition-remains');
   if (/anp_cimd_uri|client_id_metadata_document_supported|oauth-compat-1|legacy-auth\.example|\bmapped\b/i.test(text)) errors.push('adapter-contract-remains');
-  const body = future.replace(/^<a[^\n]*\n/m, '').replace(/^##[^\n]*\n/m, '').trim();
+  const body = future.replace(/^<a[^\n]*\n/m, '').replace(/^##[^\n]*\n/m, '').split(/^### 16\.1[^\n]*$/m)[0].trim();
   if (body.split(/\n\s*\n/).length !== 1 || /```|^\s*[|*-]/m.test(body)) errors.push('future-section-not-one-paragraph');
   if (!/A future version is planned|未来版本计划/.test(body) || !/includes no conversion|不包含相关转换/.test(body)) errors.push('future-scope-not-explicit');
   return errors;
@@ -506,8 +508,8 @@ for (const [name, enPattern, cnPattern] of reviewScopeGuards) {
 
 // VC Profile examples: structural consistency only, not credential or signature verification.
 const vcSamples = text => {
-  const [presentation, asMetadata, exchangeResponse, presentationRequest, roleCredential] = jsonBlocks(text).slice(8);
-  return {presentation, asMetadata, exchangeResponse, presentationRequest, roleCredential};
+  const [presentationRequest, presentation, roleCredential] = jsonBlocks(text).slice(8);
+  return {presentationRequest, presentation, roleCredential};
 };
 const oneTimeValue = value => Buffer.from(value, 'base64url').length === 16 && /^[A-Za-z0-9_-]{22}$/.test(value);
 
@@ -538,66 +540,56 @@ test('VC delegation credential example follows the Section 11.2 shape', () => {
   assert(!JSON.stringify(credential).includes('privateKey'));
 });
 
-test('VC presentation binds holder, subject, AS domain and assertion jti', () => {
-  const {claims, header} = samples(en);
-  const {presentation, asMetadata} = vcSamples(en);
+test('VC presentation binds holder and subject to the direct presentation transaction', () => {
+  const {did} = samples(en);
+  const {presentation, presentationRequest} = vcSamples(en);
   const credential = presentation.verifiableCredential[0];
   assert.deepEqual(presentation.type, ['VerifiablePresentation']);
   assert.equal(presentation['@context'][0], 'https://www.w3.org/ns/credentials/v2');
-  assert.equal(presentation.holder, claims.sub);
+  assert.equal(presentation.holder, did.id);
   assert.equal(presentation.holder, credential.credentialSubject.id);
   assert.equal(presentation.proof.proofPurpose, 'authentication');
-  assert.equal(presentation.proof.verificationMethod, header.kid);
-  assert.equal(presentation.proof.domain, asMetadata.issuer);
+  assert(did.authentication.includes(presentation.proof.verificationMethod));
+  assert.equal(presentation.proof.domain, presentationRequest.domain);
+  assert.equal(presentation.proof.challenge, presentationRequest.challenge);
   assert(oneTimeValue(presentation.proof.challenge));
   const created = Date.parse(presentation.proof.created);
   assert(created >= Date.parse(credential.validFrom) && created < Date.parse(credential.validUntil));
-  assert.equal(created / 1000, claims.iat);
-  for (const text of [en, cn]) assert(text.includes('`' + presentation.proof.challenge + '`'));
+  assert(presentationRequest.expires_at > created / 1000);
 });
 
-test('VC token exchange uses RFC 8693 with DID client authentication and no refresh token', () => {
-  const {presentation, asMetadata, exchangeResponse} = vcSamples(en);
-  assert(asMetadata.grant_types_supported.includes('urn:ietf:params:oauth:grant-type:token-exchange'));
-  assert.deepEqual(asMetadata.anp_vc_authorization, {
-    profile: vcProfile,
-    credential_types_supported: ['ANPAgentDelegationCredential', 'ANPAgentRoleCredential'],
-    cryptosuites_supported: ['eddsa-jcs-2022'],
-    status_types_supported: ['BitstringStatusListEntry'],
-  });
-  const request = blocks(en).find(block => block.language === 'http' && block.text.includes('grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&'));
-  assert(request);
-  assert(request.text.includes('Host: ' + new URL(asMetadata.issuer).host));
-  const form = new URLSearchParams(request.text.split('\n\n')[1]);
-  for (const key of form.keys()) assert.equal(form.getAll(key).length, 1, key);
-  assert.equal(form.get('client_id'), presentation.holder);
-  assert.equal(form.get('client_assertion_type'), 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer');
-  assert.equal(form.get('subject_token_type'), 'https://agent-network-protocol.com/oauth/token-type/vp');
-  const [permission] = presentation.verifiableCredential[0].credentialSubject.permissions;
-  assert.equal(form.get('resource'), permission.resource);
-  for (const action of form.get('scope').split(' ')) assert(permission.actions.includes(action), action);
-  for (const field of ['actor_token', 'actor_token_type', 'audience', 'assertion', 'client_secret', 'vp_token']) assert(!form.has(field), field);
-  assert.equal(exchangeResponse.issued_token_type, 'urn:ietf:params:oauth:token-type:access_token');
-  assert.equal(exchangeResponse.token_type, 'Bearer');
-  assert.equal(exchangeResponse.scope, form.get('scope'));
-  assert(!Object.hasOwn(exchangeResponse, 'refresh_token'));
-  assert(Number.isInteger(exchangeResponse.expires_in) && exchangeResponse.expires_in > 0);
+test('v0.6 removes VC exchange wire fields and keeps RFC 8693 informative', () => {
+  for (const text of [en, cn]) {
+    assert.doesNotMatch(text, /anp_vc_authorization|subject_token|requested_token_type|actor_token|issued_token_type|urn:ietf:params:oauth:grant-type:token-exchange|BASE64URL_VP|FRESH_CLIENT_ASSERTION/);
+    const references = text.slice(text.indexOf('<a id="references"></a>'), text.indexOf('<a id="future-extensions"></a>'));
+    const informative = references.search(/(?:Informative:|资料性引用：)/);
+    assert(informative > 0);
+    assert(!references.slice(0, informative).includes('rfc8693.html'));
+    assert(references.slice(informative).includes('rfc8693.html'));
+    const vcSection = text.slice(text.indexOf('<a id="vc-authorization"></a>'), text.indexOf('<a id="errors"></a>'));
+    assert.doesNotMatch(vcSection, /`jti`|client_assertion|client_id/);
+    const diagram = blocks(vcSection).find(block => block.language === 'mermaid');
+    assert(diagram);
+    assert.doesNotMatch(diagram.text, /\balt\b|\bAS\b|Token exchange|令牌交换/);
+  }
 });
 
 test('VC direct presentation request carries a fresh challenge and a covered permission', () => {
-  const {claims} = samples(en);
   const {presentation, presentationRequest} = vcSamples(en);
   const [permission] = presentation.verifiableCredential[0].credentialSubject.permissions;
   assert.equal(presentationRequest.type, 'ANPPresentationRequest');
+  assert.equal(presentationRequest.profile, vcProfile);
   assert(oneTimeValue(presentationRequest.challenge));
-  assert.notEqual(presentationRequest.challenge, presentation.proof.challenge);
-  assert.match(presentationRequest.domain, /^did:/);
+  assert.equal(presentationRequest.challenge, presentation.proof.challenge);
+  assert.equal(presentationRequest.domain, new URL(permission.resource).origin);
   assert(Number.isInteger(presentationRequest.expires_at));
-  assert(presentationRequest.expires_at > claims.iat && presentationRequest.expires_at - claims.iat <= 300);
+  const created = Date.parse(presentation.proof.created) / 1000;
+  assert(presentationRequest.expires_at > created && presentationRequest.expires_at - created <= 300);
   assert.deepEqual(presentationRequest.credential_types, ['ANPAgentDelegationCredential']);
   assert.equal(presentationRequest.mode, 'operation');
   assert.equal(presentationRequest.resource, permission.resource);
   for (const action of presentationRequest.actions) assert(permission.actions.includes(action), action);
+  assert.deepEqual(permission.constraints.perOperationLimit, {currency: 'CNY', value: '5000.00'});
 });
 
 test('organization role credential authorizes by action URI, not by resource or role name', () => {
@@ -639,8 +631,8 @@ const vcGuards = [
     /For a role credential, the verifier MUST confirm that the issuer DID is the organization it will treat as the principal/,
     /对角色凭证，验证方必须确认签发方 DID 就是它将视为委托主体的那个组织/],
   ['VC and OAuth are distinct mechanisms with a stated selection section',
-    /OAuth answers “does the resource side allow this client to access this resource now\?”[\s\S]*VC answers “who stated what about this Agent\?”/,
-    /OAuth 回答“资源方是否允许这个客户端现在访问这个资源”[\s\S]*VC 回答“谁对这个 Agent 声明了什么”/],
+    /OAuth answers “does the resource side allow this client to perform this operation on this resource now\?”[\s\S]*VC answers “which issuer made what verifiable statement about this Agent\?”/,
+    /OAuth 回答“资源方现在是否允许这个客户端对这个资源执行这个操作？”[\s\S]*VC 回答“哪个签发方对这个 Agent 作出了什么可验证声明？”/],
   ['a raw VC or VP is never an access token',
     /An RS MUST NOT accept a raw VC or VP as a Bearer access credential/,
     /RS 不得（MUST NOT）把原始 VC 或 VP 当作 Bearer 访问凭据接受/],
@@ -656,33 +648,15 @@ const vcGuards = [
   ['issuer authority is confirmed by the verifier, not by the credential',
     /The credential itself cannot establish or change that correspondence/,
     /凭证本身不能建立或改变这种对应关系/],
-  ['exchange VP is bound to the AS issuer and the assertion jti',
-    /The VP's `domain` MUST equal the AS `issuer`, and its `challenge` MUST equal the `jti` of this request's client assertion/,
-    /VP 的 `domain` 必须等于 AS 的 `issuer`，`challenge` 必须等于本次请求客户端断言的 `jti`/],
-  ['exchanged tokens do not outlive the credential and carry its constraints',
-    /The token expiry MUST NOT be later than the credential's `validUntil`[\s\S]*MUST NOT issue a token without the constraints[\s\S]*MUST NOT issue a refresh token for this binding/,
-    /令牌过期时间不得（MUST NOT）晚于凭证的 `validUntil`[\s\S]*不得签发不带约束的令牌[\s\S]*AS 不得（MUST NOT）为本绑定签发刷新令牌/],
-  ['revocation latency is documented rather than claimed instantaneous',
-    /Deployments MUST document the upper bound on revocation latency/,
-    /部署必须（MUST）记录撤销延迟的上界/],
-  ['the revocation bound includes status-list validity, not only cache time',
-    /bounded by the sum of the status list credential's maximum validity, the status cache time, the token lifetime and the allowed clock skew/,
-    /撤销延迟的上界为状态列表凭证的最长有效期、状态缓存时间、令牌有效期与允许时钟偏差之和/],
   ['status lists must carry and satisfy validUntil',
     /the status list credential MUST carry `validUntil` and be within its validity under the step 5 rule/,
     /状态列表凭证必须带有 `validUntil`，并按第 5 步规则处于有效期内/],
   ['issuing authority cannot be derived from credentials the issuer holds',
     /Issuing authority MUST come from the verifier's local principal binding or trust policy and MUST NOT be derived from a delegation credential, role credential, access token or execution permission the issuer itself holds/,
     /签发资格必须（MUST）来自验证方本地的主体绑定或信任策略，不得从签发方自己持有的委托凭证、角色凭证、访问令牌或执行权限推导/],
-  ['the exchange challenge is consumed once, through the assertion jti',
-    /the atomic reservation of that `jti` under Section 6\.4 is this consumption and MUST NOT be repeated as a separate value/,
-    /第 6\.4 节对该 `jti` 的原子占用即是本次消费，不得（MUST NOT）作为另一个值重复占用/],
-  ['the exchange replay record covers the whole VP acceptance window',
-    /the AS MUST retain that replay record until the later of `exp \+ s` and the VP's `created` plus 300 seconds plus `s`/,
-    /AS 必须（MUST）把该防重放记录保留到 `exp \+ s` 与“VP 的 `created` 加 300 秒再加 `s`”两者中较晚的时刻/],
   ['challenges are consumed only after holder binding',
-    /For direct presentation, only after this check does the verifier consume the presentation transaction/,
-    /直接出示时，验证方通过这项检查后才按第 11\.3 节消费出示事务/],
+    /Only after this check does the verifier consume the presentation transaction/,
+    /验证方通过这项检查后才按第 11\.3 节消费出示事务/],
   ['the Agent signs only for the verifier it is dealing with',
     /Before signing, the Agent MUST confirm that `domain` identifies the verifier it is actually dealing with/,
     /Agent 签署前必须（MUST）确认 `domain` 就是它实际交互的验证方/],
@@ -699,8 +673,32 @@ const vcGuards = [
     /Attached credentials are not subject to the holder-binding rule[\s\S]{0,120}they grant no authority by themselves/,
     /附加凭证不适用持有者绑定规则[\s\S]{0,40}它们本身不授予权限/],
   ['VC conformance applies by role rather than to all of Section 11',
-    /Section 11\.5 applies only to an AS that supports token exchange, and Section 11\.6 only to a verifier that accepts direct presentation/,
-    /第 11\.5 节只适用于声明支持令牌换发的 AS，第 11\.6 节只适用于接受直接出示的验证方/],
+    /Section 11\.6 defines direct presentation; Section 11\.5 explicitly excludes VC–OAuth composition from this version/,
+    /第 11\.6 节定义直接出示流程；第 11\.5 节明确本版不定义 VC 与 OAuth 的组合/],
+  ['v1 keeps OAuth and VC as independent authorization paths',
+    /ANP-05 v1 defines two independent authorization paths[\s\S]{0,250}V1 does not define conversion from VC\/VP to OAuth access tokens/,
+    /ANP-05 v1 定义两条相互独立的授权路径[\s\S]{0,120}v1 不定义 VC\/VP 到 OAuth Access Token 的转换/],
+  ['the presentation request advertises the exact supported VC profile',
+    /a `profile` that MUST exactly match the supported VC Profile `anp\.authorization\.vc\.v1-draft2`/,
+    /`profile`，必须（MUST）精确等于受支持的 VC Profile `anp\.authorization\.vc\.v1-draft2`/],
+  ['unsupported presentation profiles cannot be silently downgraded',
+    /a holder MUST NOT silently downgrade or reinterpret an unsupported Profile version/,
+    /不得（MUST NOT）静默降级或重新解释不支持的 Profile 版本/],
+  ['the verifier generates and stores the presentation challenge',
+    /a `challenge` that is a one-time value generated and stored by the verifier/,
+    /`challenge` 为验证方生成并保存的一次性值/],
+  ['holder identity is bound to the carrying transport authentication',
+    /`holder` MUST equal the DID of the requester authenticated by the carrying ANP-02 HTTP request or authenticated messaging session, and MUST equal the authorization credential's `credentialSubject\.id`/,
+    /`holder` 必须（MUST）等于承载本次出示的 ANP-02 HTTP 请求或已认证消息会话所认证的请求方 DID，并且必须（MUST）等于授权凭证的 `credentialSubject\.id`/],
+  ['a successful presentation does not authorize an OAuth access token',
+    /A successful VC or VP verification MUST NOT by itself create, imply, mint or authorize an OAuth access token in this version/,
+    /成功验证 VC 或 VP 本身不得（MUST NOT）创建、暗示、签发或授权 OAuth 访问令牌/],
+  ['the current profile prohibits sending a VC to an OAuth token endpoint',
+    /A VC or VP MUST NOT be sent to an OAuth token endpoint under this Profile/,
+    /在本 Profile 下，不得（MUST NOT）向 OAuth 令牌端点发送 VC 或 VP/],
+  ['direct presentation cannot bypass an OAuth interface',
+    /An interface requiring OAuth MUST NOT be bypassed through VC direct presentation/,
+    /某个接口要求 OAuth 时，不得（MUST NOT）用 VC 直接出示绕过其授权要求/],
 ];
 for (const [name, enPattern, cnPattern] of vcGuards) {
   test('VC requirement and deletion regression: ' + name, () => {

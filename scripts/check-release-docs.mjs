@@ -97,7 +97,7 @@ check(JSON.stringify(actualDrafts) === JSON.stringify([...nextVersionDrafts].sor
 for (const file of nextVersionDrafts) {
   const text = read(file);
   check(/^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m.test(text), {file, reason: 'new-draft-status-lost'});
-  const version = authorizationDrafts.includes(file) ? '0\\.5' : '1\\.2';
+  const version = authorizationDrafts.includes(file) ? '0\\.6' : '1\\.2';
   check(new RegExp('^- (?:Version: |版本：)' + version + '$', 'm').test(text), {file, reason: 'new-draft-version-changed'});
 }
 

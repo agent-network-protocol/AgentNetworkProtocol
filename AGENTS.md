@@ -52,6 +52,7 @@ This repository is documentation-first and has focused tests for maintenance aut
 
 ## Commit & Pull Request Guidelines
 
+- For all protocol-related changes, including specifications, Profiles, white papers, examples, indexes, and related validation scripts/tests, finish the edits and necessary checks, then present the change summary and verification results for user review. Wait for explicit user approval before committing or pushing that change set. Do not commit or push automatically, and do not carry approval for a previous change set forward to later modifications. Approval may cover both commit and push when the user explicitly authorizes both for the reviewed change set.
 - Commit messages are short and imperative, commonly `add ...`, `update ...`, or `docs: ...`.
 - PRs should include a clear description of the change and link related issues if any.
 - For content updates, mention affected document paths and provide before/after context.

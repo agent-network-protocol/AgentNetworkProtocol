@@ -95,7 +95,7 @@ Ordinary Direct, Group, Mention, and Attachment operations remain addressed by b
 ## Quick Start
 
 - For method-independent ordinary API authentication, read [ANP-02](02-anp-did-authentication-protocol-specification.md). It does not require Messaging, Handles, or device Manifests.
-- For proposed DID-based agent authorization, read [ANP-05 (draft)](vnext/05-anp-did-authorization-protocol-specification.md). It explains when to use OAuth and when to use VC, defines the agent-authorization roadmap and v1 identity/basic-delegation scope, with integrity-bound metadata, first-contact admission, hosted/local OAuth flows, and VC delegation credentials by direct presentation or token exchange; implementation support is not implied.
+- For proposed DID-based agent authorization, read [ANP-05 (draft)](vnext/05-anp-did-authorization-protocol-specification.md). It explains when to use OAuth and when to use VC, defines the agent-authorization roadmap and v1 identity/basic-delegation scope, with integrity-bound metadata, first-contact admission, hosted/local OAuth flows, and independent VC direct presentation for delegation and role credentials; implementation support is not implied.
 
 - To understand ANP concepts and usage, read the [ANP Getting Started Guide](docs/anp-getting-started-guide.md) or the [Chinese guide](docs/chinese/ANP入门指南.md).
 - To implement ANP 1.2 identity, start with ANP-02, then [ANP-03: did:wba](03-did-wba-method-design-specification.md) for WBA method validation or [Appendix B](appendix-b-compatibility-with-native-did-web.md) for native `did:web` integration.

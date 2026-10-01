@@ -2,20 +2,22 @@
 
 - 文档编号：ANP-05
 - 状态：草案 / 未发布
-- 版本：0.5
+- 版本：0.6
 - 规范集：ANP vNext；不属于 ANP 1.2 发布范围
-- 草案 Profile 标识：OAuth Profile `anp.authorization.oauth2.did.v1-draft4`；VC Profile `anp.authorization.vc.v1-draft1`
+- 草案 Profile 标识：OAuth Profile `anp.authorization.oauth2.did.v1-draft4`；VC Profile `anp.authorization.vc.v1-draft2`
 - 语言：中文
 - 英文镜像：[ANP DID-Based Authorization Protocol](../05-anp-did-authorization-protocol-specification.md)
 
 <a id="scope"></a>
 ## 1. 范围、授权问题与路线图
 
-ANP-05 定义基于 DID 的智能体授权方向，由两种互补机制组成：**OAuth Profile**，由资源方信任的授权服务器签发访问令牌；**VC Profile**，由拥有授权依据的用户或组织签发 W3C 可验证凭证（Verifiable Credential，VC），Agent 持有并出示。两者都用 DID 标识授权方和被授权的 Agent。**第一版（v1）是 DID–OAuth 客户端身份与基础委托访问 Profile，加上单级 VC 委托凭证，不是完整的智能体委托体系。** 当前文档是其尚未发布的 v0.5 草案。本文的“v1”指首个版本的能力范围，不代表 v1 已发布，也不代表路线图中的后续能力已经实现。
+ANP-05 定义基于 DID 的智能体授权方向，由两种互补机制组成：**OAuth Profile**，由资源方信任的授权服务器签发访问令牌；**VC Profile**，由拥有授权依据的用户或组织签发 W3C 可验证凭证（Verifiable Credential，VC），Agent 持有并出示。两者都用 DID 标识授权方和被授权的 Agent。**第一版（v1）是 DID–OAuth 客户端身份与基础委托访问 Profile，加上直接出示的单级 VC 委托凭证与组织角色凭证，不是完整的智能体委托体系。** 当前文档是其尚未发布的 v0.6 草案。本文的“v1”指首个版本的能力范围，不代表 v1 已发布，也不代表路线图中的后续能力已经实现。
 
-在 OAuth Profile 中，Agent 用自己的 DID 认证密钥证明 OAuth 客户端身份；资源所有者批准权限，授权服务器（AS）签发受限令牌，资源服务器（RS）执行访问控制。这条路径不要求 VC、VP、OIDC 登录桥接或区块链。在 VC Profile 中，对资源拥有权限的用户或组织用自己的 DID 签发委托凭证，Agent 用自己的 DID 签署可验证出示（Verifiable Presentation，VP）；验证方按自身策略决定是否采纳，可以直接执行操作，也可以由资源方的 AS 换发普通 OAuth 令牌。
+在 OAuth Profile 中，Agent 用自己的 DID 认证密钥证明 OAuth 客户端身份；资源所有者批准权限，授权服务器（AS）签发受限令牌，资源服务器（RS）执行访问控制。这条路径不要求 VC、VP、OIDC 登录桥接或区块链。在 VC Profile 中，有权主体向 Agent 签发凭证，Agent 通过与持有者绑定的可验证出示（Verifiable Presentation，VP）向验证方出示；验证方独立验证签发方、持有者、凭证状态、权限、约束与本地信任策略，然后执行或拒绝请求的操作。
 
-OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RFC 6749、RFC 9700。OAuth 2.1 draft-16 与 JWT 客户端认证更新 draft-11 只作为资料性设计参考，不是已发布 RFC 依赖。VC Profile 的规范性基线为 W3C VC 数据模型 2.0、VC Data Integrity 1.0 及其 EdDSA 密码套件、Bitstring Status List 1.0；用 VC 换发令牌时使用 RFC 8693。大写 MUST（必须）、MUST NOT（不得）、SHOULD（应当）、SHOULD NOT（不应）、MAY（可以）使用 BCP 14 定义。下文的收紧规则是本 Profile 的要求，不是对所引用规范的修改。
+OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RFC 6749、RFC 9700。OAuth 2.1 draft-16 与 JWT 客户端认证更新 draft-11 只作为资料性设计参考，不是已发布 RFC 依赖。VC Profile 的规范性基线为 W3C VC 数据模型 2.0、VC Data Integrity 1.0 及其 EdDSA 密码套件、Bitstring Status List 1.0。大写 MUST（必须）、MUST NOT（不得）、SHOULD（应当）、SHOULD NOT（不应）、MAY（可以）使用 BCP 14 定义。下文的收紧规则是本 Profile 的要求，不是对所引用规范的修改。
+
+**ANP-05 v1 定义两条相互独立的授权路径：基于 DID 客户端身份的 OAuth 资源访问授权，以及基于持有者绑定 VC 的可携带委托、角色与资质证明。v1 不定义 VC/VP 到 OAuth Access Token 的转换。**
 
 文档结构：第 1 节说明要解决的授权问题与路线图；第 2 节说明与 ANP-02 的关系，以及何时使用 OAuth、何时使用 VC；第 3–10 节定义 OAuth Profile；第 11 节定义 VC Profile；第 12–14 节是两者共同的错误处理、安全与一致性要求。
 
@@ -45,7 +47,7 @@ OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RF
 
 **用 VC 承载来自资源方之外的授权依据。** 许多智能体授权的依据并不在资源方手里：公司任命某个 Agent 为采购代表，用户给 Agent 一份可以交给多个商家的委托书，或者某机构证明 Agent 属于哪个组织、具备什么资质。OAuth 的同意记录保存在各 AS 内部，无法带到另一个服务，也无法由没有 AS 的对端验证。W3C VC 2.0 让授权方用自己的 DID 签署声明，由 Agent 持有，并出示给任何信任该签发方的验证方；验证只需解析签发方与持有者的 DID 并查询状态列表，验证方不必与签发方预先对接。ANP 已在 did:wba 文档证明和消息绑定中使用 Data Integrity 的 eddsa-jcs-2022，VC Profile 复用同一证明机制，不另外引入签名栈。VC 也有代价：撤销依赖状态列表，存在缓存延迟；验证方必须自己维护“信任哪些签发方做哪类声明”的策略；凭证一旦出示，其内容就被验证方看到。
 
-**VC 与 OAuth 分工，不互相替代。** VC 是签发方的声明，本身不授予任何访问权限，也不是访问令牌；OAuth 令牌是资源方签发的访问许可，不能携带到其他服务。二者可以组合：以 VC 作为授权依据，由资源方的 AS 验证后签发令牌。何时选择哪一种，见第 2.2 节。后续阶段提及的标准是评估方向，不是本版一致性要求。
+**VC 与 OAuth 分工，不互相替代。** v1 中二者是独立的授权路径。OAuth 用于资源方通过 OAuth 授权记录与访问令牌管理的授权；VC 用于授权依据或资质来自资源方之外、需要由 Agent 携带并交给其他方独立验证的声明。OAuth 的授权决定也可以依据角色、资质、组织身份或其他已验证信息。后续扩展可以定义外部凭证如何成为 OAuth 授权决定的输入；v1 不定义 VC 到访问令牌的换发。何时选择哪一种，见第 2.2 节。后续阶段提及的标准是评估方向，不是本版一致性要求。
 
 <a id="v1-scope"></a>
 ### 1.3 v1 交付什么
@@ -54,7 +56,7 @@ v1 的交付目标是**DID 客户端身份加上可使用、可审计的基础�
 
 用户委托授权中，AS 必须（MUST）记录其 issuer/租户上下文内已认证的资源所有者标识、Agent DID、目标资源、获准 scope、批准来源及时间、适用期限/撤销策略，以及稳定的内部授权记录标识。只有在文档化策略认可时，已有同意或管理员授权才可作为批准来源。这是 OAuth 授权记录要求；可跨系统携带的委托书由 VC Profile 定义。新增权限需要新的批准决定；用户凭据与 Agent 认证密钥保持分离。
 
-VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两种类型、与持有者 DID 绑定的出示规则、凭证验证与状态检查规则、通过 RFC 8693 用凭证换发 OAuth 令牌的绑定，以及面向没有 AS 的验证方的直接出示规则。声明支持 VC Profile 的实现必须（MUST）满足第 11 节中适用于其角色的要求；不支持 VC 的实现仍可完整符合 OAuth Profile。有效的委托凭证不替代 AS 或验证方的授权决定。
+VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两种类型、持有者绑定的出示、签发方与持有者验证、凭证状态检查、权限与约束求值，以及向资源服务器或对端 Agent 直接出示。声明支持 VC Profile 的实现必须（MUST）满足第 11 节中适用于其角色的要求；不支持 VC 的实现仍可完整符合 OAuth Profile。有效的委托凭证不替代验证方的授权决定。
 
 **安全基线：**本 Profile 不得（MUST NOT）使用隐式授权、资源所有者密码凭据授权、URI 查询中的访问令牌或 PKCE plain。授权码必须采用 S256 PKCE、获准回调匹配（仅有下文明确限定的 loopback 端口例外），以及 issuer/会话验证。不得（MUST NOT）把路线图中的后续能力宣告为 v1 已支持能力。
 
@@ -65,14 +67,14 @@ VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两�
 
 | 阶段 | 方案方向 | 宣称能力前的验证证据 |
 | --- | --- | --- |
-| v1：身份与基础委托 | 实现第 1.3 节范围。同一 DID 分别向多个服务取得独立授权，保留用户/Agent 归因和明确撤销机制；授权依据来自资源方之外时，使用单级 VC 委托凭证直接出示或换发令牌。 | 原生首次接触；托管与 loopback 用户流程；两资源隔离；元数据篡改；密钥轮换；撤销；VC 换发与直接出示的正反例；第 14 节客户端/AS 互操作证据。 |
+| v1：身份与基础委托 | 实现第 1.3 节范围。同一 DID 分别向多个服务取得独立授权，保留用户/Agent 归因和明确撤销机制；授权依据来自资源方之外时，通过直接出示使用单级 VC 委托凭证或角色凭证。 | 原生首次接触；托管与 loopback 用户流程；两资源隔离；元数据篡改；密钥轮换；撤销；VC 直接出示的正反例；第 14 节客户端/AS 互操作证据。 |
 | 下一阶段：精细权限与高风险批准 | 评估 RFC 9396 RAR 表达结构化资源/动作/限制；另行定义单次批准，可以是专用 VC 类型或其他凭据，绑定 Agent、资源、规范化后的精确动作摘要、关键参数、期限和唯一标识，由执行端原子检查并消费。 | 参数替换、重放、重复执行、过期与撤回均安全失败；重新登录、传输请求签名或宽泛的委托凭证不能代替逐笔批准。 |
-| 再下一阶段：受控转委托 | 评估 VC 委托链（子凭证引用父凭证并收窄权限）以及 RFC 8693 Token Exchange 的执行者归因；定义允许的委托深度、子授权不超出父授权有效权限、受众/期限收窄、授权族撤销与审计。跨 AS 交换须明确建立信任及账户/权限对应。v1 只用 RFC 8693 把单级委托凭证换成令牌，不用于转委托。 | A→B→C 委托；扩权或执行者不符时拒绝；根授权撤回后阻止新子授权；记录已签令牌的失效延迟。不能只凭执行者历史声明授权。 |
+| 再下一阶段：受控转委托 | 评估 VC 委托链（子凭证引用父凭证并收窄权限）以及 RFC 8693 Token Exchange 的执行者归因；定义允许的委托深度、子授权不超出父授权有效权限、受众/期限收窄、授权族撤销与审计。跨 AS 交换须明确建立信任及账户/权限对应。v1 不定义 VC 到 OAuth 令牌的换发或多级转委托。 | A→B→C 委托；扩权或执行者不符时拒绝；根授权撤回后阻止新子授权；记录已签令牌的失效延迟。不能只凭执行者历史声明授权。 |
 | 配套演进：长期与无交互执行、隐私 | 评估 RFC 8628 支持远端/无界面授权，研究其他后端授权流程、经验证的 DID 迁移和共享预算/计数执行。评估 VC 选择性披露密码套件，以及面向人类钱包的 OpenID4VP/OpenID4VCI 绑定。为采购、HR 等常见业务职能评估可互操作的动作词表，由相应领域协议定义并治理。v1 loopback 覆盖浏览器位于 Agent 同一设备的情况，不覆盖全部无界面环境。 | 用户与设备/事务绑定、防钓鱼与轮询控制；用户授权过期不能改走客户端自身权限；多个子任务并发时仍正确执行共享限额；选择性披露不泄露未出示的权限条目。 |
 
 计划统一描述授权人、目标 Agent、资源/动作、限制、适用的父授权、批准证据与撤销状态；具体线协议 Schema 和执行规则在后续扩展中制定。签名声明预算不等于实现全局计数器；令牌交换本身不等于已经实现撤销传播或权限衰减。
 
-本草案发布不代表 SDK、AS 或产品已支持。OAuth Profile 的 v1-draft4 与 VC Profile 的 v1-draft1 都是实验性标识。0.5 修订新增 VC Profile，不改变 OAuth Profile v1-draft4 的线协议规则；0.4 修订改变元数据完整性、本机回调和断言兼容规则。实现必须（MUST）精确匹配修订，迁移前重新验证受影响元数据及未完成事务；不得（MUST NOT）只改 Profile 字符串就重新解释已有授权或授权码。
+本草案发布不代表 SDK、AS 或产品已支持。OAuth Profile 的 v1-draft4 与 VC Profile 的 v1-draft2 都是实验性标识。0.6 修订移除 VC 到 OAuth 令牌的换发，并把 VC Profile 升为 v1-draft2；OAuth Profile v1-draft4 的线协议规则保持不变。0.5 修订新增 VC Profile；0.4 修订改变元数据完整性、本机回调和断言兼容规则。实现必须（MUST）精确匹配修订，迁移前重新验证受影响元数据及未完成事务；不得（MUST NOT）只改 Profile 字符串就重新解释已有授权或授权码。
 
 <a id="anp-boundary"></a>
 ## 2. 与 ANP 的关系及机制选择
@@ -89,23 +91,23 @@ ANP-02 的认证缓存令牌不会自动成为 ANP-05 的 OAuth 授权令牌，�
 | --- | --- | --- |
 | 认证直接 API 请求或通信对端，由接收方执行已有本地策略 | ANP-02 | 可选令牌在该 API 策略下复用已认证上下文，不建立标准化用户委托授权。 |
 | 代表用户取得受限权限，或使用 AS 管理的客户端授权、资源受众、同意、期限与撤销 | ANP-05 OAuth Profile | AS 为特定授权及资源签发 OAuth 访问令牌。 |
-| 出示来自资源方之外的授权依据，例如组织任命、用户委托书或资质，由验证方或其 AS 采纳 | ANP-05 VC Profile | 签发方签署的声明；验证方按自身策略决定是否采纳，凭证本身不是访问令牌。 |
+| 出示来自资源方之外的授权依据，例如组织任命、用户委托书或资质，由验证方直接验证和决定是否采纳 | ANP-05 VC Profile | 签发方签署的声明；验证方按自身策略决定是否采纳，凭证本身不是访问令牌。 |
 
 服务可以在明确分离的路由或声明的策略下同时提供多种机制。使用 JWT、签名 JSON 或把对象称作“令牌”，不会使它们可互换。ANP-05 不要求先取得 ANP-02 令牌；普通认证消息也不强制采用 AS。RS 不得（MUST NOT）把原始 VC 或 VP 当作 Bearer 访问凭据接受。
 
 <a id="mechanism-selection"></a>
 ### 2.2 OAuth 与 VC 的分工（资料性）
 
-两者回答的是不同问题。**OAuth 回答“资源方是否允许这个客户端现在访问这个资源”**：许可由资源方信任的 AS 签发，绑定单一资源，有效期短，AS 可以随时停止签发和刷新。**VC 回答“谁对这个 Agent 声明了什么”**：声明由授权依据的来源方签发，由 Agent 持有，可以交给多个验证方，每个验证方自行决定是否据此放行。
+两者回答的是不同问题。**OAuth 回答“资源方现在是否允许这个客户端对这个资源执行这个操作？”**：资源方信任的 AS 根据本地策略、用户授权、角色、资质、组织身份或其他已验证信息作出决定，再签发目标受限的访问令牌。**VC 回答“哪个签发方对这个 Agent 作出了什么可验证声明？”**：Agent 可以携带来自外部签发方的声明交给不同第三方，各验证方自行决定是否信任签发方及是否允许该操作。资质与角色也可成为 OAuth 决策输入；是否需要可携带、可独立验证的外部声明，是使用 VC 的关键。
 
 | 维度 | OAuth 访问令牌 | VC 委托凭证或属性凭证 |
 | --- | --- | --- |
 | 签发方 | 资源方信任的 AS | 授权依据的来源：用户、组织或资质机构 |
-| 授权决定 | AS 在签发令牌前做出，RS 执行 | 每个验证方（或其 AS）在凭证出示时做出 |
+| 授权决定 | AS 在签发令牌前做出，RS 执行 | 每个验证方在凭证直接出示时做出 |
 | 适用范围 | 单一资源；本 Profile 每个令牌只绑定一个 `resource` | 凭证列出的范围，可以跨多个服务；各验证方只采用与自己相关的条目 |
 | 验证依赖 | 可信 AS 的签名密钥或 introspection | 签发方 DID、持有者 DID 与状态列表；验证方不必与签发方预先对接 |
 | 有效期与撤销 | 短期令牌；AS 可以集中停止签发和刷新，但已签发的令牌在过期或 RS 得知撤销之前仍可能被使用 | 有效期通常更长；通过状态列表撤销，延迟取决于状态列表的发布与缓存 |
-| 需要的交互 | 用户在 AS 登录并同意；客户端与 AS 往返 | 签发时由授权方确认一次；出示时验证方只需解析 DID 与查询状态 |
+| 需要的交互 | 用户委托时在 AS 登录并同意；客户端与 AS 往返 | 签发时由授权方确认一次；出示时 Agent 与验证方交换 challenge 和持有者绑定 VP，并检查 DID、状态与本地策略 |
 | 隐私 | 令牌内容对客户端通常不透明；AS 掌握每次授权 | 出示的凭证内容对验证方可见；签发方不参与出示，但状态列表查询会向其托管方暴露验证方的网络地址 |
 
 **适合使用 OAuth 的情况：**
@@ -120,20 +122,18 @@ ANP-02 的认证缓存令牌不会自动成为 ANP-05 的 OAuth 授权令牌，�
 - 授权依据来自资源方之外。例如企业授权采购 Agent 以公司名义向供应商下单，额度与期限由企业决定；供应商需要确认的是“这家企业确实授权了这个 Agent”，而不是企业员工在供应商系统里登录同意。
 - 组织任命 Agent 担任某个职能角色。例如公司的 HR Agent 代表公司在招聘平台发布职位、与候选人的 Agent 约面试，采购 Agent 代表公司向新供应商询价下单。对方往往事先不认识这个 Agent，公司也无法预先列出所有对方的地址；角色凭证按业务动作说明“这个 Agent 代表本公司做什么、上限多少”，见第 11.9 节。
 - 同一份授权要交给多个互不对接的服务。例如用户签发一份委托凭证，允许 Agent 在几家酒店比价预订，每家酒店各自验证，用户不必逐一登录同意。
-- 验证方没有 AS，或者是另一个 Agent。Agent 之间点对点协作时，对端需要确认“这个 Agent 代表哪个用户或组织、被允许做什么”。
+- 对方提供支持 VC 的接口，包括 Agent 间点对点协作；是否存在 OAuth AS 不改变该出示流程。此时，对端需要确认“这个 Agent 代表哪个用户或组织、被允许做什么”。
 - 需要证明的是属性而不是访问权限，例如组织成员身份、行业资质、实名核验结果或 Agent 的运营方。本版只定义委托凭证与角色凭证两种授权类型；属性凭证的类型由签发方和验证方约定，可以复用第 11 节的签名与状态检查，但主体绑定、签发方信任和授权含义须按类型另行约定，属性凭证本身不授予访问权限。
 
-**两者组合：VC 作为输入，OAuth 作为输出。** 资源已受 OAuth 保护、授权依据却来自外部时，Agent 把 VP 交给该资源的 AS，AS 验证后签发普通访问令牌（第 11.5 节）。RS 不需要解析或验证 VC，但凭证带约束时，RS 必须执行 AS 传来的约束；令牌期限与撤销仍由 AS 控制，令牌有效期不超过凭证有效期。
+**首版边界。** OAuth 与 VC 是独立的授权入口。提供 VC 接口的验证方直接检查出示与请求的操作；只接受 OAuth 的接口仍要求通过其支持的 OAuth 流程取得授权，不能用 VC 直接出示绕过。VC 与 OAuth 的组合仅作为第 16 节的后续扩展方向。
 
 ```mermaid
 flowchart TD
   Start["Agent 要执行受保护操作"] --> Q1{"只需证明请求来自哪个 DID？"}
   Q1 -->|"是"| P02["ANP-02 请求认证<br/>接收方按本地策略处理"]
-  Q1 -->|"否，需要授权"| Q2{"授权依据由资源方掌握？<br/>用户在该服务同意，或服务方配置权限"}
-  Q2 -->|"是"| OA["OAuth Profile<br/>授权码或客户端凭据"]
-  Q2 -->|"否，来自用户、组织或资质机构的签署声明"| Q3{"资源方有 AS，<br/>希望 RS 只处理令牌？"}
-  Q3 -->|"是"| EX["VC 换发 OAuth 令牌<br/>第 11.5 节"]
-  Q3 -->|"否，没有 AS 或 Agent 间直接协作"| DP["VC 直接出示<br/>第 11.6 节"]
+  Q1 -->|"否，需要授权"| Q2{"授权由谁控制？"}
+  Q2 -->|"资源方策略、用户授权或已验证信息"| OA["OAuth Profile<br/>授权码或客户端凭据"]
+  Q2 -->|"需要携带外部签发方的可验证声明"| DP["VC Profile<br/>直接出示，第 11.6 节"]
 ```
 
 ### 2.3 信任边界（资料性）
@@ -157,8 +157,8 @@ flowchart LR
   I -->|"签发委托凭证"| W
   D -->|"认证密钥与固定摘要"| S
   M -->|"使用前校验字节"| S
-  A -->|"客户端断言，授权凭据或 VP"| S
-  I -.->|"签发方 DID 与凭证状态"| S & R
+  A -->|"客户端断言与 OAuth 授权凭据"| S
+  I -.->|"签发方 DID 与凭证状态"| R
   S -->|"限定资源的令牌"| A
   A -->|"令牌与操作，或直接出示 VP"| R["资源服务器或对端 Agent<br/>确定性策略"]
   S -->|"签发者信任 / 令牌状态"| R
@@ -169,7 +169,7 @@ flowchart LR
 <a id="roles"></a>
 ## 3. 角色与标识
 
-第 3–10 节定义 OAuth Profile。第 11 节的 VC 换发复用其中的客户端认证（第 6 节）、资源绑定（第 7 节）与令牌规则（第 8 节）。
+第 3–10 节定义 OAuth Profile。第 11 节的 VC Profile 定义独立的直接出示流程，其持有者与验证方不因采用 VC 而承担 OAuth 客户端或 AS 的职责。AS 可以作为普通业务组件实现 VC 验证方，但本版不赋予它 VC 换令牌的特殊角色。
 
 | 术语 | 含义 |
 | --- | --- |
@@ -219,7 +219,7 @@ service URL 指向 JSON OAuth 客户端元数据文档，**不是**授权服务�
 | `client_id` | 必选，精确等于裸客户端 DID，**不是**元数据 URL。 |
 | `client_name` | 必选非空显示名称；客户端自述，不是已验证组织名称。 |
 | `token_endpoint_auth_method` | 必选，`private_key_jwt`。 |
-| `grant_types` | 必选非空数组，列出请求支持的核心授权类型；使用第 11.5 节的客户端还可以列出 `urn:ietf:params:oauth:grant-type:token-exchange`。不是权限授予。 |
+| `grant_types` | 请求使用的、受支持核心授权类型的非空数组，必选：`client_credentials`、`authorization_code`、`refresh_token`。不是权限授予。 |
 | `response_types` | 请求授权码时必选且为 `["code"]`，否则省略。 |
 | `redirect_uris` | 授权码模式必选非空数组，使用获准 HTTPS 回调或按第 7.2.1 节明确声明的本机 loopback 条目；其他模式省略或为空。 |
 | `anp_application_type` | ANP 定义的可选 `web`（默认）或 `native`；loopback 必须使用 `native`。表示应用部署形式，不代表机密客户端等级。 |
@@ -326,7 +326,7 @@ AS 必须（MUST）按以下顺序执行，并限制工作量：
 }
 ```
 
-支持第 11.5 节 VC 换发的 AS 另行声明 `anp_vc_authorization` 成员，并在 `grant_types_supported` 中列出 RFC 8693 授权类型；上例只展示 OAuth Profile 的能力。
+
 
 [ANP-07 智能体描述](../../chinese/07-ANP-智能体描述协议规范.md)可以（MAY）链接到接口文档，说明其 OAuth 要求及 RFC 8414/RFC 9728 元数据位置。本版本不重定义 ANP-07 的 `securityDefinitions`，不要求在其中增加新的 `scheme` 值，也不在公开描述中放置凭据。描述与发现不是授权。
 
@@ -400,7 +400,7 @@ JWT 签名覆盖 JWS signing input，不是 ANP-02 HTTP 签名基串，也不是
 <a id="authorization-flows"></a>
 ## 7. 授权流程
 
-实现必须（MUST）至少支持以下一种流程，且仅声明实际支持的流程。本版每份授权使用一个目标资源。客户端必须（MUST）在授权请求及本版全部令牌请求中，通过 RFC 8707 提供一个不含片段的绝对 HTTPS `resource` URI，且只提供一次，包括授权码兑换与刷新。显式重复提供目标是 ANP Profile 的要求。AS 必须（MUST）将其与允许资源核对，并把授权和令牌绑定到该目标。scope 名称的语义由 AS/RS 定义；DID 不是 scope。第 11.5 节的 VC 换发是另一种授权类型，遵循同样的 resource 规则。
+实现必须（MUST）至少支持以下一种流程，且仅声明实际支持的流程。本版每份授权使用一个目标资源。客户端必须（MUST）在授权请求及本版全部令牌请求中，通过 RFC 8707 提供一个不含片段的绝对 HTTPS `resource` URI，且只提供一次，包括授权码兑换与刷新。显式重复提供目标是 ANP Profile 的要求。AS 必须（MUST）将其与允许资源核对，并把授权和令牌绑定到该目标。scope 名称的语义由 AS/RS 定义；DID 不是 scope。
 
 **每个令牌一个目标是隔离规则，不是每个 Agent 只能访问一个服务。** 同一 DID 的 Agent 可以分别持有日历服务和文档服务的授权与令牌。缓存须区分 issuer、租户、资源所有者、客户端 DID、resource、scope 及适用发送者密钥，不能只按 Agent DID 选择令牌。各 AS 认证自己的用户账户并独立批准访问；综合任务不等于综合令牌，不同 AS 中同名用户或 DID 不能静默合并账户。兑换/刷新全程提交 resource 是为避免目标歧义；不支持 RFC 8707 的 AS 因而不符合原生路径，这是明确的取舍。多资源指示符或跨 AS 授权须另行定义，不是本版要求。
 
@@ -717,7 +717,7 @@ DID 密钥撤销不会自行撤销已经由 AS 签发的令牌。部署必须（
 <a id="vc-authorization"></a>
 ## 11. 基于 VC 的授权
 
-本节定义 VC Profile `anp.authorization.vc.v1-draft1`。它让拥有授权依据的用户或组织以 W3C 可验证凭证的形式签发委托，Agent 持有凭证并在需要时出示，验证方按自身策略决定是否采纳。VC Profile 是可选能力。声明支持时，第 11.2–11.4 节与第 11.7 节是各角色的共同基础；第 11.5 节只适用于声明支持令牌换发的 AS，第 11.6 节只适用于接受直接出示的验证方。各角色的一致性要求见第 14 节。
+本节定义 VC Profile `anp.authorization.vc.v1-draft2`。它让拥有授权依据的用户或组织以 W3C 可验证凭证的形式签发委托，Agent 持有凭证并直接出示，验证方按自身策略决定是否采纳。VC Profile 是可选能力。声明支持时，第 11.2–11.4 节与第 11.7 节是适用于各角色的共同基础，第 11.6 节定义直接出示流程；第 11.5 节明确本版不定义 VC 与 OAuth 的组合。各角色的一致性要求见第 14 节。
 
 ### 11.1 角色与使用流程
 
@@ -725,7 +725,7 @@ DID 密钥撤销不会自行撤销已经由 AS 签发的令牌。部署必须（
 | --- | --- |
 | 签发方（issuer） | 对授权依据拥有权限、以自身 DID 签署凭证的用户或组织。签发密钥必须（MUST）位于签发方 DID 文档的 `assertionMethod` 关系中，并由签发方控制，例如用户 App 或组织的签发系统。 |
 | 持有者（holder） | 被授权的 Agent，用自己的 DID 持有并出示凭证；它必须（MUST）是凭证的 `credentialSubject.id`。 |
-| 验证方（verifier） | 接收出示的一方：资源方的 AS（第 11.5 节），或直接执行操作的 RS、对端 Agent（第 11.6 节）。 |
+| 验证方（verifier） | 直接评估所出示凭证与请求操作的资源服务器、服务接口、对端 Agent、网关或其他接收方（第 11.6 节）。 |
 | 状态列表 | 签发方发布的 Bitstring Status List 凭证，用于撤销已签发的委托凭证。 |
 
 签发方不得（MUST NOT）与持有者相同：Agent 给自己签发的委托凭证无效。签发方与持有者的 DID 按第 6.2 节验证，包括其中的方法范围与 k1_ 拒绝规则；区别在于凭证证明的密钥必须（MUST）位于签发方的 `assertionMethod` 关系，出示证明的密钥必须（MUST）位于持有者的 `authentication` 关系。
@@ -734,22 +734,14 @@ DID 密钥撤销不会自行撤销已经由 AS 签发的令牌。部署必须（
 sequenceDiagram
     participant I as 签发方（用户 App 或组织系统）
     participant A as Agent（持有者）
-    participant S as 资源方 AS
-    participant R as 资源服务器或对端 Agent
+    participant R as 验证方（资源服务器、网关或对端 Agent）
     I->>I: 授权方确认 Agent DID、资源、动作、限制与期限
     I->>A: 委托凭证（签发方 assertionMethod 密钥签名）
-    alt 资源方有 AS：换发 OAuth 令牌
-        A->>A: 生成客户端断言，以其 jti 作为 VP challenge
-        A->>S: 令牌交换：client_assertion、VP、resource、scope
-        S->>S: 验证客户端、VP、凭证、状态与签发方权限，权限求交
-        S-->>A: 限定资源的访问令牌，不含刷新令牌
-        A->>R: 令牌与操作
-    else 没有 AS：直接出示
-        A->>R: 经 ANP-02 认证的操作请求
-        R-->>A: 出示请求：challenge、domain、所需凭证与权限
-        A->>R: VP，holder 为 Agent DID
-        R->>R: 验证 VP、凭证、状态与签发方权限，执行或拒绝
-    end
+    A->>R: 经 ANP-02 或消息会话认证的操作请求
+    R-->>A: 出示请求：profile、challenge、domain、所需凭证与权限
+    A->>R: 持有者绑定 VP，签署验证方的 domain 与 challenge
+    R->>R: 验证签发方、持有者、状态与权限，求交并执行约束
+    R-->>A: 执行或拒绝事务中的操作
 ```
 
 ### 11.2 委托凭证与角色凭证
@@ -794,9 +786,9 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
 
 - `type` 包含 `VerifiablePresentation`；`holder` 等于 Agent 的裸 DID。
 - `verifiableCredential` 恰好包含一份授权凭证，即 `ANPAgentDelegationCredential` 或 `ANPAgentRoleCredential`；只有验证方明确要求时，才可以附带其他凭证，例如受信机构签发的组织身份凭证。附加凭证不适用持有者绑定规则，其主体可以是组织而不是 Agent；它们本身不授予权限，其验证与采纳由验证方策略决定。
-- `proof` 是 `DataIntegrityProof`：`proofPurpose` 为 `authentication`，`verificationMethod` 位于持有者的 `authentication` 关系，`domain` 为单个字符串，等于验证方标识，`challenge` 为验证方可以验证的一次性值，`created` 为签署时间。
+- `proof` 是 `DataIntegrityProof`：`proofPurpose` 为 `authentication`，`verificationMethod` 位于持有者的 `authentication` 关系，`domain` 为单个字符串，等于验证方标识，`challenge` 为验证方生成并保存的一次性值，`created` 为签署时间。
 
-验证方必须（MUST）精确比较 `domain` 和 `challenge`，并且每个 `challenge` 只能被接受一次：直接出示时，验证方原子消费自己保存的出示事务（第 11.6 节）；令牌换发时，`challenge` 就是本次客户端断言的 `jti`，第 6.4 节对该 `jti` 的原子占用即是本次消费，不得（MUST NOT）作为另一个值重复占用。复用时拒绝。`created` 与验证方当前时间之差不得超过 300 秒，允许的时钟偏差不超过 60 秒。一份 VP 只对其 `domain` 所指的验证方有效，不得（MUST NOT）转交给其他验证方使用。Agent 签署前必须（MUST）确认 `domain` 就是它实际交互的验证方：换发时为已验证 AS 元数据中的 `issuer`；直接出示时为它所调用 HTTPS 接口的 origin，或消息会话已认证的对端 DID。不得（MUST NOT）为其他验证方签署 VP。
+验证方必须（MUST）精确比较 `domain` 和 `challenge`，并且每个 `challenge` 只能被接受一次：验证方原子消费自己保存的出示事务（第 11.6 节），复用时拒绝。`created` 与验证方当前时间之差不得超过 300 秒，允许的时钟偏差不超过 60 秒。一份 VP 只对其 `domain` 所指的验证方有效，不得（MUST NOT）转交给其他验证方使用。Agent 签署前必须（MUST）确认 `domain` 就是它实际交互的验证方：它所调用 HTTPS 接口的 origin，或消息会话已认证的对端 DID。不得（MUST NOT）为其他验证方签署 VP。
 
 持有者绑定的意义在于：凭证被窃取后，没有 Agent 认证密钥的一方无法出示它。反过来，Agent 认证密钥与凭证同时泄露时，攻击者可以在凭证范围内行事，直到凭证被撤销或过期；这也是凭证有效期应当尽可能短的原因。
 
@@ -806,59 +798,38 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
 
 1. **格式与大小。** 限制解码后的 VP 大小；实现必须（MUST）至少支持 16 KiB，并设置有限的可配置上限。拒绝成员名重复的 JSON、不在允许列表中的 context 以及不支持的密码套件。
 2. **出示证明。** 按第 6.2 节解析持有者 DID，验证 VP 证明，并检查 `domain`、`challenge` 与 `created`。
-3. **持有者绑定。** `holder` 必须等于已认证的请求方 DID：换发令牌时是 `client_id`，直接出示时是 ANP-02 或消息会话已认证的 DID；并且必须等于授权凭证的 `credentialSubject.id`。直接出示时，验证方通过这项检查后才按第 11.3 节消费出示事务，使其他 DID 的证明无法耗掉合法请求方的 challenge；换发时 challenge 已随第 6.4 节的 `jti` 占用而消费。
+3. **持有者绑定。** `holder` 必须（MUST）等于承载本次出示的 ANP-02 HTTP 请求或已认证消息会话所认证的请求方 DID，并且必须（MUST）等于授权凭证的 `credentialSubject.id`。验证方通过这项检查后才按第 11.3 节消费出示事务，使其他 DID 的证明无法耗掉合法请求方的 challenge。
 4. **凭证证明。** 解析签发方 DID，验证凭证证明，确认密钥位于签发方的 `assertionMethod` 关系，且签发方与持有者不同。
 5. **有效期。** 满足 `validFrom <= now + s` 且 `now < validUntil + s`，`s` 为不超过 60 秒的允许偏差。
 6. **状态。** 获取 `statusListCredential` 并受第 13 节 SSRF 控制约束；验证状态列表凭证本身的证明，其签发方必须与所出示授权凭证的签发方相同；状态列表凭证必须带有 `validUntil`，并按第 5 步规则处于有效期内；按 Bitstring Status List 的验证算法检查条目的 `statusPurpose` 与索引；检查对应位。已撤销或已暂停时拒绝。状态无法取得时拒绝，不得视为有效。状态结果的缓存时间不得超过 300 秒。缓存上限只约束验证方多久重新获取，不约束状态本身有多旧；状态的新鲜度由状态列表凭证的有效期约束。
 7. **签发方权限。** 验证方必须（MUST）确认签发方 DID 对所请求资源有权：它已通过验证绑定到验证方的某个本地账户，或者按文档化策略被接受为新客户，或者是验证方对该资源类型信任的组织。无法确认时拒绝。凭证本身不能建立或改变这种对应关系。签发资格必须（MUST）来自验证方本地的主体绑定或信任策略，不得从签发方自己持有的委托凭证、角色凭证、访问令牌或执行权限推导；因此，持有他人委托的 Agent 再签发的凭证即使密码学上有效也会被拒绝，本版不支持转委托。对角色凭证，验证方必须确认签发方 DID 就是它将视为委托主体的那个组织：该组织已是验证方的客户并绑定了此 DID，或者验证方按文档化的客户审核策略接纳它；策略可以要求 VP 附带受信机构签发的组织身份凭证，本版不定义其格式。对 did:web，域名只证明对该域名的控制，不单独证明法律主体身份。
-8. **权限求交。** 对委托凭证，请求的资源必须与某条 `permissions[].resource` 精确匹配，请求的动作必须是该条 `actions` 的子集。对角色凭证，请求的操作必须按验证方文档化的对应关系落在某一项 `capabilities[].action` 之内。所采纳条目的全部约束必须能被验证方理解并执行。最终权限不超过“验证方本地策略、凭证权限、本次请求”三者的交集。直接出示时，“本次请求”指第 11.6 节保存的出示事务，而不是收到 VP 时另行提出的请求。
+8. **权限求交。** 对委托凭证，请求的资源必须与某条 `permissions[].resource` 精确匹配，请求的动作必须是该条 `actions` 的子集。对角色凭证，请求的操作必须按验证方文档化的对应关系落在某一项 `capabilities[].action` 之内。所采纳条目的全部约束必须能被验证方理解并执行。最终权限不超过“验证方本地策略、凭证权限、本次请求”三者的交集。“本次请求”指第 11.6 节保存的出示事务，而不是收到 VP 时另行提出的请求。
 9. **记录。** 授权记录保存凭证 `id`、签发方、持有者、状态条目、采纳的权限、验证时间以及所确认的本地主体。
 
 有效的凭证只证明签发方做出了这项声明；是否放行，由以上第 7、8 步和验证方本地策略决定。所有判断必须（MUST）由确定性的服务端策略完成，不能交给 LLM 从凭证文本中推断。
 
-<a id="vc-token-exchange"></a>
-### 11.5 用 VC 换发 OAuth 令牌
+<a id="vc-oauth-composition"></a>
+### 11.5 VC 与 OAuth 组合——不属于 v1
 
-资源已受 OAuth 保护、授权依据却来自资源方之外时，使用本绑定。它基于 RFC 8693 令牌交换：Agent 用第 6 节的客户端断言认证自己，用 VP 作为 `subject_token` 提交授权依据；AS 验证后签发普通 OAuth 访问令牌。RS 按第 8 节验证令牌，不需要理解 VC。
+本版不定义授权类型、令牌端点绑定、令牌交换或 VC/VP 到 OAuth 访问令牌的自动转换。除非另行定义并明确协商的扩展允许，否则不得（MUST NOT）向 OAuth 令牌端点提交 VC 或 VP。
 
-**AS 声明。** 支持本绑定的 AS 必须（MUST）同时符合 OAuth Profile，在 `grant_types_supported` 中列出 `urn:ietf:params:oauth:grant-type:token-exchange`，并提供 RFC 8414 扩展成员 `anp_vc_authorization`：
-
-| 字段 | 规则 |
-| --- | --- |
-| `profile` | 精确等于 `anp.authorization.vc.v1-draft1`。 |
-| `credential_types_supported` | 非空数组，取值为 `ANPAgentDelegationCredential` 和/或 `ANPAgentRoleCredential`；只列实际接受的类型。 |
-| `cryptosuites_supported` | 非空数组，必须包含 `eddsa-jcs-2022`。 |
-| `status_types_supported` | 非空数组，必须包含 `BitstringStatusListEntry`。 |
-
-`anp_vc_authorization` 是 ANP 定义、尚未注册的实验性元数据。没有精确的 Profile 匹配时，客户端不得（MUST NOT）提交 VP。
-
-**请求。** 客户端向令牌端点发送第 6.1 节规定的表单请求，其中：
-
-- `grant_type` 为 `urn:ietf:params:oauth:grant-type:token-exchange`；`client_id`、`client_assertion_type` 与新的 `client_assertion` 按第 6 节提供。
-- `subject_token` 为 VP 的 UTF-8 JSON 字节经 base64url 编码、不带填充的结果；`subject_token_type` 为 ANP 定义的 `https://agent-network-protocol.com/oauth/token-type/vp`。
-- `resource` 与 `scope` 各出现一次，且都必选；`resource` 遵循第 7 节。
-- `requested_token_type` 可以省略；提供时必须为 `urn:ietf:params:oauth:token-type:access_token`。本版不使用 `actor_token`、`actor_token_type` 与 `audience`。
-- VP 的 `domain` 必须等于 AS 的 `issuer`，`challenge` 必须等于本次请求客户端断言的 `jti`。AS 在第 6.4 节原子消费 `jti` 后检查这项绑定。对本绑定，AS 必须（MUST）把该防重放记录保留到 `exp + s` 与“VP 的 `created` 加 300 秒再加 `s`”两者中较晚的时刻，覆盖该 VP 仍可能被接受的整个窗口。因此一份 VP 只能随一次令牌请求使用，即使搭配复用同一 `jti` 的新断言也不行，并且不需要额外的往返取得 challenge。
-
-**处理与响应。** AS 先完成第 6 节客户端认证，再以 `client_id` 作为已认证 DID 执行第 11.4 节，最后签发令牌。成功响应遵循 RFC 8693，包含 `access_token`、`issued_token_type`（值为 `urn:ietf:params:oauth:token-type:access_token`）、`token_type`、`expires_in` 与实际获授的 `scope`，并携带第 8.1 节的缓存控制头。令牌的 `sub` 为第 11.4 节第 7 步确认的本地主体，`client_id` 为 Agent DID，audience 为请求的 resource。令牌过期时间不得（MUST NOT）晚于凭证的 `validUntil`。所采纳的权限带有约束时，AS 必须（MUST）确保 RS 执行这些约束，例如在 RFC 9068 令牌或 introspection 结果中返回 AS 与 RS 约定的约束声明；无法保证时拒绝换发，不得签发不带约束的令牌。AS 不得（MUST NOT）为本绑定签发刷新令牌；需要新令牌时，Agent 重新出示凭证，AS 重新检查状态。
-
-**撤销延迟。** 凭证被撤销后，AS 一旦取得反映撤销的状态列表，就必须（MUST）拒绝新的换发；已签发令牌在剩余有效期内仍可能被使用。在签发方于旧状态列表到期前发布新列表、AS 拒绝过期的状态列表、RS 执行令牌过期规则的前提下，撤销延迟的上界为状态列表凭证的最长有效期、状态缓存时间、令牌有效期与允许时钟偏差之和。部署必须（MUST）记录撤销延迟的上界及其所依据的各项取值。高敏感资源应当（SHOULD）使用更短的令牌有效期，或在 introspection 时重新检查凭证状态。
+后续版本可以研究这种组合绑定，见第 16 节。
 
 <a id="vc-direct-presentation"></a>
 ### 11.6 直接出示
 
-验证方不运行 AS，或者验证方本身就是另一个 Agent 时，使用直接出示。它适合 Agent 之间点对点协作，以及一次性的操作授权。
+直接出示是 v1 VC Profile 定义的授权机制。验证方可以是资源服务器、应用服务、网关或对端 Agent。存在 OAuth 授权服务器本身不改变该 VC 流程。某个接口要求 OAuth 时，不得（MUST NOT）用 VC 直接出示绕过其授权要求。
 
 1. 请求方先通过 ANP-02（HTTP）或已认证的消息会话表明自己的 DID。
-2. 验证方返回出示请求，至少包含：`challenge`，含至少 128 位密码学随机性、一次性使用、有效期不超过 300 秒；`domain`，即验证方自身标识，为其 HTTPS origin 或 DID；接受的凭证类型、所需资源与动作；以及 `mode`，取值为 `operation`（只授权本次操作）或 `session`（建立短期会话）。验证方必须（MUST）把 challenge 与请求方 DID、`domain`、所需资源与动作、`mode`、有效期，以及 `operation` 模式下待执行的操作一起保存为出示事务。
-3. 请求方按第 11.3 节签署 VP 并返回。
+2. 验证方返回出示请求，至少包含：`type` 为 `ANPPresentationRequest`；`profile`，必须（MUST）精确等于受支持的 VC Profile `anp.authorization.vc.v1-draft2`；`challenge`，含至少 128 位密码学随机性、一次性使用、有效期不超过 300 秒；`domain`，为所调用 HTTPS 接口的 origin 或消息会话已认证的验证方 DID；接受的凭证类型、所需资源与动作；以及 `mode`，取值为 `operation`（只授权本次操作）或 `session`（建立短期会话）。验证方必须（MUST）把 challenge 与请求方 DID、`profile`、`domain`、所需资源与动作、`mode`、有效期，以及 `operation` 模式下待执行的操作一起保存为出示事务。
+3. 请求方必须（MUST）检查 `profile` 精确匹配其支持的 VC Profile；不得（MUST NOT）静默降级或重新解释不支持的 Profile 版本。验证请求后，按第 11.3 节签署 VP 并返回。
 4. 验证方取出该 challenge 对应的出示事务，确认 ANP-02 或消息会话当前认证的 DID 就是事务中的请求方，以它作为持有者执行第 11.4 节，并以事务中保存的资源、动作与操作求交；然后只执行或拒绝该事务中的操作。
 
-本版定义出示请求对象的最小字段（示例见第 11.8 节），不定义新的 HTTP 认证方案或 `Authorization` 头；出示请求与 VP 放在哪个字段、哪条消息中，由承载接口的 ANP-07 描述或消息应用协议定义。`mode` 为 `operation` 时，授权只覆盖事务中保存的那一次操作；只有出示请求中 `mode` 为 `session` 时，验证方才可以据此建立短期会话，不得（MUST NOT）在收到 VP 后把单次操作扩大为会话。challenge 的一次性不等于业务操作的幂等，重试与去重由承载的应用协议定义。会话有效期不得（MUST NOT）晚于凭证的 `validUntil`，且须按第 11.4 节第 6 步定期重查状态。
+VC 能力由承载接口的 ANP-07 描述声明，并通过出示请求中的精确 `profile` 进行协商。本版定义出示请求对象的最小字段（示例见第 11.8 节），不定义新的 HTTP 认证方案或 `Authorization` 头；出示请求与 VP 放在哪个字段、哪条消息中，由承载接口的 ANP-07 描述或消息应用协议定义。`mode` 为 `operation` 时，授权只覆盖事务中保存的那一次操作；只有出示请求中 `mode` 为 `session` 时，验证方才可以据此建立短期会话，不得（MUST NOT）在收到 VP 后把单次操作扩大为会话。challenge 的一次性不等于业务操作的幂等，重试与去重由承载的应用协议定义。会话有效期不得（MUST NOT）晚于凭证的 `validUntil`，且须按第 11.4 节第 6 步定期重查状态。复查失败或凭证过期、撤销、暂停时，验证方必须（MUST）停止通过该会话授权操作。
 
 ### 11.7 生命周期与隐私
 
-**撤销。** 签发方通过设置状态位并发布新的状态列表撤销凭证；验证方在缓存过期并取得新列表后看到结果。签发方应当（SHOULD）为状态列表凭证设置与撤销时效要求相称的较短有效期，并在到期前重新发布；否则验证方会因状态列表过期而拒绝所有依赖它的凭证。撤销凭证不会自动撤销 AS 已经换发的令牌，延迟上界见第 11.5 节。
+**撤销。** 签发方通过设置状态位并发布新的状态列表撤销凭证；验证方在缓存过期并取得新列表后看到结果。签发方应当（SHOULD）为状态列表凭证设置与撤销时效要求相称的较短有效期，并在到期前重新发布；否则验证方会因状态列表过期而拒绝所有依赖它的凭证。
 
 **密钥与 DID 变化。** 签发方从 `assertionMethod` 移除某个密钥后，由该密钥签署的凭证无法再通过验证，需要重新签发。Agent 只轮换认证密钥时，凭证仍然有效，因为凭证绑定的是 DID 而不是密钥，但 VP 必须用当前获准的密钥签署。Agent DID 发生变化时，包括 did:wba 绑定密钥轮换产生的新 DID，旧凭证不能转移给新 DID，须重新签发。
 
@@ -868,9 +839,27 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
 
 ### 11.8 示例（资料性）
 
-以下示例中的 `proofValue`、`BASE64URL_VP` 与 `FRESH_CLIENT_ASSERTION` 是占位符，不是可验证的签名。示例场景：企业 `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` 授权 Agent `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` 在供应商处下单，单笔上限 5000 元；Agent 在 2026-09-27T00:00:00Z 向供应商的 AS 出示凭证并换发令牌。
+以下示例中的 `proofValue` 是占位符，不是可验证的签名。示例场景：企业 `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` 向 Agent `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` 签发采购委托凭证，单笔上限 5000 CNY。Agent 通过 ANP-02 认证向供应商提出一笔 4200.00 CNY 的下单请求；供应商把该操作与请求方 DID 保存为出示事务，然后返回以下出示请求：
 
-用于令牌交换的 VP，内含委托凭证。`challenge` 等于同一请求中客户端断言的 `jti`：
+```json
+{
+  "type": "ANPPresentationRequest",
+  "profile": "anp.authorization.vc.v1-draft2",
+  "challenge": "JP-0hfyItrCTHObnXV3Svg",
+  "domain": "https://supplier.example",
+  "expires_at": 1790467500,
+  "credential_types": [
+    "ANPAgentDelegationCredential"
+  ],
+  "mode": "operation",
+  "resource": "https://supplier.example/api/orders",
+  "actions": [
+    "orders.create"
+  ]
+}
+```
+
+Agent 精确检查 `profile`、HTTPS 接口 origin、所需资源与动作后，签署持有者绑定 VP，出示委托凭证；VP 的 `domain` 和 `challenge` 与上述出示请求一致：
 
 ```json
 {
@@ -936,88 +925,21 @@ Agent 出示凭证时，必须（MUST）把凭证放入一份由自己签署的 
     "created": "2026-09-27T00:00:00Z",
     "verificationMethod": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
     "proofPurpose": "authentication",
-    "domain": "https://auth.supplier.example",
-    "challenge": "Mflb_lNn12d4yt1jXKE9SQ",
+    "domain": "https://supplier.example",
+    "challenge": "JP-0hfyItrCTHObnXV3Svg",
     "proofValue": "HOLDER_PROOF_VALUE_PLACEHOLDER"
   }
 }
 ```
 
-供应商 AS 元数据中与 VC 换发相关的成员；完整元数据还须包含第 5 节的 `anp_did_oauth` 等成员：
-
-```json
-{
-  "issuer": "https://auth.supplier.example",
-  "grant_types_supported": [
-    "authorization_code",
-    "refresh_token",
-    "urn:ietf:params:oauth:grant-type:token-exchange"
-  ],
-  "anp_vc_authorization": {
-    "profile": "anp.authorization.vc.v1-draft1",
-    "credential_types_supported": [
-      "ANPAgentDelegationCredential",
-      "ANPAgentRoleCredential"
-    ],
-    "cryptosuites_supported": [
-      "eddsa-jcs-2022"
-    ],
-    "status_types_supported": [
-      "BitstringStatusListEntry"
-    ]
-  }
-}
-```
-
-令牌交换请求，表单正文用一行展示；客户端断言的 `aud` 为 `https://auth.supplier.example`，`jti` 为 `Mflb_lNn12d4yt1jXKE9SQ`：
-
-```http
-POST /token HTTP/1.1
-Host: auth.supplier.example
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_CLIENT_ASSERTION&subject_token=BASE64URL_VP&subject_token_type=https%3A%2F%2Fagent-network-protocol.com%2Foauth%2Ftoken-type%2Fvp&resource=https%3A%2F%2Fsupplier.example%2Fapi%2Forders&scope=orders.create
-```
-
-成功响应的 JSON 正文；HTTP 头与第 9 节相同，包含 `Cache-Control: no-store`：
-
-```json
-{
-  "access_token": "OPAQUE_EXCHANGED_ACCESS_TOKEN",
-  "issued_token_type": "urn:ietf:params:oauth:token-type:access_token",
-  "token_type": "Bearer",
-  "expires_in": 300,
-  "scope": "orders.create"
-}
-```
-
-直接出示时，供应商的销售 Agent 返回的出示请求对象。Agent 随后签署 `domain`、`challenge` 与之相同的 VP：
-
-```json
-{
-  "type": "ANPPresentationRequest",
-  "challenge": "JP-0hfyItrCTHObnXV3Svg",
-  "domain": "did:wba:supplier.example:sales-agent:e1_m9uTB9Y_JCB1ooA_WCYOJGOYjttwMdAIvug0S0zBkSA",
-  "expires_at": 1790467500,
-  "credential_types": [
-    "ANPAgentDelegationCredential"
-  ],
-  "mode": "operation",
-  "resource": "https://supplier.example/api/orders",
-  "actions": [
-    "orders.create"
-  ]
-}
-```
-
-`expires_at` 是 NumericDate。供应商在接受下单前，还要确认 `did:wba:corp.example:issuer:e1_jp0UC2iDyHyfM23uwWm480i4fC9QwHPTzQoVvdXgR1Y` 对应其系统中的哪个企业客户（第 11.4 节第 7 步），并检查本次订单金额不超过 `perOperationLimit`。
+`expires_at` 是 NumericDate。供应商按第 11.4 节验证 VP、签发方权限、持有者与状态，原子消费出示事务的 challenge，再对事务中保存的操作检查权限和约束。示例中的 4200.00 CNY 订单在 5000 CNY 的单笔上限内；超过 5000 CNY、币种不同或没有文档化金额时拒绝。放行还须符合供应商本地策略；此流程不签发 OAuth 令牌。
 
 <a id="vc-organization-agents"></a>
 ### 11.9 场景：代表公司工作的 HR Agent 与采购 Agent（资料性）
 
 公司常常希望让 Agent 承担一个完整的职能，而不只是访问某一个服务：HR Agent 负责招聘，采购 Agent 负责询价和下单。它们要面对的对方——招聘平台、候选人的 Agent、供应商及其销售 Agent——大多事先不认识这个 Agent，也不一定运行 OAuth。对方真正关心三件事：这个 Agent 是否确实代表这家公司，它被允许做哪些事，上限是多少。
 
-**做法。** 公司用自己的 DID 为每个 Agent 签发一份角色凭证，写明职能名称、允许的业务动作和约束，有效期较短并定期续签。Agent 与对方接触时，先用 ANP-02 或消息会话证明自己的 DID，再按对方的出示请求出示角色凭证。对方按第 11.4 节验证：凭证由该公司签发且未撤销，出示者就是凭证中的 Agent，公司是自己认可的客户或合作方，请求的操作落在凭证列出的动作与约束之内。对方有 AS 时，也可以按第 11.5 节把角色凭证换成访问令牌，此后按普通 OAuth 调用接口；令牌的 `sub` 是该公司在对方系统中的客户账户，`client_id` 是 Agent 的 DID。
+**做法。** 公司用自己的 DID 为每个 Agent 签发一份角色凭证，写明职能名称、允许的业务动作和约束，有效期较短并定期续签。Agent 与对方接触时，先用 ANP-02 或消息会话证明自己的 DID，再按对方的出示请求出示角色凭证。对方按第 11.4 节验证：凭证由该公司签发且未撤销，出示者就是凭证中的 Agent，公司是自己认可的客户或合作方，请求的操作落在凭证列出的动作与约束之内。对方提供支持 VC 的接口时，Agent 直接出示角色凭证；若另一个 API 要求 OAuth，Agent 必须通过该 API 支持的 OAuth 流程取得授权。v1 不把角色凭证自动转换成该 OAuth 授权。
 
 **采购 Agent。** 凭证可以列出“询价”“下采购订单”“查询订单状态”等动作，并为下单设置单笔上限。新供应商第一次接到订单时，按自己的客户审核策略决定是否接纳这家公司，例如要求附带受信机构签发的组织身份凭证，或者先走线下开户流程。超过单笔上限的订单不在凭证授权范围内，应当回到公司内部审批，由人工或另一份专门的批准来处理。跨多个供应商的累计预算无法由单个供应商执行，必须由公司自己的系统控制。
 
@@ -1085,7 +1007,7 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
 <a id="errors"></a>
 ## 12. 错误处理
 
-使用 OAuth 错误；不要在令牌端点返回 ANP-02 `DIDWba` 挑战、ANP `did_superseded` 载荷或虚构的 DID 授权类型。
+OAuth Profile 使用 OAuth 错误；不要在令牌端点返回 ANP-02 `DIDWba` 挑战、ANP `did_superseded` 载荷或虚构的 DID 授权类型。
 
 | 条件 | 错误 / 行为 |
 | --- | --- |
@@ -1098,12 +1020,8 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&client_id=d
 | 目标资源不可接受 | RFC 8707 的 `invalid_target` |
 | 用户在授权端点拒绝授权 | 按授权端点规则返回 `access_denied` |
 | 解析器或重放存储暂时不可用 | 拒绝放行；允许无令牌的 HTTP 503。不得声称认证成功或伪造成功的 OAuth 响应。 |
-| VC 换发中 `subject_token` 无法解码，或 VP、凭证、状态、签发方权限检查失败 | RFC 8693 第 2.2.2 节规定的 `invalid_request` |
-| VC 换发中凭证不覆盖请求的资源 | `invalid_target` |
-| VC 换发中请求动作超出凭证权限或本地策略，或约束无法交给 RS 执行 | `invalid_scope` |
-| 状态列表暂时无法取得 | 拒绝放行；允许无令牌的 HTTP 503，不得把凭证视为有效。 |
 
-使用正文断言认证时，令牌错误通常采用 HTTP 400 与 RFC 6749 第 5.2 节的 JSON 格式；适用的 OAuth HTTP 认证专用状态码/头规则仍然有效。通用 `invalid_client` 与 VC 换发的 `invalid_request` 描述应当（SHOULD）避免暴露账号是否存在、签发方是否被信任或私有策略。RS 错误遵循所选 Bearer/DPoP 规范，不使用此令牌端点错误表。直接出示的错误格式由承载接口定义，同样不应暴露具体是哪一步验证失败。不得把无效授权请求重定向到未经批准的 URI。
+使用正文断言认证时，令牌错误通常采用 HTTP 400 与 RFC 6749 第 5.2 节的 JSON 格式；适用的 OAuth HTTP 认证专用状态码/头规则仍然有效。通用 `invalid_client` 描述应当（SHOULD）避免暴露账号是否存在、签发方是否被信任或私有策略。RS 错误遵循所选 Bearer/DPoP 规范，不使用此令牌端点错误表。VC 直接出示的错误格式由承载接口定义；VP、持有者、凭证状态、签发方权限或约束检查失败时必须（MUST）拒绝操作，错误同样不应暴露具体是哪一步验证失败。本版不为这些失败新增 OAuth 错误。不得把无效授权请求重定向到未经批准的 URI。
 
 <a id="security"></a>
 ## 13. 安全与隐私要求
@@ -1122,20 +1040,22 @@ AS 必须（MUST）绑定所选 issuer、客户端记录、资源与授权事务
 
 VC 验证与 DID/元数据解析使用同一套 SSRF 控制：签发方 DID、状态列表 URL 与允许列表外的 context 都是不可信输入。VC 或 VP 不得（MUST NOT）被当作 Bearer 访问凭据，也不得放入 URL、提示词、任务文本或产物。人类或组织的签发密钥不得（MUST NOT）复制给 Agent；Agent 持有凭证不等于能签发凭证。签发方的信任策略必须（MUST）按凭证类型和资源限定：信任某组织签发其员工的委托，不等于信任它为其他组织或其他资源签发委托。凭证文本中的自然语言描述不构成权限。
 
+本版中，成功验证 VC 或 VP 本身不得（MUST NOT）创建、暗示、签发或授权 OAuth 访问令牌。在本 Profile 下，不得（MUST NOT）向 OAuth 令牌端点发送 VC 或 VP。
+
 <a id="conformance"></a>
 ## 14. 一致性与发布证据
 
-客户端一致性要求实现原生 DID 元数据发布/发现、第 6 节断言、可信 AS 发现、所声明授权流程与令牌处理。AS 一致性要求实现原生 DID、自发布准入、明确的已启用策略声明、所支持方法验证、防重放、独立授权与生命周期处理。RS 一致性要求实现所选标准令牌验证与真实资源策略执行。本 Profile 内的可选能力必须（MUST）在使用前声明并验证。
+OAuth 客户端一致性要求实现原生 DID 元数据发布/发现、第 6 节断言、可信 AS 发现、所声明授权流程与令牌处理。AS 一致性要求实现原生 DID、自发布准入、明确的已启用策略声明、所支持方法验证、防重放、独立授权与生命周期处理。RS 一致性要求实现所选标准令牌验证与真实资源策略执行。本 Profile 内的可选能力必须（MUST）在使用前声明并验证。
 
-声明 VC Profile 时，持有者须实现第 11.3 节的 VP 签署与绑定；验证方须实现第 11.4 节的完整验证顺序、状态检查与签发方权限确认；支持换发的 AS 还须实现第 11.5 节并声明 `anp_vc_authorization`。签发方一致性只要求凭证格式、证明与状态列表发布正确，本版不认证签发界面或签发协议。
+声明 VC Profile 时，持有者须实现第 11.3 节的持有者绑定 VP 签署和第 11.6 节的 Profile 检查；验证方须实现第 11.6 节的直接出示、第 11.4 节的完整验证顺序、持有者绑定、签发方权限确认、状态检查、权限求交与约束执行。OAuth 一致性与 VC 直接出示一致性相互独立。签发方一致性只要求凭证格式、证明与状态列表发布正确，本版不认证签发界面或签发协议。
 
 以下为**必须覆盖的设计场景**，不是宣称某个实现已经通过。发布或公开启用前，应验证适用正向流程及全部相关拒绝路径；未实现的可选能力应记录为不支持，不能报告为通过。
 
-场景标识是稳定证据引用，不是必须连续的清单序号。已退役的 03、19、24、25、28 及 34–40 不复用，0.4 新增要求从 41 开始，0.5 新增的 VC 场景从 51 开始（角色凭证为 61–64）；编号空缺不免除表中任何场景。
+场景标识是稳定证据引用，不是必须连续的清单序号。已退役的 03、19、24、25、28、34–40，以及 0.6 退役的 51、52、58 均不复用。0.4 新增要求从 41 开始，0.5 的 VC 场景从 51 开始（角色凭证为 61–64），0.6 新增的直接出示场景为 65–69；编号空缺不免除表中任何场景。
 
 | ID | 场景与预期结果 |
 | --- | --- |
-| AUTHZ-01 | 已批准 `did:web` 客户端、获准密钥与客户端凭据策略：签发目标受限令牌。 |
+| AUTHZ-01 | 已批准 `did:wba` 客户端、通过方法验证的 DID 文档、获准密钥与客户端凭据策略：签发目标受限令牌。对每种已声明支持的 DID 方法重复此正向流程。 |
 | AUTHZ-02 | 已批准 WBA 客户端：仅在声明的 WBA 绑定与密钥策略验证通过后签发。 |
 | AUTHZ-04 | 用户批准的授权码，重定向、state/会话与 S256 PKCE 匹配：保留用户主体和资源。 |
 | AUTHZ-05 | 错误签名、`none`/`HS*`、不兼容算法或不支持曲线：拒绝。 |
@@ -1173,22 +1093,24 @@ VC 验证与 DID/元数据解析使用同一套 SSRF 控制：签发方 DID、�
 | AUTHZ-48 | 服务要求高风险操作批准时，缺失、不匹配或已消费的操作批准阻止执行；登录、宽泛 scope、DID/DPoP 证明本身不能满足该策略。 |
 | AUTHZ-49 | 本 v1 绑定拒绝 k1_；EdDSA 只在启用且采用 Ed25519 密钥时接受；改标签的曲线或未支持算法失败。 |
 | AUTHZ-50 | 仅客户端凭据部署不宣称用户委托；路线图中的转委托/逐笔批准/累计预算不能仅靠元数据声明就变成已启用能力。 |
-| AUTHZ-51 | 已确认签发方权限的委托凭证，VP 的 `domain` 为 AS issuer、`challenge` 为断言 `jti`：换发的令牌 `sub` 为确认的本地主体、`client_id` 为 Agent DID、过期不晚于 `validUntil`，且不含刷新令牌。 |
-| AUTHZ-52 | VP `holder` 与 `client_id` 或已认证 DID 不同，`credentialSubject.id` 与 holder 不同，`domain`/`challenge` 不匹配，或同一 VP 再次使用，包括搭配复用同一 `jti` 的新断言：拒绝。 |
 | AUTHZ-53 | 凭证证明错误、签名密钥不在签发方 `assertionMethod`、VP 密钥不在持有者 `authentication`、签发方 DID 无法验证、未启用的密码套件或允许列表外的 context：拒绝。 |
 | AUTHZ-54 | 凭证未生效或已过期、状态为撤销或暂停、状态列表签发方不同、状态列表缺少 `validUntil` 或已过期，或状态列表无法取得：拒绝，不视为有效。 |
 | AUTHZ-55 | 签发方 DID 无法确认为对该资源有权的本地主体，或 Agent 自签委托（签发方等于持有者）：拒绝；凭证不能建立账户对应关系，签发资格只来自验证方本地绑定或信任策略。 |
 | AUTHZ-56 | 请求资源不在凭证中、动作超出凭证或本地策略、存在不理解的约束，约束无法交给 RS 执行，或 `perOperationLimit` 的币种不同、操作没有文档化金额：拒绝；获授权限为三方交集。 |
 | AUTHZ-57 | 直接出示时 challenge 缺失、过期或已用，`domain` 指向其他验证方，ANP-02 已认证 DID 与 holder 或事务中的请求方不同，请求的操作与出示事务中保存的不同，或把 `mode` 为 `operation` 的出示用于建立会话：拒绝，不执行操作。 |
-| AUTHZ-58 | 凭证在换发后被撤销：AS 取得反映撤销的状态列表后新的换发失败；旧状态列表过期后不再被接受；已签发令牌的剩余有效期不超过按各项取值记录的撤销延迟上界。 |
-| AUTHZ-59 | 把原始 VC 或 VP 放入 `Authorization` 头访问 RS，或向未精确声明 VC Profile 的 AS 提交 VP：拒绝或不发送。 |
+| AUTHZ-59 | 把原始 VC 或 VP 放入 `Authorization` 头访问 RS，或在本 Profile 下向 OAuth 令牌端点提交 VC/VP：拒绝或不发送。 |
 | AUTHZ-60 | Agent A 持有用户的委托但没有独立签发资格，给 Agent B 签发一份密码学上有效的委托凭证（转委托）：本版拒绝。 |
-| AUTHZ-61 | 组织签发的角色凭证，签发方已被确认为验证方认可的组织，请求的操作按文档化对应关系落在所列动作与约束之内：接受，令牌或本次操作的主体为该组织的本地账户。 |
+| AUTHZ-61 | 组织签发的角色凭证，签发方已被确认为验证方认可的组织，请求的操作按文档化对应关系落在所列动作与约束之内：接受，本次操作的主体为该组织的本地账户。 |
 | AUTHZ-62 | 角色凭证含有验证方没有对应关系的动作 URI，或请求的操作不在任何所列动作之内，或超出单笔上限：拒绝该项或该操作。 |
 | AUTHZ-63 | 签发方 DID 无法确认为验证方认可的组织，或验证方策略要求的组织身份凭证缺失、不受信：拒绝；仅凭 `role` 名称或 did:web 域名不能通过。 |
 | AUTHZ-64 | 用角色凭证读取第三方个人数据，或代替高风险操作的逐笔批准：不能满足，拒绝或转入验证方自己的批准机制。 |
+| AUTHZ-65 | 直接出示正向流程：经承载接口认证的请求方 DID、VP holder 与授权凭证 credentialSubject.id 一致，签发方权限、状态与约束有效；替换其中任何一个 DID 时拒绝。 |
+| AUTHZ-66 | VP 的 domain/challenge 与保存的出示事务不符，challenge 过期、复用或并发消费：拒绝；并发出示至多接受一次。 |
+| AUTHZ-67 | 委托凭证已撤销、暂停或过期，状态列表缺失、过期或无法验证：拒绝直接操作，并在状态复查发现后停止基于该凭证的会话。 |
+| AUTHZ-68 | 直接出示只执行保存的操作，并执行权限求交与 5000 CNY 单笔上限；金额超限、币种不同、缺少金额、扩大动作或未知约束：拒绝。 |
+| AUTHZ-69 | 出示请求缺少 profile 或版本不受支持：不签署 VP，不静默降级；VC/VP 不能绕过 OAuth 专用接口，也不能在本 Profile 下换发访问令牌。 |
 
-草案或实验原型可以凭一套完整实现及明确的拒绝路径证据评审，但必须（MUST）标记为实验状态。宣称稳定、可互操作的 v1 发布时，须具备两套独立开发的客户端/AS 实现及交叉实现测试、适用 RS 测试、各 AS 首次准入与关闭准入行为、元数据篡改/更新、声明授权码支持时的托管与 loopback 回调、方法/运行密钥生命周期、所声明流程的多资源隔离，以及明确的安全评审。声明 VC Profile 时，还须具备独立实现的持有者与验证方之间的交叉测试，覆盖换发与直接出示两种方式，以及凭证撤销。独立性指协议代码路径的独立实现，不是同一服务器运行两个实例；须记录共享组件。该门槛不阻止发布或评审草案。
+草案或实验原型可以凭一套完整实现及明确的拒绝路径证据评审，但必须（MUST）标记为实验状态。宣称 OAuth Profile 稳定、可互操作的 v1 发布时，须具备两套独立开发的客户端/AS 实现及交叉实现测试、适用 RS 测试、各 AS 首次准入与关闭准入行为、元数据篡改/更新、声明授权码支持时的托管与 loopback 回调、方法/运行密钥生命周期、所声明流程的多资源隔离，以及明确的安全评审。声明 VC Profile 时，还须具备独立实现的持有者与验证方之间的交叉测试，覆盖直接出示、Profile 版本匹配，以及凭证撤销。独立性指协议代码路径的独立实现，不是同一服务器运行两个实例；须记录共享组件。该门槛不阻止发布或评审草案。
 
 对自定义元数据及可选算法/类型处理须记录兼容性决定。高风险批准测试验证拒绝行为或部署明确的业务批准策略，不认证 v1 尚未定义的通用批准格式。仅有规范正文、图示检查和文档测试不能证明运行时或稳定发布一致性。
 
@@ -1218,9 +1140,10 @@ VC Profile 的规范性引用，在声明该 Profile 时适用：
 - [W3C Verifiable Credentials Data Model v2.0](https://www.w3.org/TR/vc-data-model-2.0/)：凭证与出示的数据模型。
 - [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) 与 [Data Integrity EdDSA Cryptosuites v1.0](https://www.w3.org/TR/vc-di-eddsa/)：`DataIntegrityProof`、`domain`/`challenge` 与 `eddsa-jcs-2022`。
 - [W3C Bitstring Status List v1.0](https://www.w3.org/TR/vc-bitstring-status-list/)：凭证撤销与暂停状态。
-- [RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html)：用 VP 换发访问令牌所用的令牌交换。
 
 资料性引用：
+
+- [RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html)：可能用于后续 VC–OAuth 组合扩展的评估依据，v1 不实现该绑定。
 
 - [OAuth 2.1 draft-16](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-16)：仍在制定，不是已发布 RFC。
 
@@ -1232,6 +1155,10 @@ VC Profile 的规范性引用，在声明该 Profile 时适用：
 ## 16. 未来扩展（资料性）
 
 未来版本计划支持与 CIMD 的兼容，以便不原生支持 DID 的授权服务器也能接入。本版本仅定义 DID 原生的 OAuth 与 VC 授权流程，不包含相关转换、映射或发布适配的实现要求；具体方案将在后续独立扩展中制定，且不会成为核心协议的必选依赖。
+
+### 16.1 VC–OAuth 组合
+
+未来扩展可以研究把外部签发的 VC 作为 OAuth AS 授权决定的输入，经独立策略评估后签发限定资源的访问令牌。该绑定须明确签发方信任、权限衰减、动作到 scope 的对应、约束保留、令牌受众、令牌期限、VC 撤销到令牌撤销的延迟传播，以及持有者/客户端归因；这些能力不属于 v1。
 
 ## 版权声明
 

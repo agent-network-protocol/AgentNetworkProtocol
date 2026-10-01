@@ -29,6 +29,16 @@ const schematicExamples = [];
 const cache = new Map();
 const check = (condition, item) => { if (!condition) errors.push(item); };
 
+function stripHtmlTagsRepeatedly(input) {
+  let previous;
+  let output = input;
+  do {
+    previous = output;
+    output = output.replace(/<[^>]*>/g, '');
+  } while (output !== previous);
+  return output;
+}
+
 function parse(text) {
   const prose = [], blocks = [], anchors = new Set(), explicit = [];
   const counts = new Map();
@@ -48,7 +58,7 @@ function parse(text) {
     for (const match of line.matchAll(/\bid=["']([^"']+)["']/g)) { anchors.add(match[1]); explicit.push(match[1]); }
     const heading = line.match(/^#{1,6}\s+(.+?)\s*#*$/);
     if (heading) {
-      const slug = heading[1].replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/<[^>]*>/g, '').replace(/[`*]/g, '').toLowerCase().replace(/[^\p{L}\p{N}\p{M}\p{Pc}\-\s]/gu, '').replace(/\s/g, '-');
+      const slug = stripHtmlTagsRepeatedly(heading[1].replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')).replace(/[`*]/g, '').toLowerCase().replace(/[^\p{L}\p{N}\p{M}\p{Pc}\-\s]/gu, '').replace(/\s/g, '-');
       const count = counts.get(slug) ?? 0;
       counts.set(slug, count + 1);
       anchors.add(slug + (count ? '-' + count : ''));

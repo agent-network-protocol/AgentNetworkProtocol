@@ -1,10 +1,10 @@
 # ANP Profile 4: Group Messaging Base Semantics
 
-- Document ID: ANP-P4
+- Document ID: ANP-P4-vNext
 - Title: Group Messaging Base Semantics
-- Status: Released
-- Version: 1.2
-- Specification Set: ANP Messaging 1.2
+- Status: Draft
+- Baseline: ANP Messaging 1.2
+- Specification Set: ANP Messaging vNext
 - Language: English
 - Profile: `anp.group.base.v2`
 - Dependencies: `anp.core.binding.v1`, `anp.identity.discovery.v1`
@@ -12,7 +12,7 @@
 
 ---
 
-> Note: This v2 specification retains two core entry paths: "self-service joining and direct addition":
+> Note: This vNext draft retains two core entry paths: "self-service joining and direct addition":
 >
 > 1. `group.invite`, `group.accept_invite` and standard `invitation` objects remain outside the core;
 > 2. `membership_request`, `membership_request_digest`, `group.approve_membership`, and `group.reject_membership` remain outside the core;
@@ -339,13 +339,14 @@ Field description:
 
 The interpretation rules are as follows:
 
-1. `message_security_profile` constraints:
-   - `group.send`
-   - Member-only group operations after becoming a member of `active`
+1. `message_security_profile` constrains application-message submission and delivery:
+   - `group.send` and ordinary P4 `group.incoming`, or the corresponding application-message methods defined by the Group E2EE Overlay;
+   - It does not change the Profile or security mode of membership, governance, group-information reads, or group-state notifications. Those operations retain their method-defined bindings.
 
-2. `bootstrap_security_profile` constraints:
-   - `group.join`
-   - and subsequent Overlay's clearly defined onboarding / bootstrap methods
+2. `bootstrap_security_profile` constrains the security requirements for completing member onboarding:
+   - P4 `group.create`, `group.join`, and `group.add` establish DID-level business membership under `admission_mode` and `permissions`;
+   - When `group-e2ee` is required, P6 separately establishes MLS membership for eligible devices after the corresponding P4 membership is `active`;
+   - This policy does not redefine P4 request envelopes or require an unjoined device to encrypt a P4 join request with group secrets it does not yet possess. Section 11.7 defines the P4/P6 composition and readiness boundary.
 
 3. `admission_mode` **MUST** take one of the following values:
    - `admin-add`
@@ -1133,17 +1134,44 @@ The optional ANP-02 access-token flow **MAY** be used to optimize repeated calls
 - An access token **MUST NOT** replace `auth.origin_proof`;
 - sender-constrained access token **SHOULD** take precedence over ordinary Bearer tokens.
 
-### 11.7 security profile requirements
+### 11.7 Security profile requirements
 
-If `message_security_profile` in the group policy requires `group-e2ee`:
+Group policy determines the security required for the corresponding business action. It **MUST NOT** be used to reinterpret a method under a different `meta.profile` or `meta.security_profile` from that method's binding.
 
-- For member-only group operations on `group.send` and after becoming a member of `active`, the sender **MUST** use Group E2EE Profile;
-- Group Host Service MUST reject requests related to `transport-protected`.
+#### 11.7.1 Application messages
 
-If `bootstrap_security_profile` in the group policy requires `group-e2ee`:
+If `message_security_profile` requires `group-e2ee`:
 
-- For `group.join` and subsequent Overlay's clearly defined onboarding / bootstrap methods, the sender **MUST** use Group E2EE Profile;
-- Group Host Service **MUST NOT** silently downgrade to `transport-protected` without explicit negotiation.
+- The sender **MUST** submit application messages through P6 `group.e2ee.send`, and encrypted delivery **MUST** use P6 `group.incoming`;
+- The Group Host **MUST** reject ordinary P4 `group.send` for that group and **SHOULD** return `group.security_mode_required`. It **MUST NOT** distribute the application message through ordinary P4 `group.incoming`;
+- A request hint, missing capability, or failed E2EE operation **MUST NOT** override the authoritative group policy or trigger fallback to transport-protected application messages.
+
+This requirement does not convert P4 membership or governance operations into P6 methods. P4 `group.create`, `group.join`, `group.add`, `group.remove`, `group.leave`, `group.update_profile`, `group.update_policy`, `group.get_info`, and `group.state_changed` retain their P4 bindings, including in an E2EE group. Their existing DID authentication, Origin Proof, authorization, receipt, and cross-domain service-authentication requirements continue to apply where defined. P4 operations and notifications **MUST NOT** acquire P6 device selectors.
+
+#### 11.7.2 Member onboarding and cryptographic readiness
+
+If `bootstrap_security_profile` requires `group-e2ee`, onboarding consists of P4 business membership followed by the P6 cryptographic steps:
+
+1. The Group Host processes `group.create`, `group.join`, or `group.add` under the existing P4 admission and authorization rules. A successful membership result establishes the relevant DID as `active`;
+2. P6 initializes the owner's MLS group after P4 creation, or adds a selected eligible device of an already-active member using its KeyPackage, as specified by [P6 state coupling](06-group-end-to-end-encryption.md#10-state-coupling-rules);
+3. Before treating a device as ready for group E2EE, the participants **MUST** complete the applicable P2/P6 checks for the current `deviceManifest`, complete Profile dependencies, device/key binding, KeyPackage, and MLS state. P6 controls the required Welcome and Commit processing.
+
+A successful P4 response **MUST NOT** be interpreted as proof that any device has completed MLS onboarding, received its Welcome, or can decrypt group messages. P4 membership and each device's P6 readiness are separate states; this composition adds no P4 `pending` status or device fields. An unready device **MUST NOT** fall back to ordinary Base messaging for application messages that require `group-e2ee`.
+
+#### 11.7.3 Method, Profile, and security-mode bindings
+
+The following table summarizes the existing P4 bindings and the [P6 Group E2EE Profile identifier](06-group-end-to-end-encryption.md#41-profile-name) and [security modes](06-group-end-to-end-encryption.md#43-security-profile). It does not define a new Profile or method.
+
+| Method or notification | `meta.profile` | `meta.security_profile` | Purpose |
+|---|---|---|---|
+| `group.create`, `group.join`, `group.add`, `group.remove`, `group.leave`, `group.update_profile`, `group.update_policy`, `group.get_info` | `anp.group.base.v2` | `transport-protected` | DID-level membership, governance, and group information, including in E2EE groups |
+| `group.state_changed` | `anp.group.base.v2` | `transport-protected` | DID-addressed business-state notification |
+| `group.send`, ordinary P4 `group.incoming` | `anp.group.base.v2` | `transport-protected` | Application messages only when permitted by the group's message policy |
+| `group.e2ee.publish_key_package`, `group.e2ee.get_key_package`, `group.e2ee.notice` | [P6 Group E2EE Profile](06-group-end-to-end-encryption.md#41-profile-name) | `transport-protected` | Device-bound key material and Welcome/Commit delivery |
+| `group.e2ee.create`, `group.e2ee.add`, `group.e2ee.remove` | [P6 Group E2EE Profile](06-group-end-to-end-encryption.md#41-profile-name) | `group-e2ee` | MLS control actions bound to P4 state |
+| `group.e2ee.send`, P6 `group.incoming` | [P6 Group E2EE Profile](06-group-end-to-end-encryption.md#41-profile-name) | `group-e2ee` | Device-bound encrypted application messages |
+
+Capability checks **MUST** follow the method's Profile, its complete dependencies, and its security mode under P1/P2 negotiation. P6 capability does not replace the P4 business contract. Supporting transport-protected P4 controls or P6 key-material and notice methods does not authorize transport-protected application-message fallback. The table does not make P4 optional push capabilities mandatory or change P6's candidate release restrictions.
 
 An accepted `member-did-updated` event is a P4 business-state change. If the group uses E2EE, P6 **MUST** independently verify the DID transition and its assurance, confirm that the P4 roster contains the new DID, add the selected new-DID device leaves, and only then remove the old-DID leaves. P4 acceptance does not substitute for an MLS Commit.
 

@@ -1,11 +1,11 @@
 # ANP vNext Protocol Collection
 
-- Status: Next-version workspace seeded with historical ANP 1.2 pre-release snapshots; no post-1.2 protocol changes yet
+- Status: Active next-version workspace; P4 revisions are unreleased drafts based on ANP Messaging 1.2
 - Current specifications: [ANP 1.2](../README.md) and [Chinese index](../README.cn.md)
 
-This directory is the single entry for the next protocol iteration. It currently contains the vNext snapshots that preceded ANP 1.2, with their protocol text preserved and links adjusted for the consolidated tree. Versions, statuses, and draft notices in those documents still describe their pre-release state; they do not assert a post-1.2 release. For the current contract, use the ANP 1.2 links in the last column below. Make future vNext protocol edits in this tree.
+This directory is the single entry for the next protocol iteration. The English and Chinese P4 drafts now use the released ANP Messaging 1.2 text as their baseline and clarify P4/P6 security-mode bindings and member-onboarding readiness. These revisions are under review and do not change the released ANP 1.2 contract. Other documents retain their historical pre-release snapshots unless explicitly updated. For the current contract, use the ANP 1.2 links in the last column below. Make future vNext protocol edits in this tree.
 
-| Protocol area | vNext snapshots | Current ANP 1.2 |
+| Protocol area | vNext documents | Current ANP 1.2 |
 | --- | --- | --- |
 | Core, English | Documents below | [English specification index](../README.md) |
 | Core, Chinese | [Chinese core index](chinese/README.md) | [Chinese specification index](../README.cn.md) |

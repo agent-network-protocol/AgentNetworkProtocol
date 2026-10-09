@@ -1,14 +1,14 @@
-# ANP Messaging 1.2 Pre-release Draft Archive
+# ANP Messaging vNext
 
 - Unified entry: [vNext protocol collection](../README.md)
-- Status: Historical draft snapshots; not the current specification entry point
+- Status: Active draft workspace; P4 revisions are based on ANP Messaging 1.2 and are not released
 - Current documents: [ANP 1.2 specification set](../../message/README.md)
 
-This directory preserves the specification drafts from before their integration into ANP 1.2 for historical links and diff review. Versions, statuses, pre-release notices, and baseline descriptions inside those snapshots describe their historical state, not the current contract. Use the current index above and the corresponding documents below; do not treat this snapshot as a new vNext development cycle.
+This directory is the English messaging workspace for the next protocol iteration. P4 has been refreshed from the released ANP Messaging 1.2 baseline; its draft changes clarify P4/P6 method and security-mode bindings and distinguish business membership from MLS readiness. Review those changes here. They do not modify the current ANP 1.2 contract linked above.
 
-All P1–P9 documents have been integrated into the parent directory. P6 retains its registered MLS ExtensionType release gate and is explicitly marked as a candidate in the current documentation.
+The other messaging documents retain their historical pre-release snapshots until separately updated. Their versions and statuses describe that earlier state. P6 retains its registered MLS ExtensionType release gate and is explicitly marked as a candidate in the current documentation. Frozen historical messaging copies remain in `../../message/vnext/`.
 
-| Historical snapshot | Current 1.2 document |
+| vNext document | Current 1.2 document |
 | --- | --- |
 | [01-core-binding.md](01-core-binding.md) | [ANP 1.2](../../message/01-core-binding.md) |
 | [02-identity-and-discovery.md](02-identity-and-discovery.md) | [ANP 1.2](../../message/02-identity-and-discovery.md) |

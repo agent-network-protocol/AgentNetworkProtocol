@@ -1,9 +1,10 @@
 # ANP Profile 4: Group Messaging Base Semantics
 
-- Document ID: ANP-P4-vNext
+- Document ID: ANP-P4
 - Title: Group Messaging Base Semantics
-- Status: Draft
-- Specification Set: ANP Messaging 1.2 Draft
+- Status: Released
+- Version: 1.2
+- Specification Set: ANP Messaging 1.2
 - Language: English
 - Profile: `anp.group.base.v2`
 - Dependencies: `anp.core.binding.v1`, `anp.identity.discovery.v1`
@@ -11,7 +12,7 @@
 
 ---
 
-> Note: This v2 draft retains two core entry paths: "self-service joining and direct addition":
+> Note: This v2 specification retains two core entry paths: "self-service joining and direct addition":
 >
 > 1. `group.invite`, `group.accept_invite` and standard `invitation` objects remain outside the core;
 > 2. `membership_request`, `membership_request_digest`, `group.approve_membership`, and `group.reject_membership` remain outside the core;

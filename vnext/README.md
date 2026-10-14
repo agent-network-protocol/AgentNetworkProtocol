@@ -8,6 +8,7 @@ This directory contains protocol drafts and white paper revisions with substanti
 | Draft | Status | Scope |
 | --- | --- | --- |
 | [ANP-01: Technical White Paper](01-agentnetworkprotocol-technical-white-paper.md) / [中文](chinese/01-AgentNetworkProtocol技术白皮书.md) | Informative working draft / not released; based on v1.2 | Revised vision, architecture, identity, messaging, discovery, description, and application-protocol discussion. |
+| [P4: Group Messaging Base Semantics](p4-group-messaging-base-semantics.md) / [中文](chinese/P4-群组基础语义.md) | Draft / not released; based on ANP Messaging 1.2 | Clarifies P4/P6 method and security-mode bindings and distinguishes DID membership from MLS device readiness. |
 
 ## Authorization draft at the repository root
 

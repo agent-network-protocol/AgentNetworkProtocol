@@ -20,7 +20,11 @@ const whitePaperDrafts = [
   'vnext/01-agentnetworkprotocol-technical-white-paper.md',
   'vnext/chinese/01-AgentNetworkProtocol技术白皮书.md',
 ];
-const nextVersionDrafts = [...whitePaperDrafts];
+const groupMessagingDrafts = [
+  'vnext/p4-group-messaging-base-semantics.md',
+  'vnext/chinese/P4-群组基础语义.md',
+];
+const nextVersionDrafts = [...whitePaperDrafts, ...groupMessagingDrafts];
 const authorizationValidationGuides = ['docs/anp-05-validation-guide.md', 'docs/chinese/anp-05-validation-guide.md'];
 const exampleIndexes = ['examples/message-vnext/README.md', 'examples/message-vnext/README.cn.md', 'examples/did-authentication-vnext/README.md', 'examples/did-authentication-vnext/README.cn.md'];
 const documents = [...new Set([...core, ...messages, 'README.md', 'README.cn.md', ...draftIndexes, ...exampleIndexes, ...nextVersionDrafts, ...authorizationDrafts, ...authorizationValidationGuides, ...readerGuides.map(guide => guide.file)])].sort();
@@ -108,6 +112,12 @@ check(JSON.stringify(actualDrafts) === JSON.stringify([...nextVersionDrafts].sor
 for (const file of [...nextVersionDrafts, ...authorizationDrafts]) {
   const text = read(file);
   check(/^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m.test(text), {file, reason: 'new-draft-status-lost'});
+  if (groupMessagingDrafts.includes(file)) {
+    check(/^- (?:Document ID: |文档编号：)ANP-P4-vNext$/m.test(text), {file, reason: 'incorrect-group-draft-document-id'});
+    check(/^- (?:Baseline: |基线：)ANP Messaging 1\.2$/m.test(text), {file, reason: 'group-draft-baseline-changed'});
+    check(/^- (?:Specification Set: |规范集版本：)ANP Messaging vNext$/m.test(text), {file, reason: 'group-draft-specification-set-changed'});
+    continue;
+  }
   const version = authorizationDrafts.includes(file) ? '0\\.6' : '1\\.2';
   check(new RegExp('^- (?:Version: |版本：)' + version + '$', 'm').test(text), {file, reason: 'new-draft-version-changed'});
 }

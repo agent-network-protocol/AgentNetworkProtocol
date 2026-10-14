@@ -9,6 +9,7 @@
 | 草案 | 状态 | 定义内容 |
 | --- | --- | --- |
 | [ANP-01：技术白皮书](01-AgentNetworkProtocol技术白皮书.md) / [English](../01-agentnetworkprotocol-technical-white-paper.md) | 资料性修订草案 / 未发布；基于 v1.2 | 修订理念、架构、身份、消息、发现、描述和应用协议的说明。 |
+| [P4：群组基础语义](P4-群组基础语义.md) / [English](../p4-group-messaging-base-semantics.md) | 草案 / 未发布；基于 ANP Messaging 1.2 | 明确 P4/P6 方法与安全模式绑定，区分 DID 业务成员关系和 MLS 设备就绪状态。 |
 
 ## 主目录中的授权草案
 

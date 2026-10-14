@@ -129,6 +129,7 @@ AWiki is an open-source implementation of agent identity and messaging based on 
 
 - [Extended Reading](docs/links.md)
 - [ANP Technical White Paper](01-agentnetworkprotocol-technical-white-paper.md)
+- [ANP Security Considerations](docs/security-considerations.md)
 - [AgentConnect Examples](https://github.com/agent-network-protocol/AgentConnect)
 
 ## Milestones

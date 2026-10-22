@@ -2,20 +2,20 @@
 
 - 文档编号：ANP-05
 - 状态：草案 / 未发布
-- 版本：0.6
+- 版本：0.7
 - 规范集：ANP vNext；不属于 ANP 1.2 发布范围
-- 草案 Profile 标识：OAuth Profile `anp.authorization.oauth2.did.v1-draft4`；VC Profile `anp.authorization.vc.v1-draft2`
+- 草案 Profile 标识：OAuth Profile `anp.authorization.oauth2.cimd.v1-draft1`；VC Profile `anp.authorization.vc.v1-draft2`
 - 语言：中文
 - 英文镜像：[ANP DID-Based Authorization Protocol](../05-anp-did-authorization-protocol-specification.md)
 
 <a id="scope"></a>
 ## 1. 范围、授权问题与路线图
 
-ANP-05 定义基于 DID 的智能体授权方向，由两种互补机制组成：**OAuth Profile**，由资源方信任的授权服务器签发访问令牌；**VC Profile**，由拥有授权依据的用户或组织签发 W3C 可验证凭证（Verifiable Credential，VC），Agent 持有并出示。两者都用 DID 标识授权方和被授权的 Agent。**第一版（v1）是 DID–OAuth 客户端身份与基础委托访问 Profile，加上直接出示的单级 VC 委托凭证与组织角色凭证，不是完整的智能体委托体系。** 当前文档是其尚未发布的 v0.6 草案。本文的“v1”指首个版本的能力范围，不代表 v1 已发布，也不代表路线图中的后续能力已经实现。
+ANP-05 定义基于 DID 的智能体授权方向，由两种互补机制组成：**OAuth Profile**，由资源方信任的授权服务器签发访问令牌；**VC Profile**，由拥有授权依据的用户或组织签发 W3C 可验证凭证（Verifiable Credential，VC），Agent 持有并出示。DID 在 ANP 层标识主体。OAuth 路径中，普通 AS 使用 URL 客户端标识及其自身的资源所有者身份；只有明确验证 DID 绑定后，该 AS 才能确认关联的 DID。VC 路径用 DID 标识签发方及被授权 Agent。**第一版（v1）是 DID–OAuth 客户端身份与基础委托访问 Profile，加上直接出示的单级 VC 委托凭证与组织角色凭证，不是完整的智能体委托体系。** 当前文档是其尚未发布的 v0.7 草案。本文的“v1”指首个版本的能力范围，不代表 v1 已发布，也不代表路线图中的后续能力已经实现。
 
-在 OAuth Profile 中，Agent 用自己的 DID 认证密钥证明 OAuth 客户端身份；资源所有者批准权限，授权服务器（AS）签发受限令牌，资源服务器（RS）执行访问控制。这条路径不要求 VC、VP、OIDC 登录桥接或区块链。在 VC Profile 中，有权主体向 Agent 签发凭证，Agent 通过与持有者绑定的可验证出示（Verifiable Presentation，VP）向验证方出示；验证方独立验证签发方、持有者、凭证状态、权限、约束与本地信任策略，然后执行或拒绝请求的操作。
+在 OAuth Profile 中，Agent 将自己的 DID 与标准 OAuth 客户端标识元数据文档（Client ID Metadata Document，CIMD）的 HTTPS URL 关联，并用已发布的认证密钥证明该 URL 客户端身份；资源所有者批准权限，授权服务器（AS）签发受限令牌，资源服务器（RS）执行访问控制。这条路径不要求 VC、VP、OIDC 登录桥接或区块链。在 VC Profile 中，有权主体向 Agent 签发凭证，Agent 通过与持有者绑定的可验证出示（Verifiable Presentation，VP）向验证方出示；验证方独立验证签发方、持有者、凭证状态、权限、约束与本地信任策略，然后执行或拒绝请求的操作。
 
-OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RFC 6749、RFC 9700。OAuth 2.1 draft-16 与 JWT 客户端认证更新 draft-11 只作为资料性设计参考，不是已发布 RFC 依赖。VC Profile 的规范性基线为 W3C VC 数据模型 2.0、VC Data Integrity 1.0 及其 EdDSA 密码套件、Bitstring Status List 1.0。大写 MUST（必须）、MUST NOT（不得）、SHOULD（应当）、SHOULD NOT（不应）、MAY（可以）使用 BCP 14 定义。下文的收紧规则是本 Profile 的要求，不是对所引用规范的修改。
+OAuth Profile 的基线为 **OAuth 2.0 与已发布扩展**，包括 RFC 6749、RFC 9700，并明确固定使用 CIMD draft-02 定义 URL 客户端标识及元数据发现。CIMD 是仍在制定中的依赖，不是已发布 RFC。OAuth 2.1 draft-16 与 JWT 客户端认证更新 draft-11 只作为资料性设计参考，不是已发布 RFC 依赖。VC Profile 的规范性基线为 W3C VC 数据模型 2.0、VC Data Integrity 1.0 及其 EdDSA 密码套件、Bitstring Status List 1.0。大写 MUST（必须）、MUST NOT（不得）、SHOULD（应当）、SHOULD NOT（不应）、MAY（可以）使用 BCP 14 定义。下文的收紧规则是本 Profile 的要求，不是对所引用规范的修改。
 
 **ANP-05 v1 定义两条相互独立的授权路径：基于 DID 客户端身份的 OAuth 资源访问授权，以及基于持有者绑定 VC 的可携带委托与组织角色凭证出示。v1 不定义 VC/VP 到 OAuth Access Token 的转换。本版本不定义独立的资质或属性凭证 Profile。**
 
@@ -41,9 +41,9 @@ OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RF
 
 **复用 OAuth 管理授权生命周期。** RFC 6749 已区分资源所有者、客户端、AS、RS，并提供同意/授权、访问令牌及刷新流程；RFC 7523 第 2.2 节提供客户端断言传输；RFC 7636、RFC 8707、RFC 7009、RFC 7662 分别提供授权码保护、目标资源限制、撤销及状态检查。ANP 因而可集中定义可复用的 Agent 身份与缺少的智能体委托语义，不必重新建立另一套授权/令牌生态。OAuth 不是全部答案：任务总预算、权限衰减及用户对具体业务动作的批准，并不会因采用 OAuth 自动获得。
 
-**DID 标识主体，不授予权限。** 同一经过方法验证的 DID 及认证密钥关系可以用于普通 ANP 认证、通信和 OAuth 访问。原生 did:web 仍以 DNS/HTTPS/托管为信任基础，不会因为采用本 Profile 就获得指纹绑定身份或抵抗自身 DID 文档托管方的保证。路径型 did:wba e1_ 增加绑定密钥指纹与可验证文档证明。这些性质均以正确的方法验证和密钥保管为前提；两种方法都不证明软件完整性或用户同意。这里的价值是共同的身份/生命周期模型，不是宣称只有 DID 才能提供可移植标识。
+**DID 标识主体，不授予权限。** 同一经过方法验证的 DID 及选定的认证密钥关系可以用于普通 ANP 认证、通信和 OAuth 客户端公钥发布。标准 CIMD 模式下，AS 认证的是 URL 客户端；只有执行额外 DID 绑定检查的验证方，才能声称已认证所关联的 DID。原生 did:web 仍以 DNS/HTTPS/托管为信任基础，不会因为采用本 Profile 就获得指纹绑定身份或抵抗自身 DID 文档托管方的保证。路径型 did:wba e1_ 增加绑定密钥指纹与可验证文档证明。这些性质均以正确的方法验证和密钥保管为前提；两种方法都不证明软件完整性或用户同意。这里的价值是共同的身份/生命周期模型，不是宣称只有 DID 才能提供可移植标识。
 
-**需要明确的 AS 适配。** 不假设现成 OAuth AS 可以原样接受本流程。适配模块需要接受 DID 客户端标识、解析方法/密钥策略、发现并验证自发布客户端元数据、执行准入并声明 ANP 能力。既有 OAuth 授权/令牌引擎及 RS 验证在能力满足时可复用；架构不要求重写整个服务器，但也不宣称零改造兼容。客户端需要 DID 密钥调用、元数据发布、发现及标准 OAuth 流程支持。私钥留在 Agent 或它明确批准的签署方。
+**复用 CIMD 接入现有 OAuth 生态。** 主要优势是：已经支持 CIMD 及所选标准 OAuth 能力的授权服务器，可以在不对客户端标识、元数据发现、授权或令牌流程进行 ANP 专用改造的情况下处理该客户端。OAuth `client_id` 仍为 CIMD HTTPS URL；DID 文档提供 ANP 身份关联，发布方把选定认证密钥导出为标准 JWKS。DID 适配因而位于 Agent SDK 或元数据发布器，不必要求每个 AS 部署 DID 解析器。兼容性取决于 AS 的准入策略、支持的认证算法和所选流程；这不代表每个 OAuth 服务器都支持 CIMD，也不代表标准 CIMD 服务器已经验证 DID。第 4 节区分普通 CIMD 处理与可选、明确协商的 DID 绑定验证。未来扩展可以探索 DID 本身作为 `client_id`（第 16 节），届时需明确 AS 支持及迁移规则。私钥留在 Agent 或它明确批准的签署方。
 
 **用 VC 承载来自资源方之外的授权依据。** 许多智能体授权的依据并不在资源方手里：公司任命某个 Agent 为采购代表，用户给 Agent 一份可以交给多个商家的委托书，或者某机构证明 Agent 属于哪个组织、具备什么资质。OAuth 的同意记录保存在各 AS 内部，无法带到另一个服务，也无法由没有 AS 的对端验证。W3C VC 2.0 让授权方用自己的 DID 签署声明，由 Agent 持有，并出示给任何信任该签发方的验证方；验证只需解析签发方与持有者的 DID 并查询状态列表，验证方不必与签发方预先对接。ANP 已在 did:wba 文档证明和消息绑定中使用 Data Integrity 的 eddsa-jcs-2022，VC Profile 复用同一证明机制，不另外引入签名栈。VC 也有代价：撤销依赖状态列表，存在缓存延迟；验证方必须自己维护“信任哪些签发方做哪类声明”的策略；凭证一旦出示，其内容就被验证方看到。
 
@@ -52,9 +52,9 @@ OAuth Profile 的规范性基线为 **OAuth 2.0 与已发布扩展**，包括 RF
 <a id="v1-scope"></a>
 ### 1.3 v1 交付什么
 
-v1 的交付目标是**DID 客户端身份加上可使用、可审计的基础用户委托**：DID 作为 client_id、具备完整性绑定的自发布元数据、无需逐 AS 预注册且受策略控制的首次准入、RFC 7523 客户端认证、适用于合格机密部署的客户端凭据、面向托管 HTTPS 与本机 loopback 客户端的 S256 PKCE 授权码、目标限定令牌、可选刷新与生命周期执行。在 OAuth Profile 中声明支持用户委托的部署必须（MUST）实现授权码路径；只实现客户端凭据的部署不得（MUST NOT）宣称具备 OAuth 用户委托能力。只通过 VC Profile 接受委托的验证方不受此项约束。
+v1 的交付目标是**与 DID 关联的 OAuth 客户端身份，加上可使用、可审计的基础用户委托**：标准 CIMD URL 客户端标识、DID 到 CIMD 的发现及公钥发布、可选的完整性校验 DID 绑定、启用时无需逐 AS 预注册且受策略控制的首次准入、RFC 7523 客户端认证、适用于合格机密部署的客户端凭据、面向托管 HTTPS 与本机 loopback 客户端的 S256 PKCE 授权码、目标限定令牌、可选刷新与生命周期执行。在 OAuth Profile 中声明支持用户委托的部署必须（MUST）实现授权码路径；只实现客户端凭据的部署不得（MUST NOT）宣称具备 OAuth 用户委托能力。只通过 VC Profile 接受委托的验证方不受此项约束。
 
-用户委托授权中，AS 必须（MUST）记录其 issuer/租户上下文内已认证的资源所有者标识、Agent DID、目标资源、获准 scope、批准来源及时间、适用期限/撤销策略，以及稳定的内部授权记录标识。只有在文档化策略认可时，已有同意或管理员授权才可作为批准来源。这是 OAuth 授权记录要求；可跨系统携带的委托书由 VC Profile 定义。新增权限需要新的批准决定；用户凭据与 Agent 认证密钥保持分离。
+用户委托授权中，AS 必须（MUST）记录其 issuer/租户上下文内已认证的资源所有者标识、URL 客户端标识、仅在验证通过时记录的关联 Agent DID、目标资源、获准 scope、批准来源及时间、适用期限/撤销策略，以及稳定的内部授权记录标识。只有在文档化策略认可时，已有同意或管理员授权才可作为批准来源。这是 OAuth 授权记录要求；可跨系统携带的委托书由 VC Profile 定义。新增权限需要新的批准决定；用户凭据与 Agent 认证密钥保持分离。
 
 VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两种类型、持有者绑定的出示、签发方与持有者验证、凭证状态检查、权限与约束求值，以及向资源服务器或对端 Agent 直接出示。声明支持 VC Profile 的实现必须（MUST）满足第 11 节中适用于其角色的要求；不支持 VC 的实现仍可完整符合 OAuth Profile。有效的委托凭证不替代验证方的授权决定。
 
@@ -67,14 +67,14 @@ VC Profile 是可选能力，交付：ANP 委托凭证与组织角色凭证两�
 
 | 阶段 | 方案方向 | 宣称能力前的验证证据 |
 | --- | --- | --- |
-| v1：身份与基础委托 | 实现第 1.3 节范围。同一 DID 分别向多个服务取得独立授权，保留用户/Agent 归因和明确撤销机制；授权依据来自资源方之外时，通过直接出示使用单级 VC 委托凭证或角色凭证。 | 原生首次接触；托管与 loopback 用户流程；两资源隔离；元数据篡改；密钥轮换；撤销；VC 直接出示的正反例；第 14 节客户端/AS 互操作证据。 |
+| v1：身份与基础委托 | 实现第 1.3 节范围。同一 DID 分别向多个服务取得独立授权，保留用户/Agent 归因和明确撤销机制；授权依据来自资源方之外时，通过直接出示使用单级 VC 委托凭证或角色凭证。 | CIMD 首次接触及可选 DID 绑定验证；已声明的托管与 loopback 用户流程；两资源隔离；元数据篡改；密钥轮换；撤销；VC 直接出示的正反例；第 14 节客户端/AS 互操作证据。 |
 | 下一阶段：精细权限与高风险批准 | 评估 RFC 9396 RAR 表达结构化资源/动作/限制；另行定义单次批准，可以是专用 VC 类型或其他凭据，绑定 Agent、资源、规范化后的精确动作摘要、关键参数、期限和唯一标识，由执行端原子检查并消费。 | 参数替换、重放、重复执行、过期与撤回均安全失败；重新登录、传输请求签名或宽泛的委托凭证不能代替逐笔批准。 |
 | 再下一阶段：受控转委托 | 评估 VC 委托链（子凭证引用父凭证并收窄权限）以及 RFC 8693 Token Exchange 的执行者归因；定义允许的委托深度、子授权不超出父授权有效权限、受众/期限收窄、授权族撤销与审计。跨 AS 交换须明确建立信任及账户/权限对应。v1 不定义 VC 到 OAuth 令牌的换发或多级转委托。 | A→B→C 委托；扩权或执行者不符时拒绝；根授权撤回后阻止新子授权；记录已签令牌的失效延迟。不能只凭执行者历史声明授权。 |
 | 配套演进：长期与无交互执行、隐私 | 评估 RFC 8628 支持远端/无界面授权，研究其他后端授权流程、经验证的 DID 迁移和共享预算/计数执行。评估 VC 选择性披露密码套件，以及面向人类钱包的 OpenID4VP/OpenID4VCI 绑定。为采购、HR 等常见业务职能评估可互操作的动作词表，由相应领域协议定义并治理。v1 loopback 覆盖浏览器位于 Agent 同一设备的情况，不覆盖全部无界面环境。 | 用户与设备/事务绑定、防钓鱼与轮询控制；用户授权过期不能改走客户端自身权限；多个子任务并发时仍正确执行共享限额；选择性披露不泄露未出示的权限条目。 |
 
 计划统一描述授权人、目标 Agent、资源/动作、限制、适用的父授权、批准证据与撤销状态；具体线协议 Schema 和执行规则在后续扩展中制定。签名声明预算不等于实现全局计数器；令牌交换本身不等于已经实现撤销传播或权限衰减。
 
-本草案发布不代表 SDK、AS 或产品已支持。OAuth Profile 的 v1-draft4 与 VC Profile 的 v1-draft2 都是实验性标识。0.6 修订移除 VC 到 OAuth 令牌的换发，并把 VC Profile 升为 v1-draft2；OAuth Profile v1-draft4 的线协议规则保持不变。0.5 修订新增 VC Profile；0.4 修订改变元数据完整性、本机回调和断言兼容规则。实现必须（MUST）精确匹配修订，迁移前重新验证受影响元数据及未完成事务；不得（MUST NOT）只改 Profile 字符串就重新解释已有授权或授权码。
+本草案发布不代表 SDK、AS 或产品已支持。0.7 修订用实验性 `anp.authorization.oauth2.cimd.v1-draft1` 替换此前 DID 作为 client_id 的 OAuth 设计；独立的 VC Profile 保持为 `anp.authorization.vc.v1-draft2`。原 `anp.authorization.oauth2.did.v1-draft4` 标识不是本修订的别名。0.6 修订移除了 VC 到 OAuth 令牌的换发；0.5 修订新增 VC Profile。实现必须（MUST）精确匹配修订，并在迁移前重新验证受影响元数据和未完成事务。客户端标识变化意味着新的 OAuth 客户端，不能通过更新 Profile 字符串来重新解释现有授权或 code。
 
 <a id="anp-boundary"></a>
 ## 2. 与 ANP 的关系及机制选择
@@ -148,15 +148,15 @@ flowchart LR
     D["Agent DID 文档<br/>认证密钥与元数据摘要"]
   end
   subgraph MH["元数据托管边界"]
-    M["自发布 OAuth 客户端元数据"]
+    M["标准 CIMD 与 JWKS"]
   end
   subgraph IS["凭证签发方边界"]
     I["用户或组织<br/>签发密钥与状态列表"]
   end
   U["资源所有者"] -->|"同意 / 撤销"| S["授权服务器"]
   I -->|"签发委托凭证"| W
-  D -->|"认证密钥与固定摘要"| S
-  M -->|"使用前校验字节"| S
+  D -.->|"可选 DID 绑定：URL、密钥与固定摘要"| S
+  M -->|"标准元数据与客户端公钥"| S
   A -->|"客户端断言与 OAuth 授权凭据"| S
   I -.->|"签发方 DID 与凭证状态"| R
   S -->|"限定资源的令牌"| A
@@ -164,7 +164,7 @@ flowchart LR
   S -->|"签发者信任 / 令牌状态"| R
 ```
 
-图中把 DID 文档托管单列为一个边界。对 did:wba e1_，文档完整性来自 Agent 控制的绑定密钥证明，托管方只能拒绝服务或重放旧文档；对原生 did:web，托管方被攻破就能替换密钥与摘要（见第 4.2 节）。签发方与资源所有者可以是同一个人，但签发密钥始终由签发方控制，不交给 Agent。
+架构及 OAuth/VC 分工保持不变。实线元数据路径适用于普通 CIMD AS；虚线 DID 路径只在验证 DID 绑定时启用。图中把 DID 文档托管单列为一个边界。对 did:wba e1_，文档完整性来自 Agent 控制的绑定密钥证明，托管方只能拒绝服务或重放旧文档；对原生 did:web，托管方被攻破就能替换密钥与摘要（见第 4.2 节）。签发方与资源所有者可以是同一个人，但签发密钥始终由签发方控制，不交给 Agent。
 
 <a id="roles"></a>
 ## 3. 角色与标识
@@ -174,361 +174,304 @@ flowchart LR
 | 术语 | 含义 |
 | --- | --- |
 | 客户端 / Agent 运行实例 | 申请并使用访问令牌的软件部署，其身份与资源所有者区分。 |
-| 客户端 DID | 通过其认证密钥证明客户端身份的 DID，不一定是人类用户的 DID。 |
-| `client_id` | 本 Profile 中作为 OAuth 客户端标识的裸 Agent DID。 |
+| Agent DID | 通过 DID 文档与 OAuth 客户端关联的 ANP 身份；不是 OAuth 线协议标识，也不一定是人类用户的 DID。 |
+| `client_id` | 作为 OAuth 客户端标识的精确 HTTPS CIMD URL。 |
 | 资源所有者 | 有权授予资源访问权限的用户或组织。 |
-| 授权服务器（AS） | 认证客户端，验证授权凭据与策略，并签发令牌。 |
+| 授权服务器（AS） | 认证 URL 客户端、验证授权凭据与策略并签发令牌；只有启用 DID 绑定处理时才验证 Agent DID。 |
 | 资源服务器（RS） | 执行资源访问控制的目标 Agent、API 或网关。 |
 
-客户端断言的 `sub` 标识客户端。访问令牌的 `sub` 标识授权所针对的主体：在用户委托访问时通常是资源所有者；在客户端自身访问时由 AS 确定。不得（MUST NOT）仅因认证成功，就把客户端断言的 `sub` 直接复制到用户委托令牌中。
+请求 `client_id`、CIMD `client_id` 和客户端断言 `iss`、`sub` 必须（MUST）是完全相同的 CIMD URL。客户端断言的 `sub` 标识客户端。访问令牌的 `sub` 标识授权所针对的主体：在用户委托访问时通常是资源所有者；在客户端自身访问时由 AS 确定。不得（MUST NOT）仅因认证成功，就把客户端断言的 `sub` 直接复制到用户委托令牌中。
 
-客户端断言的 `aud` 标识 AS；访问令牌的 audience 标识目标 RS。同一 DID 可以被多个 AS 接受，但登记、授权和令牌仍分别受各 AS 管理。某 AS 签发的令牌不会因为客户端拥有 DID 就自动通用于所有服务。
+客户端断言的 `aud` 按固定的认证策略标识被接受的 AS；访问令牌的 audience 标识目标 RS。同一 Agent DID 与 CIMD URL 可以在多个 AS 使用，但准入、授权、用户账户和令牌仍分别受各 AS 管理。令牌不会因为客户端拥有 DID 就自动通用于所有服务。
 
-AS 必须（MUST）在授权记录中区分资源所有者主体、已认证客户端/Agent、租户或信任域、授权与目标资源。客户端自身权限与用户委托权限不得（MUST NOT）混用。
+客户端记录、授权及令牌缓存必须（MUST）按 (issuer, tenant-or-trust-domain, client_id) 隔离，并分别保留资源所有者、授权、目标资源与处理模式。RFC 9068 JWT 访问令牌必选的 `client_id` 声明承载 URL，不得填入所关联的 DID。RFC 7662 introspection 保持标准语义：返回 `client_id` 时，其值为 URL。策略依赖客户端身份的 RS 必须（MUST）从可信令牌/introspection 上下文或等价可信状态取得该身份；所需身份不可用时，必须（MUST）拒绝该决策，不能相信调用方提供的字段。本 Profile 不要求普通 CIMD AS 在令牌中增加 DID 声明。
 
-客户端记录、授权及令牌缓存必须（MUST）按 (issuer, tenant-or-trust-domain, client_id) 隔离。预期客户端 DID 就是精确的 client_id，不能由调用方提供的其他值替代。RFC 9068 JWT 访问令牌已有必选的 client_id 声明，本 Profile 必须（MUST）令其值为该 DID；用户委托令牌的 sub 仍表示用户。依据本 Profile 返回给获准查询方的 RFC 7662 活动令牌结果，AS 必须（MUST）包含同义的 client_id。RFC 7662 本身将其定义为可选，本 Profile 对活动结果增加此要求，以免各自发明 Agent-DID 声明；非活动结果保持最小化，不披露它。其他可信的不透明令牌验证路径必须（MUST）向 RS 提供等价客户端身份上下文。
+支持 ANP 的 AS 单独记录成功验证的 DID 绑定、Profile 修订与验证状态。向 RS 传递结果需要明确可信的通道或双方约定的令牌扩展；本版不强制新增令牌声明。RS 不得（MUST NOT）从未经验证的 `anp_did`、`kid` 标签或某 URL 当前的内容推断 DID 已经验证。若 AS 未验证绑定，而资源要求 DID 认证，则需要按另行约定的绑定提供与实际请求/令牌关联的独立证明，否则必须（MUST）拒绝该操作。本修订不定义这种证明交换。
 
-RS 只有在验证可信签发者或查询通道、令牌状态、目标受众与 scope 后才能使用 client_id。普通请求字段不是证据。这标识令牌原本签发给哪个 Agent，不证明当前 Bearer 令牌出示者仍控制该 Agent 密钥；发送者约束须单独验证。DID 本身不代表模型版本、软件完整性或人类所有者。
+多个 Agent 实例共用 CIMD URL 时，该 URL 仍表示一个 OAuth 客户端。需要逐 Agent 独立客户端身份的部署应当（SHOULD）发布不同的稳定 URL 及认证密钥。多个用户共用 URL，不会替代各 issuer 范围内的资源所有者身份。这是身份关联，不是自动合并账户、软件证明或权限授予。
 
 <a id="enrollment"></a>
 ## 4. 客户端登记与绑定
 
-### 4.1 DID 作为客户端标识
+### 4.1 CIMD URL 作为客户端标识
 
-声明本修订核心一致性的 AS 必须（MUST）实现 DID 直接作为客户端标识，以及下文的自发布元数据发现/准入流程。客户端标识为裸 DID，不含 DID URL 路径、查询或片段。DID 方法中以冒号分隔的路径属于 DID 本身，不是 DID URL 路径。例如，`did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` 标识客户端，`did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1` 标识密钥。
+本修订使用 CIMD draft-02 定义的 HTTPS 客户端标识 URL。该 URL 必须（MUST）含路径，不得（MUST NOT）含 userinfo、片段或单点/双点路径分量。本 Profile 的发布方必须（MUST）省略查询部分。一次正常表单/JSON 解码后按字符串精确比较，不得通过端口、大小写、路径或别名规范化将不同标识视为等价。OAuth `client_id` 字段中不得（MUST NOT）用 DID 或 DID URL 替代 CIMD URL。
 
-AS 可以（MAY）保留预注册的原生客户端，也可以（MAY）通过本地策略关闭开放的首次接触准入；必须（MUST）按第 5 节声明已启用的登记模式。仅开放预注册的部署不能宣称客户端无需预注册即可接入。准入决定可以（MAY）自动作出，不把逐客户端的人工管理批准作为核心前提。
+在事务开始前选择以下两种处理模式之一：
 
-请求 `client_id`、断言 `iss`、断言 `sub` 和原生元数据 `client_id` 必须（MUST）标识完全相同的裸 DID。`kid` 的 DID 部分必须（MUST）与其一致。一次正常表单/JSON 解码后精确比较；不得（MUST NOT）通过大小写折叠、递归百分号解码、前缀匹配或 WNS/别名替换，把不一致标识视为相同。
+| 模式 | 验证职责 |
+| --- | --- |
+| `cimd` | 标准 CIMD 元数据发现、URL 客户端认证及 OAuth 授权。AS 无需解析 DID、理解 ANP 扩展或检查 DID 内固定的摘要。 |
+| `did_bound` | 使用相同的标准 URL 客户端与 OAuth 消息，额外执行第 4.2 节和第 6.2 节的 DID/URL/元数据/实际认证密钥检查。AS 按第 5 节明确声明该增强能力。 |
 
+明确归属于 `did_bound` 的要求，只在实现并启用该增强能力时适用，不得（MUST NOT）将其作为普通 CIMD AS 处理标准流程的前提。下文共同的 OAuth 安全要求约束参与实现及能力选择；支持 CIMD 本身不等于声明支持本文涉及的全部可选 OAuth 扩展。连接要求某项尚不支持的能力时，应在授权前失败，而不是要求采用 ANP 专用替代协议。
+
+客户端必须（MUST）在授权前固定被接受的 issuer、URL `client_id`、所选模式及认证策略。要求 DID 绑定身份时，缺少精确匹配的增强能力或其检查失败，必须（MUST）终止操作，不得（MUST NOT）自动切换为 `cimd` 模式重试。明确配置的 `cimd` 连接有效，但不得（MUST NOT）宣称 AS 已完成 DID 认证。未来 DID 作为 client_id 的研究属于另行协商的扩展（第 16 节）。
+
+<a id="anpcimd"></a>
+<a id="anp-oauth-keys"></a>
+<a id="anp-metadata-sha256"></a>
 ### 4.2 自发布 OAuth 客户端元数据
 
-自发布客户端必须（MUST）在经过方法验证的 DID 文档中提供且只提供一个类型为 `ANPOAuthClientMetadata` 的 service。service `id` 必须（MUST）是该 DID 加非空片段；`serviceEndpoint` 必须（MUST）是含路径的单个绝对 HTTPS URL，不含 userinfo、查询或片段。重复 service ID 或多个匹配 service 均拒绝，其他 DID service 不受影响。此类型是 **ANP 定义的实验性 DID service 类型**，不是已有 W3C 类型。JSON-LD 部署需使用明确、固定的扩展 context；不得（MUST NOT）假设 DID Core context 已定义该词项。
+ANP 发布方通过本 Profile 中唯一的 `ANPCIMD` 类型 service，将 Agent DID 与 CIMD 关联。其 `id` 必须（MUST）是该 DID 加非空片段，`serviceEndpoint` 必须（MUST）精确等于 CIMD HTTPS URL。ANP 发现过程拒绝重复 service ID 或多个匹配 service。`ANPCIMD` 是 ANP 定义的实验性 DID service 类型，不是 W3C 定义的类型。JSON-LD 部署需要明确、固定的扩展 context；DID Core context 不定义这些扩展词项。旧 `ANPOAuthClientMetadata` service 不用于选择本新 Profile。
 
-service URL 指向 JSON OAuth 客户端元数据文档，**不是**授权服务器或令牌端点。只能从已验证 DID 取得该 URL，不能由调用方参数覆盖。HTTPS 获取成功必须（MUST）返回 HTTP 200 与 `application/json`；重定向、畸形或成员名重复的 JSON、私有材料及超限内容均拒绝。实现必须（MUST）支持至多 5 KiB 的文档，并设置有限的可配置大小上限、获取超时和第 13 节 SSRF 控制。获取公开元数据时不得携带凭据或 cookie。
+发布方必须（MUST）将经过方法验证的 DID 材料与明确的 OAuth 应用配置结合。下列映射是发布过程的规范性要求，不要求标准 AS 进行 DID 解析：
 
-所选 service 还必须（MUST）包含 anp_metadata_sha256，这是 ANP 定义的 64 位小写十六进制 SHA-256 摘要，覆盖完整元数据表示。对 HTTP 传输/内容解码后的 UTF-8 响应字节计算摘要，包括全部空白及末尾换行；不重新序列化 JSON、不规范化文本、不包含 HTTP 头。拒绝 BOM 或无效 UTF-8，在哈希/解析前限制解码后大小。控制方完成序列化后计算摘要，再通过 DID 方法认证的文档更新流程发布；对 e1_，该值位于绑定密钥证明覆盖的文档内。
-
-在使用任何客户端名称、回调 URI 或授权元数据前，AS 必须（MUST）将计算值与当前经过方法验证的 DID 文档内摘要比较；缺失、格式错误或不匹配均拒绝。响应 Content-Digest 头或仅由元数据托管方给出的摘要不能替代它。这样无需新增凭据格式或在线元数据签署服务，即可绑定正文。任何元数据更新（包括纯显示变更）都须同步更新 DID 文档摘要；未完成事务是否仍能继续，按第 4.3 节判断。
-
-以下字段在适用时复用 RFC 7591 的 OAuth 客户端元数据定义，但不要求 RFC 7591 注册端点：
-
-| 字段 | 原生元数据规则 |
+| 输出 | 来源与规则 |
 | --- | --- |
-| `anp_profile` | 必选，精确等于当前草案 Profile 标识；ANP 定义的实验性区分字段。 |
-| `client_id` | 必选，精确等于裸客户端 DID，**不是**元数据 URL。 |
-| `client_name` | 必选非空显示名称；客户端自述，不是已验证组织名称。 |
-| `token_endpoint_auth_method` | 必选，`private_key_jwt`。 |
-| `grant_types` | 请求使用的、受支持核心授权类型的非空数组，必选：`client_credentials`、`authorization_code`、`refresh_token`。不是权限授予。 |
-| `response_types` | 请求授权码时必选且为 `["code"]`，否则省略。 |
-| `redirect_uris` | 授权码模式必选非空数组，使用获准 HTTPS 回调或按第 7.2.1 节明确声明的本机 loopback 条目；其他模式省略或为空。 |
-| `anp_application_type` | ANP 定义的可选 `web`（默认）或 `native`；loopback 必须使用 `native`。表示应用部署形式，不代表机密客户端等级。 |
-| `scope` | 可选，以空格分隔的期望能力；实际权限仍由 AS 与资源所有者独立决定。 |
-| `token_endpoint_auth_signing_alg` | 可选的获准 JOSE 算法；与 DID 获准密钥及 AS 能力取交集，不能扩大任一方范围。 |
-| `client_uri`、`logo_uri` | 可选显示元数据，另行执行获取/渲染防护。 |
+| `client_id` | 与 DID 关联的精确 CIMD URL。 |
+| `jwks` 或 `jwks_uri` | 从 DID 获准的 `authentication` 方法中选出的公开签名密钥，不得导出私钥材料。`jwks_uri` 必须（MUST）提供标准 JWK Set，不能直接返回未转换的 DID 文档。这两个元数据字段必须且只能使用一个。 |
+| `client_name`、`client_uri`、`logo_uri` | 明确的应用显示配置；客户端自述名称不是已验证组织身份。 |
+| `redirect_uris` | 应用实际回调配置；不能只根据 DID 域名推导回调。 |
+| `grant_types`、`response_types`、`scope` | 已实现/请求的 OAuth 能力及应用配置；这些值不授予权限。 |
+| `token_endpoint_auth_method` | 本 Profile 的客户端认证路径使用 `private_key_jwt`。采用 `none` 的公共客户端连接不属于其基于 DID 的客户端认证能力。 |
+| `token_endpoint_auth_signing_alg` | 提供时须为受支持且与选定密钥兼容的非对称算法；实际使用仍要求 AS 支持。 |
 
-原生元数据不得（MUST NOT）包含 `jwks`、`jwks_uri`、共享 secret、私钥或 bearer 凭据。客户端密钥唯一权威来源仍是 DID 的 `authentication` 关系。未知安全扩展不得覆盖这些规则。元数据 URL 只是获取位置，不得（MUST NOT）替代 DID 作为 `client_id`。
+CIMD 文档必须（MUST）遵循 CIMD draft-02 及适用的 RFC 7591 元数据语义。它必须（MUST）将自身精确 URL 作为 `client_id`，并包含非空 `client_name`。授权码发布包含 `response_types=["code"]` 和已配置的 `redirect_uris`。文档必须（MUST）可通过无需认证的 HTTPS GET 获取，返回 HTTP 200 与 JSON；发布方应当（SHOULD）使用 `application/json`。获取方不得（MUST NOT）自动跟随重定向，或将错误响应接受为元数据。不得发布共享 secret、私钥或 bearer 凭据。每次获取均受第 13 节约束，包括外部 JWKS 获取。
 
-service 委托的是交付职责，不是独立改写元数据的权限。独立元数据托管方无法在没有相应、符合方法验证的 DID 文档更新时修改可被接受的字节。e1_ 更新包括有效的绑定密钥文档证明；而 did:web 的 DID 文档托管方被控制时，攻击者仍可替换密钥与摘要。摘要固定不能防止托管方拒绝服务，也不能在 DID 方法无法证明最新状态时阻止旧的有效 DID 文档及匹配元数据被重放；它不等于抗回滚或独立组织背书。须执行当前方法状态验证、有界缓存及本地停用策略，并将 DID 与客户端自述名称一起展示。
+`anp_profile` 和 `anp_application_type` 不是必选 CIMD 成员。仅含标准字段的 CIMD 文档已足以用于 `cimd` 模式。可选的实验性 `anp_did` 成员标识用于反向发现的候选裸 Agent DID；在 DID 绑定检查通过前不具备可信效力。无需反向发现，或可信带外绑定已提供 DID 时，发布方可以（MAY）省略该字段。普通 AS 无需理解它；必须验证与 AS 所接受元数据的兼容性，不能静默更换事务的客户端身份或安全模式。
+
+在 `did_bound` 发布与验证中，`ANPCIMD` service 还必须（MUST）包含：
+
+- `anp_oauth_keys`：来自该 DID `authentication` 关系的、互不重复的验证方法 ID 非空数组，明确授权这些密钥用于所关联的 URL 客户端。每个引用经 DID Core 相对引用处理后，必须解析为该 DID 加非空片段。该字段不授权 `keyAgreement` 密钥，也不授权仅列于 `verificationMethod` 中的任意密钥。
+- `anp_metadata_sha256`：覆盖完整 CIMD 表示的 64 位小写十六进制 SHA-256 摘要。对 HTTP 传输/内容解码后的 UTF-8 响应字节计算摘要，包括空白及末尾换行；不重新序列化 JSON，不包含 HTTP 头。拒绝 BOM、无效 UTF-8 及重复 JSON 成员。完成序列化后计算摘要，再通过 DID 方法认证的文档更新流程发布。
+
+增强 AS 在将元数据用于回调或授权决定前，必须（MUST）从可信配置或可选 `anp_did` 发现提示取得候选 DID，验证 DID 及 service，精确检查 URL 和适用的反向 DID 一致性，并验证固定摘要。必选绑定缺失、格式错误或不匹配均拒绝。调用方提供的覆盖值，或仅由元数据托管方提供的摘要，不能替代该验证。冲突的反向 DID 不得（MUST NOT）覆盖已有的已接受绑定。这些检查完成前，获取的候选名称或回调不可信。增强获取方必须（MUST）支持至多 5 KiB 的文档，并设置有限的大小、超时及并发上限。
+
+摘要覆盖内嵌的 `jwks` 值，但对 `jwks_uri` 只覆盖 URL 字符串，不保护独立获取的 JWKS 字节。两种形式下，**实际用于该客户端认证的密钥**都必须（MUST）属于 service 的 `anp_oauth_keys`，且当前仍受已验证 DID 的 `authentication` 关系授权。比较经验证的真实公钥材料或 RFC 7638 JWK 指纹，不能只比较 `kid`，并拒绝有歧义的密钥选择。仅在 JWKS 的其他位置找到一把匹配密钥不够。本修订保护 CIMD 字节与实际获准的认证密钥，不定义整个外部 JWKS 文档的摘要。
+
+普通 CIMD AS 信任其接受的 HTTPS 元数据和客户端认证策略；发布方本地完成 DID 检查，不证明 AS 获取了同一状态或已经验证 DID。增强模式下，DID 授权的摘要将元数据托管方限制为交付方，不能独立修改内容。对 did:wba e1_，绑定由方法有效的文档证明覆盖；对 did:web，控制 DID 文档托管方仍可替换密钥与摘要。两种模式都不会获得超出所选 DID 方法与新鲜度策略的抗回滚能力。在使用摘要固定保护时，后续元数据更新即使仅涉及显示内容，也必须重新计算固定摘要。
 
 ### 4.3 无需逐 AS 预注册的首次接触准入
 
-启用 `self_published` 时，未知裸 DID 是待发现候选者，不能仅因数据库没有记录就立即返回 `invalid_client`。不新增授权类型、注册端点、client secret，也不要求 VC 或 OIDC 登录桥接。
+CIMD AS 可以（MAY）接纳此前未知的客户端标识 URL，也可以将准入限制为已批准/预注册客户端。CIMD 不强制开放准入。对已启用 CIMD 首次接触的 AS，ANP 不增加强制人工登记或注册接口调用。准入不授予资源访问权限。
 
-AS 必须（MUST）按以下顺序执行，并限制工作量：
+首次接触流程如下：
 
-1. 联网前检查请求 `client_id` 语法、支持的方法、所选流程和本地拒绝/停用记录。已禁用客户端不得（MUST NOT）通过缓存淘汰后“重新变成未知”绕过封禁。
-2. 按第 6.2 节解析和验证 DID，选择元数据 service，获取并验证第 4.2 节文档及 DID 内固定的摘要，精确匹配 `client_id` 与 `anp_profile`。检查流程一致性：refresh 必须同时具备授权码流程；不允许隐式/密码授权或 `none` 客户端认证。
-3. 对 DID/方法、元数据来源、请求的授权类型、客户端部署、回调及目标资源执行明确的本地准入策略。策略可以（MAY）自动接纳陌生客户端，也可以拒绝。准入决定不授予资源权限；请求元数据不是 AS 策略。
-4. 建立有界、按 issuer/租户隔离的**候选事务记录**，包含 DID、service ID/URL、接受的元数据快照及其 DID 内固定摘要、认证策略、所选资源和策略决定。不要求预分配永久客户端数据库记录。发现/缓存条目必须（MUST）与已经认证的活动客户端区分。
-5. 在 `/token` 验证新的第 6 节断言，原子消费 `jti`，将证明绑定到候选 DID 和接受的元数据。然后确认客户端绑定，并独立判断授权凭据、适用的用户同意、资源与 scope，最后才可签发访问令牌。
+1. 在获准联网前，检查 URL 语法、所选流程、接受的 issuer 及本地停用/准入策略。缓存未命中不得（MUST NOT）抹去先前的封禁。
+2. 获取并验证 CIMD 元数据及公钥来源。`did_bound` 模式额外解析候选 DID，并在使用回调或配置前执行第 4.2 节。`cimd` 模式中，AS 遵循标准 CIMD，不依赖 ANP 解析器。
+3. 对客户端、部署形式、元数据来源、认证算法、回调及请求的授权类型/资源执行 AS 准入策略。自发布字段不能覆盖该策略。
+4. 将候选事务绑定到 issuer、URL `client_id`、所选模式、接受的元数据/回调、资源及认证策略。增强事务还固定已验证的 DID、service 与元数据摘要。发现/缓存条目不是持有私钥的证据。
+5. 在 `/token` 使用接受的客户端密钥验证新的第 6 节客户端断言，再独立验证授权凭据、适用的资源所有者、目标及权限，最后签发令牌。增强验证重新检查当前密钥授权与绑定新鲜度；绑定或安全相关元数据变化时，未完成事务失效，而不是替换其中的值。
 
-授权码流程中，在 `/authorize` 展示同意界面或签发 code 前完成发现与回调批准。遵循 OAuth 原有分工：客户端控制证明在兑换 code 时验证，不新增前端签名步骤。AS 必须（MUST）把所签发 code 和用户授权绑定到候选 DID、接受的元数据快照、精确回调、issuer、resource 与 S256 PKCE 事务。不得（MUST NOT）仅因读取元数据就声称 Agent 已证明私钥持有。兑换前必须（MUST）重新检查新鲜度、当前 DID 密钥授权、接受的元数据及本地策略。认证策略、元数据端点或回调/授权配置变化时，该未完成事务失效；必须重启，不能替换成新值。可按文档化、确定性的比较规则，把纯显示变更识别为等价。
+授权码流程中，客户端发现与回调批准发生在 `/authorize`，客户端密钥持有证明在兑换 code 时验证。不得新增前端 DID 签名，也不得仅因读取元数据就宣称已经证明密钥持有。code 绑定到其精确客户端、issuer、实际回调、S256 PKCE、资源及已接受的事务状态。客户端凭据流程可以在首次令牌请求中完成准入与证明，但仍须现有 AS 策略/授权独立允许访问。刷新不能创建新授权。
 
-客户端凭据流程可以在首次令牌请求中完成发现、准入和证明。访问仍须 AS 策略授权该客户端访问相应资源；自发布 `scope` 或有效 DID 签名不足以获得权限。刷新不能创建新授权，仍要求现有有效的 refresh-token/client/issuer 绑定。
-
-因此，**无需逐 AS 预注册**是指不强制提前人工登记或调用注册接口；不是无需准入决定、本地状态、同意或无条件接受所有 DID。预注册客户端可以（MAY）使用已批准的带外元数据而不发布 service，但 AS 必须（MUST）保留该来源选择，不得（MUST NOT）静默改用新发现的元数据。
+预注册的 CIMD URL 仍是 URL 客户端。必须（MUST）保留其已接受的元数据来源及绑定策略；新发现的数据不能静默替代固定的注册信息。实现必须（MUST）区分策略控制的准入与无条件接受，并准确报告首次接触被关闭的情况。
 
 **首次接触准入概览（资料性）。**
 
 ```mermaid
 flowchart TD
-  Request["未知客户端 DID<br/>已启用 self_published"]
-  Precheck["1. 检查语法、方法、流程<br/>与拒绝记录"]
-  Discover["2. 验证 DID 与元数据<br/>摘要、client_id 与 Profile"]
-  Admission{"3. 准入策略接受？"}
-  Candidate["4. 保存候选事务<br/>尚未完成认证"]
-  Proof["5. 在 /token 重新验证新断言<br/>通过后消费 jti"]
-  Grant["确认绑定并检查授权、<br/>同意、资源与 scope"]
-  Issue["签发目标受限访问令牌"]
-  Reject["拒绝，不签发令牌"]
-  ConsumedReject["拒绝授权<br/>断言仍视为已消费"]
-  Request --> Precheck
-  Precheck -->|"通过"| Discover
-  Precheck -->|"失败"| Reject
-  Discover -->|"通过"| Admission
-  Discover -->|"失败"| Reject
-  Admission -->|"接受"| Candidate
-  Admission -->|"拒绝"| Reject
-  Candidate --> Proof
-  Proof -->|"通过"| Grant
-  Proof -->|"失败"| Reject
-  Grant -->|"批准"| Issue
-  Grant -->|"拒绝"| ConsumedReject
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class Reject,ConsumedReject reject
-  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
-  class Issue allow
+  Request["CIMD URL 客户端请求"] --> Metadata["验证 CIMD 与本地准入"]
+  Metadata --> Mode{"选择 DID 绑定模式？"}
+  Mode -->|"是"| Binding["验证 DID、URL、元数据摘要与密钥策略"]
+  Mode -->|"否"| Proof["验证新的标准客户端断言"]
+  Binding -->|"通过"| Proof
+  Binding -->|"失败"| Reject["拒绝，不切换模式"]
+  Proof --> Grant["检查独立授权、用户、资源与 scope"]
+  Grant -->|"批准"| Token["签发限定资源的令牌"]
+  Grant -->|"拒绝"| Reject
 ```
 
 ### 4.4 客户端边界
 
-公共客户端不会仅因持有密钥或使用 PKCE 就变成机密客户端。本 Profile 要求逐 Agent 的非对称认证绑定，不是在所有应用副本中嵌入共享 secret。具有自身获准 DID 密钥的本地 Agent 可以在仍被分类为公共客户端时，使用授权码及第 7.2.1 节 loopback 绑定。AS 必须（MUST）记录并评估实际客户端类型；客户端凭据仍要求合格的机密保管能力。托管 HTTPS 回调继续支持。无法使用同设备浏览器的远端/无界面客户端需要后续设备/后端授权扩展，不能用无限制回调例外替代。
+持有密钥或使用 PKCE，本身不能证明部署满足机密客户端的密钥保管要求。本 Profile 使用选定的逐 Agent 认证密钥，不是在所有分发的应用副本中嵌入同一私钥。AS 接受的客户端类型与认证模型必须符合实际部署；支持 CIMD 本身不代表支持每一种原生应用逐实例密钥方案。客户端凭据仍限于合格的机密部署。普通公共客户端 `none` 流程不能被宣称为基于 DID 的客户端认证，也不能在必选绑定检查失败后作为回退。
+
+托管回调与明确支持的原生 loopback 回调遵循第 7.2.1 节。发布方可以为本地 Agent 提供公开 CIMD/JWKS，而无需持有其签名私钥。无法使用同设备浏览器的远端/无界面客户端需要后续设备/后端授权扩展，不能用无限制回调例外替代。
 
 <a id="discovery"></a>
 ## 5. AS 发现与能力声明
 
-对于动态发现的 HTTP 资源，RS 必须（MUST）发布 RFC 9728 受保护资源元数据，包含 `resource` 及一个或多个 `authorization_servers`；客户端必须（MUST）实现该发现路径。`401` 挑战可携带 `resource_metadata`，否则按 RFC 9728 的 well-known 位置规则发现。选择 AS 前，客户端必须（MUST）依据目标 RS 和被接受的信任策略验证资源/元数据关联。封闭部署可以（MAY）使用可信带外配置，但仍须验证资源与 issuer 的关系。
+对于动态发现的 HTTP 资源，在可用时使用 RFC 9728 受保护资源元数据与 RFC 8414 AS 元数据，并验证资源/AS 关联及精确 issuer。`401` 挑战可以标识 `resource_metadata`。现有或封闭部署可以（MAY）通过可信带外配置建立相同关联。任意 DID service 或 Agent Description 无权为资源选择另一个 AS。
 
-客户端必须（MUST）从被接受的资源关系或可信配置中取得预期 issuer，实现 RFC 8414 发现，并精确匹配所得 AS 元数据中的 issuer。任意 DID 文档或 Agent Description 中的 URL 无权更改目标资源的 AS。
+客户端记录、事务及令牌缓存必须（MUST）保持按 AS issuer 和租户/信任域隔离。issuer 变化后须重新验证资源关系，不得将旧 AS 的 code、刷新令牌或断言发给新 AS。新接受的 AS 需要新的受众绑定断言。
 
-客户端记录、授权事务及令牌缓存必须（MUST）按 AS issuer 和租户/信任域隔离。issuer 改变后需要重新验证关系，并按要求完成注册/绑定批准；不得把旧 AS 的授权码、刷新令牌、secret 或客户端断言发给新 AS。只有新关系获准并重新生成受众绑定断言后，才可复用 DID/密钥。
+`cimd` 模式下，根据 AS 元数据中的 `client_id_metadata_document_supported=true` 或明确可信的部署配置确认 CIMD 支持。检查 `private_key_jwt`、双方接受的签名算法和所选授权流程。授权码要求 S256 PKCE 及被接受的回调/issuer 验证策略。RFC 8707、RFC 9207、loopback 回调或 DPoP 等附加标准，只在支持或明确配置时选择。策略要求其中某项能力而对方不支持时，该流程终止，不能据此降低安全要求。普通 CIMD AS 无需声明 `anp_did_oauth` 或其他 ANP 能力。
 
-实现本 Profile 的 AS 必须（MUST）发布 RFC 8414 元数据，包括 `issuer`、`token_endpoint`、包含 `private_key_jwt` 的 `token_endpoint_auth_methods_supported`、支持的签名算法及授权类型。支持授权码的 AS 还必须（MUST）发布授权端点、code 响应支持、`S256` PKCE 支持及 `authorization_response_iss_parameter_supported=true`，并实现 RFC 9207 响应签发者标识。
+提供 `did_bound` 处理的 AS 必须（MUST）声明下列实验性 RFC 8414 扩展 `anp_cimd_binding`。它为相同的 URL 客户端和标准 OAuth 流程增加绑定验证，不定义新授权类型或令牌端点认证方法。
 
-本草案定义 RFC 8414 可选扩展成员 `anp_did_oauth`。声明支持本 Profile 时必须提供该成员，其必选字段如下：
-
-| 字段 | 类型与规则 |
+| 字段 | 规则 |
 | --- | --- |
-| `profile` | 字符串，精确等于 `anp.authorization.oauth2.did.v1-draft4`。 |
-| `did_methods_supported` | 非空方法标识数组，例如 `did:web`、`did:wba`；只列 AS 实际完成验证的方法。 |
-| `client_id_modes_supported` | 精确等于 `["did"]`；本版只定义原生 DID 客户端标识。 |
-| `client_enrollment_methods_supported` | 非空数组，列出已启用的原生 `self_published` 和/或 `pre_registered` 模式；必须实现自发布能力，本地策略可以限制准入。 |
-| `redirect_uri_modes_supported` | 启用授权码时必选，非空数组列出已启用的 `https` 和/或 `loopback`；授权码实现须实现两者，本地准入可限制使用。仅客户端凭据部署省略。 |
+| `profile` | 精确等于 `anp.authorization.oauth2.cimd.v1-draft1`。 |
+| `did_methods_supported` | 按第 6.2 节实际验证的方法非空数组。 |
+| `client_enrollment_methods_supported` | 非空数组，列出已启用的 `self_published` 和/或 `pre_registered` CIMD URL 模式。 |
+| `redirect_uri_modes_supported` | 启用授权码时，列出支持/启用的 `https` 和 `loopback` 子集；CIMD 本身不隐含支持其中任一模式。 |
 
-`anp_did_oauth` 与草案 Profile 标识是 ANP 定义、尚未注册的实验性元数据，不是现有 IETF/IANA 功能。它们不创建新的令牌端点认证方法；认证方法仍为 `private_key_jwt`。没有精确的 Profile 匹配时，客户端不得（MUST NOT）假设对方支持 DID 处理，也不得静默退回另一身份或更弱认证。
+声明该精确能力意味着 AS 承诺：对其已声明授权端点与令牌端点接受的每个 CIMD 客户端事务，强制执行 `did_bound`。缺少 DID 提示或可信绑定、摘要无效、密钥未获授权或 DID 方法不支持时，必须（MUST）拒绝；请求不能选择退出并改走普通处理。本初始扩展不提供逐请求模式选择器。提供普通 CIMD 处理的 AS 省略该扩展；同时提供两种策略的部署需要分离且无歧义的 issuer/端点配置。要求 DID 绑定身份的客户端必须（MUST）提供可发现绑定材料或已建立的可信绑定，并在授权前选择强制执行该模式的配置。能力发现本身不能向 RS 逐令牌证明来自其他上下文的令牌采用了该模式。
 
-客户端必须（MUST）在发起流程前固定 issuer、客户端 DID、Profile 修订及凭据策略。认证或准入失败时，不得（MUST NOT）自动更换客户端身份或降低认证强度以绕过拒绝。
-
-以下元数据为示意，地址不代表已部署服务：
+以下增强 AS 示例同时提供标准 CIMD 能力。端点仅为示意；标准 AS 可以完全省略 `anp_cimd_binding`：
 
 ```json
 {
   "issuer": "https://auth.example",
   "authorization_endpoint": "https://auth.example/authorize",
   "token_endpoint": "https://auth.example/token",
-  "token_endpoint_auth_methods_supported": [
-    "private_key_jwt"
-  ],
-  "token_endpoint_auth_signing_alg_values_supported": [
-    "RS256",
-    "Ed25519",
-    "EdDSA"
-  ],
-  "grant_types_supported": [
-    "client_credentials",
-    "authorization_code",
-    "refresh_token"
-  ],
-  "response_types_supported": [
-    "code"
-  ],
-  "code_challenge_methods_supported": [
-    "S256"
-  ],
+  "client_id_metadata_document_supported": true,
+  "token_endpoint_auth_methods_supported": ["private_key_jwt"],
+  "token_endpoint_auth_signing_alg_values_supported": ["RS256", "Ed25519", "EdDSA"],
+  "grant_types_supported": ["client_credentials", "authorization_code", "refresh_token"],
+  "response_types_supported": ["code"],
+  "code_challenge_methods_supported": ["S256"],
   "authorization_response_iss_parameter_supported": true,
-  "anp_did_oauth": {
-    "profile": "anp.authorization.oauth2.did.v1-draft4",
-    "did_methods_supported": [
-      "did:web",
-      "did:wba"
-    ],
-    "client_id_modes_supported": [
-      "did"
-    ],
-    "client_enrollment_methods_supported": [
-      "self_published",
-      "pre_registered"
-    ],
-    "redirect_uri_modes_supported": [
-      "https",
-      "loopback"
-    ]
+  "anp_cimd_binding": {
+    "profile": "anp.authorization.oauth2.cimd.v1-draft1",
+    "did_methods_supported": ["did:web", "did:wba"],
+    "client_enrollment_methods_supported": ["self_published", "pre_registered"],
+    "redirect_uri_modes_supported": ["https", "loopback"]
   }
 }
 ```
 
-
-
-[ANP-07 智能体描述](07-ANP-智能体描述协议规范.md)可以（MAY）链接到接口文档，说明其 OAuth 要求及 RFC 8414/RFC 9728 元数据位置。本版本不重定义 ANP-07 的 `securityDefinitions`，不要求在其中增加新的 `scheme` 值，也不在公开描述中放置凭据。描述与发现不是授权。
+[ANP-07 智能体描述](07-ANP-智能体描述协议规范.md)可以（MAY）链接到说明此授权要求的接口。该链接仅用于描述，不能覆盖可信 issuer、已选客户端身份或能力检查。
 
 <a id="client-assertion"></a>
-## 6. 基于 DID 的 JWT 客户端认证
+## 6. 与 DID 关联的 JWT 客户端认证
 
 ### 6.1 传输与 JWT 字段
 
-客户端必须（MUST）向已验证的令牌端点发送 HTTPS POST，使用 `application/x-www-form-urlencoded`，且必选参数 `grant_type`、`client_id`、`client_assertion_type`、`client_assertion` 各出现一次。断言类型必须（MUST）为 `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`。授权类型专用参数遵循第 7 节。安全相关表单参数重复时必须（MUST）拒绝，不得采用取首值或末值的方式消除歧义。
+客户端向已接受的令牌端点发送 HTTPS POST，使用 `application/x-www-form-urlencoded`，`grant_type`、`client_id`、`client_assertion_type`、`client_assertion` 各出现一次，并附带所选授权类型的参数。断言类型为 `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`。安全相关参数重复时必须（MUST）拒绝。客户端断言使用紧凑签名 JWT/JWS 序列化，不使用 JWE、分离式载荷、访问令牌或同时多种认证方式。不得（MUST NOT）将其放入 URL、普通任务数据或日志。
 
-`client_assertion` 必须（MUST）是一个紧凑 JWS，包含内置、经过 base64url 编码的 JWT 载荷。本 Profile 不允许 JWE、分离式载荷、未编码载荷、多份断言或同时使用多种客户端认证方式。不得（MUST NOT）将断言或私钥放入 URL、日志或 Agent Description。
-
-JWS 受保护头字段如下：alg、kid 必选，typ 推荐提供：
-
-| 字段 | 要求 |
+| 头字段 | 规则 |
 | --- | --- |
-| `typ` | 推荐 `client-authentication+jwt`；按下文兼容规则，也可使用旧 `anp-did-client-auth+jwt`、`JWT` 或省略。 |
-| `alg` | 获准且与解析所得密钥兼容的非对称 JOSE 签名算法。 |
-| `kid` | 由预期客户端 DID 加非空片段组成的完整 DID URL，指向认证验证方法。本 Profile 的密钥引用不允许 DID URL 路径或查询。 |
+| `alg` | 双方接受且与选定公钥兼容的非对称 JOSE 签名算法。 |
+| `kid` | 已接受 CIMD/JWKS 中无歧义的密钥标识。可以（MAY）用 DID URL 作为不透明标签，但普通 AS 无需将其作为 DID 解析或解引用。 |
+| `typ` | 使用目标 AS 支持的标准客户端认证类型策略。按双方约定可使用 `JWT`、省略类型或明确支持的 `client-authentication+jwt`；不要求 ANP 专用类型。类型标签不能替代上下文与签名检查。 |
 
-客户端应当（SHOULD）使用资料性 JWT 客户端认证更新 draft-11 推荐的 client-authentication+jwt。其他验证全部通过时，AS 必须（MUST）接受该值、旧 anp-did-client-auth+jwt、通用 JWT 或未提供 typ 的断言。存在 typ 时必须是此允许列表内的字符串；访问令牌类型或其他不支持角色均拒绝。AS 不得（MUST NOT）仅靠 typ 选择身份、issuer、授权、权限或验证策略。专用 client_assertion 处理、精确 DID/issuer 绑定、当前密钥授权与防重放仍为必选。此兼容规则不把访问令牌或元数据文档变成客户端断言。本 Profile 采用该类型名时仍明确其来源草案尚在制定。
-
-载荷必须（MUST）包含：
-
-| 声明 | 要求 |
+| 声明 | 规则 |
 | --- | --- |
-| `iss` | 精确等于请求的 `client_id`；由客户端签发此断言。 |
-| `sub` | 精确等于请求的 `client_id`；这是客户端认证，不是用户委托。 |
-| `aud` | 已验证 AS 的 `issuer` 是唯一受众：可为精确匹配的 JSON 字符串，或只含该字符串的单元素数组。拒绝空/多元素数组、非字符串及不同于 issuer 的令牌端点 URL。 |
-| `iat` | 以秒为单位的整数 NumericDate，表示签署时间。 |
-| `exp` | 整数 NumericDate；满足 `0 < exp - iat <= 300`。 |
-| `jti` | 新生成的非空标识，包含至少 128 位密码学随机性；不得在请求、密钥或重试之间复用。 |
+| `iss` | 精确等于 URL `client_id`；客户端签署自己的断言。 |
+| `sub` | 精确等于 URL `client_id`，不是 Agent DID 或资源所有者。 |
+| `aud` | 按预先建立的认证策略，精确标识已接受 AS 的单一受众：已验证 issuer，或在 AS 使用 RFC 7523/OIDC 相应惯例时采用已验证令牌端点 URL。不得（MUST NOT）从不可信错误响应选择受众，也不得通过自动认证回退更换受众。 |
+| `iat` | 表示签署时间的整数 NumericDate。 |
+| `exp` | 整数 NumericDate；本 Profile 生成的断言满足 `0 < exp - iat <= 300`。 |
+| `jti` | 新生成的非空标识，含至少 128 位密码学随机性，不在请求、密钥或重试之间复用。 |
 
-`nbf` 可选；存在时必须（MUST）为不大于 `exp` 的整数 NumericDate，并必须（MUST）执行其时间限制。AS 允许的时钟偏差不得（MUST NOT）超过 60 秒。设 AS 当前时间为 `now`、允许偏差为 `s`，接受条件为 `iat <= now + s`、`now < exp + s`，且存在 `nbf` 时满足 `nbf <= now + s`。ISO 日期字符串不是 NumericDate。
+JWT 客户端认证更新 draft-11 的仅 issuer 受众规则及显式类型，可在双方都支持时使用，不会自动施加给现有 CIMD 服务器。第 9 节示例选择 issuer 受众。客户端必须（MUST）在发送凭据前固定 AS 接受的受众/类型策略；不匹配时该事务失败。额外声明不覆盖客户端身份、用户同意、权限或授权凭据。
 
-AS 必须（MUST）拒绝受保护头或载荷中的重复 JSON 成员名、未知关键 JWS 参数及畸形编码。额外非关键声明不得（MUST NOT）创建权限，或覆盖已批准客户端记录、资源所有者、请求参数和授权凭据。本版不使用 JWT 授权模式的 `assertion` 参数，也不使用 `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer`。
+增强验证方必须（MUST）要求表中每个声明均存在，并拒绝重复 JSON 成员、畸形编码、未知关键 JWS 参数、不支持的算法与角色混淆 JWT。必须（MUST）执行整数时间值检查、`0 < exp - iat <= 300`、`iat <= now + skew`、`now < exp + skew`，并使允许时钟偏差不超过 60 秒。存在 `nbf` 时，它必须（MUST）为整数，且满足 `nbf <= exp` 和 `nbf <= now + skew`。普通 AS 使用其支持且符合标准的验证策略；部署必须（MUST）确认该策略满足所要求的保证，不能由 CIMD 支持推断其实现了 ANP 的附加限制。
 
 ### 6.2 DID 解析与密钥授权
 
-AS 必须（MUST）按第 4 节确定预期 DID，在信任文档前完成对应方法的验证。下列已定义的方法绑定中，必须（MUST）至少实现并声明一种：
+`cimd` 模式中，AS 从已接受的 CIMD/JWKS 取得认证密钥。ANP 发布方在发布前验证自己的 DID 及选定密钥，但这不会使普通 AS 的结果自动成为已验证 DID 认证。
 
-- `did:web`：应用原生方法解析、HTTPS 验证、文档 `id` 精确检查及 ANP-02 Web 身份材料规则。不得（MUST NOT）把 WBA 指纹和 WBA 文档证明要求施加给原生 Web DID。
-- `did:wba`：应用 ANP-03 中选定方法 Profile、文档完整性/绑定校验、有效状态检查及认证密钥策略。有效 JWT 不能代替 WBA E1 的 proof 与指纹验证。
+`did_bound` 模式中，验证方必须（MUST）验证第 4.2 节的 DID 到 URL 关系、元数据摘要与选定密钥授权。候选 DID 来自可信状态或可选 CIMD 发现提示，不能只由 JWT 头决定。文档 `id` 必须（MUST）精确等于预期裸 DID；该 DID 必须标识已接受绑定中的同一主体，`ANPCIMD` 端点必须精确等于 `client_id`。至少实现并声明一种受支持的方法绑定：
 
-本 v1 的 did:wba 绑定覆盖 e1_ 路径 Profile 及 ANP-03 的裸域名形式，不包含独立的 k1_ 兼容扩展；遇到 k1_ DID 时拒绝，不能因声明 did:wba 就暗示支持所有变体。增加该扩展须同时明确其指纹/文档证明策略及正确的 ES256K/secp256k1 JOSE 验证，不能改用 ES256/P-256 或仅换算法名称；需要独立评审的方法绑定及验证证据。
+- `did:web`：执行原生方法解析、HTTPS 验证、文档 `id` 精确检查及 ANP-02 Web 身份材料规则。不向原生 Web DID 施加 WBA 指纹或文档证明要求。
+- `did:wba`：执行 ANP-03 的 e1_ 路径 Profile 或裸域名绑定，包括完整性/证明、适用的指纹、有效状态及认证密钥检查。有效 JWT 不能替代方法验证。k1_ 扩展不属于本绑定，不得隐式启用。
 
-其他 DID 方法在声明前，需要有文档化适配器，明确固定的方法规范版本、状态规则、验证方法、JOSE 转换与验证证据。兼容 DID Core 不代表自动支持；本草案不自动启用 `did:webvh` 或 BID。
+包括 `did:webvh`、BID 在内的其他方法，在声明增强支持前，需提供文档化适配器，明确固定的方法规范、状态规则、支持的密钥表示及验证证据。普通 CIMD 操作不要求 AS 实现这些适配器。
 
-解析所得文档 `id` 必须（MUST）等于预期 DID，`kid` 的 DID 部分也必须（MUST）与其一致。所选验证方法必须（MUST）能从已验证文档中解析取得，并被其 `authentication` 关系授权，无论是内嵌于该关系还是由该关系引用。仅出现在 `verificationMethod`、`assertionMethod` 或 `keyAgreement` 中不够。文档中的相对引用必须（MUST）先按 DID Core 规则解析，再精确比较。跨 DID 认证密钥不属于本初始 Profile，必须（MUST）拒绝。
+实际验签密钥必须（MUST）同时受 `service.anp_oauth_keys` 与当前 DID `authentication` 关系授权。精确解析引用后，允许内嵌或被引用的方法；跨 DID 方法不属于本初始绑定。仅出现在 `verificationMethod`、`assertionMethod` 或 `keyAgreement` 中不够。将真实公钥或其 RFC 7638 指纹与实际用于验证断言的密钥比较，不能只比较标签。客户端通过 JWS `jwk`、`jku`、`x5u` 或 `x5c` 提供的密钥不得（MUST NOT）替代已接受的密钥来源。方法/套件所需 JSON-LD context 必须固定或纳入允许列表。
 
-验证者必须（MUST）从上述已验证关系取得公钥，不得（MUST NOT）信任客户端通过 JWS `jwk`、`jku`、`x5u` 或 `x5c` 提供的替代密钥；本 Profile 不允许这些头字段。方法或验证套件需要的 JSON-LD context 必须（MUST）固定或纳入允许列表，不得无限制地联网获取。
+DID/URL 声明及匹配公钥均为可复制的公开配置。成功验证的新断言才提供私钥持有证明；配置检查本身不证明持有私钥、用户同意或访问权限。
 
 ### 6.3 算法与序列化
 
-AS 必须（MUST）实现 RS256 验证：RFC 7523 第 5 节明确将其列为必须实现算法。本 Profile 另要求实现 Ed25519 验证。这不要求只有 Ed25519 密钥的客户端增加 RSA 密钥，也不要求每个 DID 都使用 RSA。AS 只声明已经实现且启用的算法；实际使用范围由客户端获准密钥、元数据与 AS 策略取交集。
+取已发布密钥能力、客户端启用算法和目标 AS 已声明/配置策略的交集。RFC 7523 将 RS256 列为符合其规范的实现必须支持的算法；这不要求每个 Agent 使用 RSA，也不表示 CIMD AS 支持 Ed25519。增强 ANP 实现除 RFC 7523 基线外还必须（MUST）支持 Ed25519；客户端仍须协商实际算法，不能假定普通模式具备增强算法。
 
-Ed25519 是 RFC 9864 定义的完整指定 JOSE 算法标识，新部署应当（SHOULD）优先使用。为兼容旧库，AS 应当（SHOULD）提供可明确配置、仅接受 Ed25519 密钥的 EdDSA 验证选项，并只在启用时声明。RFC 9864 将多义 EdDSA 标识列为 deprecated，而非 prohibited；实现可依文档化策略关闭兼容项，不把它作为所有新部署的强制算法。不得改写已签名 alg 头，也不得把 Ed448 密钥当成 Ed25519。没有共同启用算法时客户端安全失败，而非静默替换。ES256 等其他算法须明确实现、密钥表示与策略支持。拒绝 none、HS*、算法与密钥不匹配以及不支持曲线。
+Ed25519 在支持时优先使用 RFC 9864 完整指定的 `Ed25519` 标识。旧 `EdDSA` 标识是需明确启用、仅限 Ed25519 密钥的兼容选项；不得改写已签名头，也不得把 Ed448 重新解释为 Ed25519。ES256 等其他算法需要明确的密钥表示与策略支持。此客户端认证路径拒绝 `none`、共享密钥 `HS*` 方法、不支持曲线以及算法与密钥不匹配的情况。
 
-DID `publicKeyJwk` 材料必须（MUST）验证为所需类型和长度的公钥；RSA 密钥必须（MUST）至少为 2048 位。使用 Ed25519 `Multikey` 前必须（MUST）解码并验证其 multicodec/密钥类型与长度，不得（MUST NOT）把任意 multibase 字节当作 Ed25519 公钥。支持 WBA E1 的 AS 必须（MUST）支持该绑定要求的 Ed25519 密钥表示。
-
-JWT 签名覆盖 JWS signing input，不是 ANP-02 HTTP 签名基串，也不是经 JCS 规范化重建的 JSON。密钥表示转换必须（MUST）保持公钥不变；签名字节编码必须（MUST）遵循所选 JOSE 算法。
+JWK 导出转换的是表示形式，不是把一种密码算法变成另一种。必须验证公钥类型和长度；RSA 密钥至少为 2048 位。Ed25519 Multikey 在构造 OKP JWK 前须验证 multibase、multicodec 和 32 字节公钥。不得导出 JWK 私有参数。JWT 签名覆盖 JWS signing input，不是 ANP-02 HTTP 签名基串或经 JCS 重新序列化的载荷。
 
 ### 6.4 验证与防重放
 
-接受认证前，AS 必须（MUST）完成有界解析、获准记录查询或第 4.3 节候选发现/准入、预期 DID 选择、Profile 与算法检查、方法/文档/密钥验证、JWT 签名验证、声明精确匹配及时间校验。启用自发布时，不得仅因未知 DID 没有预存记录就拒绝；它仍须通过完整准入流程。然后必须（MUST）原子性占用 `(AS issuer, client_id, jti)`，保留至 `exp + allowed skew`。即使换用其他 `kid`、访问不同服务器副本或并发请求，复用也必须（MUST）失败。无效签名不得（MUST NOT）污染重放记录。防重放存储不可用时，AS 必须（MUST）拒绝放行。
+根据所选模式、已接受的元数据/密钥来源、精确 URL `iss`/`sub`、受众、算法/类型策略和时间界限验证新的断言。增强处理额外检查当前 DID 授权与元数据新鲜度。身份或绑定检查无效时必须（MUST）拒绝，不能回退到其他密钥来源或模式。
 
-成功验证的断言必须（MUST）在处理授权或签发令牌前视为已消费；后续授权错误不能使它重新可用。重试需要重新签署断言并生成新 `jti`，同时仍遵守授权凭据自身的一次性规则。
+增强 AS 必须（MUST）在密码学/声明验证成功后、授权处理前，原子占用 `(AS issuer, client_id, jti)`，保留至 `exp + allowed skew`。跨密钥、服务器副本或并发请求的复用均失败；无效签名不得污染重放记录。重放存储不可用时拒绝。后续授权错误不会使断言重新可用；重试使用新断言，并遵守授权凭据自身的一次性规则。普通模式使用 AS 支持的重放控制，该控制须满足部署所要求的保证。
 
-最后，AS 必须（MUST）独立验证授权凭据、适用的资源所有者、允许资源、申请权限与当前策略。有效客户端断言不足以签发令牌。它没有签署 OAuth 表单正文；传输由 HTTPS 保护，凭据绑定和参数验证由 OAuth 执行。它不是交易签名或人类同意证明。
+最后，AS 独立验证授权凭据、适用的资源所有者、资源、权限与策略。客户端认证本身不足以签发令牌。断言不签署 OAuth 表单正文或业务交易；HTTPS 保护传输，OAuth 流程验证并绑定自身参数。
 
 **客户端断言验证与防重放（资料性）。**
 
 ```mermaid
 flowchart TD
-  Request["收到令牌请求"]
-  Checks["解析并选择客户端 DID<br/>检查 Profile、方法与密钥<br/>验证 JWT 签名、声明与时间"]
-  BeforeReject["拒绝认证<br/>不占用 jti"]
-  Reserve["原子占用<br/>(AS issuer, client_id, jti)"]
-  ReplayReject["重放或重放存储失败时拒绝<br/>不签发令牌"]
-  Consumed["断言已消费<br/>记录保留至 exp + skew"]
-  Grant["检查独立授权与所有者、<br/>资源、权限与策略"]
-  GrantReject["拒绝授权<br/>重试须使用新断言与新 jti"]
-  Issue["按获准授权签发访问令牌"]
-  Request --> Checks
-  Checks -->|"失败"| BeforeReject
-  Checks -->|"通过"| Reserve
-  Reserve -->|"否"| ReplayReject
-  Reserve -->|"是"| Consumed
-  Consumed --> Grant
-  Grant -->|"拒绝"| GrantReject
-  Grant -->|"批准"| Issue
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class BeforeReject,ReplayReject,GrantReject reject
-  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
-  class Issue allow
+  Input["CIMD URL 的客户端断言"] --> Keys["选择已接受 JWKS 密钥与认证策略"]
+  Keys --> Mode{"DID 绑定处理？"}
+  Mode -->|"是"| DID["验证当前 DID、URL、摘要及实际密钥"]
+  Mode -->|"否"| JWT["验证 JWT 签名、声明与新鲜度"]
+  DID -->|"通过"| JWT
+  DID -->|"失败"| Reject["拒绝，不回退"]
+  JWT --> Replay["执行防重放控制"]
+  Replay --> Grant["评估授权与目标资源权限"]
+  Grant -->|"批准"| Token["签发令牌"]
+  Grant -->|"拒绝"| Reject
 ```
 
 <a id="authorization-flows"></a>
 ## 7. 授权流程
 
-实现必须（MUST）至少支持以下一种流程，且仅声明实际支持的流程。本版每份授权使用一个目标资源。客户端必须（MUST）在授权请求及本版全部令牌请求中，通过 RFC 8707 提供一个不含片段的绝对 HTTPS `resource` URI，且只提供一次，包括授权码兑换与刷新。显式重复提供目标是 ANP Profile 的要求。AS 必须（MUST）将其与允许资源核对，并把授权和令牌绑定到该目标。scope 名称的语义由 AS/RS 定义；DID 不是 scope。
+实现必须（MUST）支持下列至少一种流程，且只声明已支持的流程。本修订中每项授权/令牌只允许绑定一个目标资源。支持并选用 RFC 8707 时，客户端发送一个且仅一个不含片段的绝对 HTTPS `resource` URI，AS 验证该目标。增强绑定中，授权、授权码兑换、客户端凭据及刷新请求都必须（MUST）显式提供 `resource`。普通 CIMD 连接可以（MAY）使用 AS 既有且明确配置的目标绑定机制，包括限制为单一资源的部署，前提是客户端、授权及令牌仍无歧义地绑定到预期资源。不支持 RFC 8707 不是签发不受限令牌的理由。在授权前选择并固定绑定机制；连接要求 RFC 8707 而其不可用时，必须（MUST）失败。scope 名称仍遵循 AS/RS 定义的语义；DID 不是 scope。
 
-**每个令牌一个目标是隔离规则，不是每个 Agent 只能访问一个服务。** 同一 DID 的 Agent 可以分别持有日历服务和文档服务的授权与令牌。缓存须区分 issuer、租户、资源所有者、客户端 DID、resource、scope 及适用发送者密钥，不能只按 Agent DID 选择令牌。各 AS 认证自己的用户账户并独立批准访问；综合任务不等于综合令牌，不同 AS 中同名用户或 DID 不能静默合并账户。兑换/刷新全程提交 resource 是为避免目标歧义；不支持 RFC 8707 的 AS 因而不符合原生路径，这是明确的取舍。多资源指示符或跨 AS 授权须另行定义，不是本版要求。
+**每个令牌只对应一个目标，是隔离规则，不是限制一个 Agent 只能访问一个服务。** Agent 可以用同一 DID 与 CIMD URL，为日历和文档服务分别持有授权与令牌。缓存按 issuer、租户、资源所有者、URL `client_id`、资源、scope、处理模式及适用的发送者密钥隔离；不能仅按 DID 选择令牌。每个 AS 独立认证其用户账户并批准访问。聚合任务不是聚合令牌，不同 AS 上相同的用户名或 DID 不会合并账户。多个 resource indicator 或跨 AS 授权需要单独扩展。
 
 ### 7.1 客户端凭据
 
-仅在机密客户端以自身名义访问，或存在 AS 认可的资源所有者预先授权安排时使用 `grant_type=client_credentials`。不得（MUST NOT）仅凭 Agent DID 获得任意用户的权限。
+`grant_type=client_credentials` 只适用于以自身名义行事，或依 AS 认可的既有资源所有者授权安排执行的机密客户端。不得（MUST NOT）仅根据 Agent DID 或 CIMD 发布，为其取得任意用户的权限。
 
-AS 必须（MUST）完成第 6 节验证，检查允许该客户端访问目标资源与 scope 的当前策略/授权，并且只授予允许的访问权限。本 Profile 不为客户端凭据模式签发刷新令牌；客户端需要新令牌时重新认证。
+AS 必须（MUST）执行第 6 节验证，检查当前策略/授权是否允许该 URL 客户端访问所选资源及 scope，并只签发获准权限。本 Profile 不为客户端凭据流程签发刷新令牌；客户端需要再次认证来取得另一个令牌。
 
 ### 7.2 用户委托的授权码与 PKCE
 
-客户端访问 AS 授权端点，携带 `response_type=code`、已接受的 `client_id`、获准 `redirect_uri`、目标 `resource`、申请的 `scope`、新生成且与会话绑定的 `state`，以及 `code_challenge_method=S256` 的 PKCE。AS 使用自身支持的方式认证资源所有者，获取同意或应用已有有效授权。DID 客户端认证不能认证该用户，也不能代替用户同意。
+客户端使用 AS 授权端点，携带 `response_type=code`、作为 `client_id` 的 CIMD URL、获准 `redirect_uri`、所选资源绑定、请求 `scope`、新生成且绑定会话的 `state`，以及 PKCE `code_challenge_method=S256`。AS 用其支持的方式认证资源所有者，并取得同意或应用已有有效授权。URL 客户端认证（包括可选 DID 绑定验证）不认证该用户，也不替代用户同意。
 
-发起授权前，客户端必须（MUST）在同一事务记录中保存已验证 issuer、resource、客户端绑定、回调 URI、`state` 和 PKCE verifier。成功与错误回调都必须（MUST）先与该记录核对 `state` 和 RFC 9207 `iss`，然后才能提交授权码或接受错误。本 Profile 中，`iss` 缺失、重复或不一致必须（MUST）终止流程；只做正常响应解码后的精确匹配，不进行 URL 归一化。未验证响应字段不得（MUST NOT）选择另一 AS 或令牌端点。重定向 URI 必须（MUST）在签发 code 前依据已通过完整性验证的元数据快照或预注册获得批准；按第 7.2.1 节匹配，仅有该节规定的 loopback 端口例外，不允许通配符。
+授权前，客户端必须（MUST）在一条事务记录中保留已验证 issuer、资源、URL 客户端标识、处理模式、认证策略、获准回调 URI、`state` 及 PKCE verifier。在发送 code 或接受错误前，成功与错误回调都必须（MUST）绑定到该记录。支持或要求 RFC 9207 时，将唯一 `iss` 与记录中的 issuer 精确比较；缺失、重复或不匹配均终止。普通 AS 未支持 RFC 9207 时，可以改用明确配置的 RFC 9700 防混淆措施，例如为每个 issuer 使用不同回调 URI。客户端必须（MUST）事先固定该策略，不得（MUST NOT）在 issuer 检查失败后回退。增强授权码处理必须（MUST）支持 RFC 9207。任何回调字段都不得选择未经验证的 AS 或令牌端点。
 
-在令牌端点，客户端提交 `grant_type=authorization_code`、`code`、相同的 `redirect_uri`、`code_verifier` 以及一份新的第 6 节断言。必须（MUST）提交 `resource`，且必须（MUST）与授权的原始目标相同；本 Profile 拒绝省略或改变目标。AS 必须（MUST）验证一次性授权码的客户端、重定向、PKCE、目标资源与授权绑定。不得（MUST NOT）在输出授权中用客户端自身身份替代资源所有者。
+签发 code 前，必须（MUST）依据已接受的 CIMD 元数据或预注册批准回调 URI；增强处理在信任回调前还须校验 DID 内固定的摘要。应用第 7.2.1 节匹配规则及其唯一的 loopback 端口例外，不允许通配符。令牌端点请求包含 `grant_type=authorization_code`、相同 URL `client_id`、`code`、相同实际 `redirect_uri`、`code_verifier` 和新的第 6 节断言。按所选资源绑定机制保留原始目标。AS 必须（MUST）验证一次性 code 与客户端、回调、PKCE、目标和授权的绑定，并原子消费 code。输出授权中不得（MUST NOT）用客户端自身身份替代资源所有者。
 
 ### 7.2.1 托管与本机回调绑定
 
-实现授权码流程的 AS 必须（MUST）实现 HTTPS 和 RFC 8252 loopback 匹配，并按第 5 节声明已启用模式。客户端开始前检查所选模式已启用；本地策略仍可独立于实现支持而拒绝某部署。
+客户端必须（MUST）在开始前确认其回调模式受支持。支持 CIMD 本身不表示 AS 接受 loopback 回调或原生应用逐实例认证密钥。增强 AS 按第 5 节声明已启用模式；实现只声明并测试自己支持的模式。普通 AS 无需 `anp_application_type` 扩展；其已接受的应用配置及标准元数据决定获准部署形式。
 
-托管回调必须为不含片段及 userinfo 的绝对 HTTPS URI，并与获准回调精确匹配。本机 loopback 要求 anp_application_type=native，元数据中获准条目的 scheme 为 http，主机为字面量 127.0.0.1 或 [::1]，路径非空且精确。本初始绑定不允许 query、fragment、userinfo、localhost 名称、其他数字 IP 写法、主机通配符或路径通配符。元数据条目可省略端口或写一个具体合法端口，不使用 URI 模板。按 RFC 8252 第 7.3 节，授权请求与获准 loopback 条目比较时仅忽略端口；请求中的回调必须（MUST）显式携带 1 至 65535 的端口，匹配允许其中任意端口。IPv4 和 IPv6 是分别批准的条目，其他组件须精确匹配，不通过解码/路径归一化改成另一值。
+托管回调要求不含片段或 userinfo 的绝对 HTTPS URI，并与获准回调精确匹配。明确支持原生 loopback 时，要求获准元数据条目使用 `http`、字面量主机 `127.0.0.1` 或 `[::1]`，以及精确的非空路径。查询、片段、userinfo、`localhost` 名称、其他数字 IP 写法和通配符不在本初始 loopback 绑定范围内。元数据可省略端口或指定一个有效端口，但不是 URI 模板。按 RFC 8252 第 7.3 节，授权请求与该条目比较时只忽略端口。实际请求回调必须（MUST）显式包含 1 至 65535 之间的端口。IPv4 与 IPv6 是不同获准条目；其余分量精确匹配，不能通过解码或路径规范化变成其他值。
 
-AS 必须（MUST）把实际完整回调 URI（包括选定端口）绑定到授权码；兑换时必须（MUST）重复完全相同的值。端口例外只用于元数据与授权请求之间的匹配，不适用于授权码兑换。临时请求端口改变不代表元数据快照改变。S256 PKCE、state、响应 iss 与新的 Agent 客户端断言仍为必选。
+AS 必须（MUST）将包括端口的完整实际回调 URI 绑定到 code。兑换时必须（MUST）重复该精确值；端口例外只适用于元数据与授权请求之间的匹配。临时请求端口不改变元数据快照。S256 PKCE、`state`、所选 issuer 验证策略与新的客户端断言仍为必选。
 
-本地客户端须先打开仅监听 loopback 的端口，再启动外部系统浏览器，只绑定选定的回环接口，完成或超时即关闭。嵌入式登录 webview、0.0.0.0 监听或局域网回调不能替代。此 HTTP 例外不授权 AS 抓取回调或访问本机/私网元数据端点：浏览器返回自身设备，而 AS 获取 DID/元数据仍受第 13 节 SSRF 控制。同一设备没有浏览器的远端 Agent 不属于此绑定范围。
+本地客户端在打开系统浏览器前建立仅绑定所选 loopback 接口的监听，并在完成或超时后关闭。内嵌登录 webview、`0.0.0.0` 监听或局域网回调不能替代它。此 HTTP 例外不授权 AS 获取回调或私有元数据端点：浏览器回到自己的设备，而 AS 到元数据/DID 的流量仍受第 13 节约束。浏览器不在同一设备上的远端 Agent 不属于本绑定范围。
 
 ### 7.2.2 首次接触的用户委托时序（资料性）
 
 ```mermaid
 sequenceDiagram
     participant U as 用户 / 系统浏览器
-    participant A as Agent（自有 DID 密钥）
+    participant A as Agent
     participant R as 资源服务器
     participant S as 授权服务器
-    participant D as DID 解析 / 托管
-    participant M as 元数据托管
-    A->>R: 无令牌请求资源
+    participant P as 公开 CIMD / JWKS / DID 托管方
+    A->>R: 不带令牌请求资源
     R-->>A: 401 与 resource_metadata
-    A->>S: 发现并验证 issuer 与能力声明
-    A->>U: 打开授权 URL（DID、resource、state、S256 PKCE）
-    U->>S: 授权请求
-    S->>D: 解析并验证 DID 文档
-    D-->>S: 认证密钥、service URL 与固定摘要
-    S->>M: 获取元数据字节
-    M-->>S: 自发布元数据
-    S->>S: 校验摘要、准入客户端、批准回调
-    S->>U: 认证用户并请求限定范围的同意
-    U->>S: 同意或拒绝
-    alt 用户同意
-        S-->>U: 携带 code、state 与 iss 重定向
-        U->>A: 获准的 HTTPS 或 loopback 回调
-        A->>A: 验证 state 与 iss
-        A->>S: code、精确回调、verifier、resource、client_assertion
-        S->>S: 重验元数据与密钥、验证证明与授权、消费 jti 与 code
+    A->>S: 验证 issuer、CIMD 及所选能力
+    A->>U: 打开授权 URL（CIMD URL、resource、state、S256）
+    U->>S: 标准授权请求
+    S->>P: 获取 CIMD 及已接受 JWKS
+    P-->>S: 标准元数据及公钥
+    opt 已声明 DID 绑定处理
+        S->>P: 解析关联 DID 并进行方法验证
+        P-->>S: service URL、摘要及获准密钥
+        S->>S: 接受元数据前验证绑定
+    end
+    S->>S: 执行准入并批准回调
+    S->>U: 认证用户并请求范围明确的同意
+    U->>S: 批准或拒绝
+    alt 用户批准
+        S-->>U: code、state，以及选用时的 iss
+        U->>A: 获准 HTTPS 或 loopback 回调
+        A->>A: 验证会话及固定的 issuer 策略
+        A->>S: code、精确回调、verifier、新断言及目标绑定
+        S->>S: 验证当前密钥/绑定、断言、code 及授权
         S-->>A: 限定资源的访问令牌
-        A->>R: 令牌与获准操作
-        R->>R: 验证 issuer、audience、client_id、scope 与策略
+        A->>R: 令牌及获准操作
+        R->>R: 验证令牌、当前授权及操作策略
     else 用户拒绝
-        S-->>U: 在获准回调上返回错误、state 与 iss
-        U->>A: 返回错误，停止操作
+        S-->>U: 获准回调上的错误、state，以及选用时的 iss
+        U->>A: 验证错误绑定并停止
     end
 ```
 
 ### 7.3 刷新
 
-AS 可以（MAY）为授权码流程签发刷新令牌。刷新请求必须（MUST）携带新的第 6 节客户端断言，并使用原客户端绑定。必须（MUST）保持资源、资源所有者和授权不变，scope 不得（MUST NOT）扩大。必须（MUST）提供 `resource`，且必须（MUST）等于原来的单一目标。
+AS 可以（MAY）为授权码流程签发刷新令牌。刷新请求必须（MUST）针对原 URL 客户端及处理模式附带新的第 6 节断言，保留资源所有者、授权及原始单一目标；不得（MUST NOT）扩大 scope。增强处理要求显式提供不变的 `resource`。普通处理按事先选定的 AS 机制保留目标，省略参数不能扩大目标范围。
 
-AS 必须（MUST）执行过期与撤销规则，并实现带复用检测的刷新令牌轮换，或一种受支持的发送者约束刷新机制。仅做 DID 认证并不构成刷新令牌的发送者约束。客户端绑定或授权失效后必须（MUST）阻止刷新。已有有效授权不要求每次 API 调用都提示用户，但新增权限需要新的授权决定。
+AS 必须（MUST）执行到期与撤销规则，并实现带复用检测的刷新令牌轮换，或受支持的发送者约束刷新机制。DID 关联本身不约束刷新令牌的发送者。失效客户端绑定或授权必须（MUST）阻止刷新。现有有效授权不必每次 API 调用都要求用户确认，但新增权限需要新的授权决定。
 
 <a id="tokens"></a>
 ## 8. 访问令牌与资源执行
@@ -541,7 +484,7 @@ AS 必须（MUST）执行过期与撤销规则，并实现带复用检测的刷�
 
 不得（MUST NOT）把客户端断言当作访问令牌、ID Token、刷新令牌或授权凭据。`Bearer` 访问遵循 RFC 6750。AS 与 RS 都支持时推荐使用 DPoP，但它在本初始 Profile 中仍为可选项。使用时遵循 RFC 9449，包括 `token_type=DPoP`、`Authorization: DPoP`、proof 验证、RS 处的 `ath` 以及 JWT 密钥绑定中的 `cnf.jkt`。DPoP 不替代客户端认证，其密钥也不必是长期 DID 密钥。策略要求 DPoP 时不得（MUST NOT）静默降级到 Bearer。
 
-如果已有令牌/策略实现足够，RS 无需仅为接受 AS 令牌而解析 DID；但仍需支持协商采用的扩展，例如 DPoP，并且必须（MUST）执行权限检查，不能假设熟悉的 DID 拥有无限权限。身份认证、授权、TLS 与消息 E2EE 仍是不同保证。
+如果已有令牌/策略实现足够，RS 无需仅为接受 AS 签发令牌而解析 DID。OAuth 客户端身份仍为 CIMD URL；声称 DID 身份已经验证时，需要第 3 节所述可信证据。RS 仍需支持协商采用的扩展，例如 DPoP，并且必须（MUST）执行权限检查，不能假设熟悉的 DID 拥有无限权限。身份认证、授权、TLS 与消息 E2EE 仍是不同保证。
 
 ### 8.2 入站与出站授权
 
@@ -571,18 +514,18 @@ flowchart LR
 
 RS 缺少有效令牌时使用 `401`；已获权限不足时使用 `403` 与适用的 `insufficient_scope` 挑战。动态 HTTP 发现中，RS 应当（SHOULD）附带 `resource_metadata` 和本操作最小 scope。客户端必须（MUST）验证挑战属于所选 RS 与获准 AS 关系，再申请经独立批准的权限增加；不得（MUST NOT）把挑战本身当作授权，或静默切换到高权限客户端凭据。申请增加 scope 仍受资源所有者同意及本地策略限制；重试必须（MUST）有界。
 
-授权必须（MUST）覆盖实际资源/动作和调用方的任务访问权，不能仅依据熟悉的 DID 或任务标识。授权未完成时阻止受影响操作。会话 ID、已建立流或上一次成功调用，都不自行授予后续权限。凭据必须（MUST）保留在专用认证/授权通道，不能进入普通提示词、任务文本或产物。
+授权必须（MUST）覆盖实际资源/动作和调用方的任务访问权，不能仅依据熟悉的 DID 或任务标识。每次操作前，RS 必须（MUST）按部署的有效期/撤销策略检查适用授权仍然有效；发现、缓存的客户端绑定或先前成功的操作都不是新的授权。缓存状态结果只能在部署明确记录的有效区间内使用。策略要求当前在线状态而无法取得时，必须（MUST）拒绝。授权未完成时阻止受影响操作。会话 ID、已建立流或上一次成功调用，都不自行授予后续权限。凭据必须（MUST）保留在专用认证/授权通道，不能进入普通提示词、任务文本或产物。
 
 <a id="examples"></a>
 ## 9. 线协议示例（资料性）
 
-以下是示意消息，不是可执行密码学测试向量。`SIGNED_CLIENT_ASSERTION`、`OPAQUE_ACCESS_TOKEN` 是占位符，NumericDate 是固定示例，不是实时凭据。客户端记录可以事先批准，也可以按第 4.3 节首次准入；签发令牌前均须完成其有效 `#auth-1` Ed25519 密钥与授权验证。
+以下为示意消息，不是可执行的密码学测试向量。`SIGNED_CLIENT_ASSERTION` 与 `OPAQUE_ACCESS_TOKEN` 是占位值，固定 NumericDate 也不是当前有效凭据。本例选择 RFC 8707、issuer 受众，以及接受 `typ=JWT` 和 Ed25519 的服务器。它可以连接兼容的标准 CIMD AS 或第 5 节增强 AS；只有后者验证 DID 绑定。签发令牌前仍须通过准入、密钥持有证明及有效独立授权检查。
 
-DID 作为客户端标识模式下，解码后的 JWS 头与载荷：
+解码后的 JWS 头和载荷：`kid` 恰好使用 DID URL 作为 JWKS 标签，而 `iss`、`sub` 都为 CIMD URL：
 
 ```json
 {
-  "typ": "client-authentication+jwt",
+  "typ": "JWT",
   "alg": "Ed25519",
   "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
 }
@@ -590,8 +533,8 @@ DID 作为客户端标识模式下，解码后的 JWS 头与载荷：
 
 ```json
 {
-  "iss": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
-  "sub": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "iss": "https://agents.example/agent-a/oauth/client.json",
+  "sub": "https://agents.example/agent-a/oauth/client.json",
   "aud": "https://auth.example",
   "iat": 1790467200,
   "exp": 1790467500,
@@ -599,14 +542,14 @@ DID 作为客户端标识模式下，解码后的 JWS 头与载荷：
 }
 ```
 
-客户端凭据请求，表单正文用一行展示：
+客户端凭据请求，表单正文放在一行：
 
 ```http
 POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=client_credentials&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
+grant_type=client_credentials&client_id=https%3A%2F%2Fagents.example%2Fagent-a%2Foauth%2Fclient.json&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
 ```
 
 ```http
@@ -631,11 +574,11 @@ Host: docs.example
 Authorization: Bearer OPAQUE_ACCESS_TOKEN
 ```
 
-AS 的服务端不透明令牌记录将该令牌绑定到 `https://docs.example/api` 与获准客户端/授权。audience 不会因为在不透明令牌中不可见就被省略。授权码兑换使用相同的断言传输，但改用 `grant_type=authorization_code`，并携带第 7.2 节的 `code`、`redirect_uri` 和 `code_verifier`。
+AS 的服务器端记录将该不透明令牌绑定到 `https://docs.example/api` 及获准 URL 客户端/授权；不透明令牌仍具有目标受众。授权码兑换按第 7.2 节使用同一断言传输，并提供 `grant_type=authorization_code`、`code`、`redirect_uri` 和 `code_verifier`。
 
 ### 9.1 资源发现
 
-受保护资源的挑战与相应 RFC 9728 JSON 文档：
+受保护资源挑战及对应 RFC 9728 JSON 文档：
 
 ```http
 HTTP/1.1 401 Unauthorized
@@ -658,18 +601,29 @@ Cache-Control: no-store
 }
 ```
 
-客户端先验证资源关联，再发现 `https://auth.example`。元数据本身不授予 `documents.read`。
+客户端先验证资源关联，再发现 `https://auth.example`。元数据不授予 `documents.read` 权限。
 
-### 9.2 原生 DID 发布
+### 9.2 DID 关联与标准 CIMD 发布
 
-以下 did:wba e1_ 示例使用 Ed25519 Multikey（multicodec 为 0xed，无符号变长整数前缀字节 ed 01，后接 32 字节公钥），DID 最后一段为该公钥的 RFC 7638 指纹。本示意示例授权同一密钥用于身份认证与文档证明；生产客户端应当（SHOULD）按第 10.1 节分离密钥。示例展示必需的 context、断言验证关系和 Data Integrity proof 结构，但 `zDOCUMENT_PROOF_PLACEHOLDER` 不是可验证的签名。AS 必须验证 WBA 指纹与文档证明后才能接受客户端断言。本例不含私钥。service 摘要覆盖下方原生元数据代码块的精确 UTF-8 字节，包括末尾 LF 换行；序列化变化须重算摘要。
+下列 did:wba e1_ 示例使用 Ed25519 Multikey（multicodec 0xed，无符号 varint 字节 ed 01，后接 32 字节公钥）。DID 最后一段是该密钥的 RFC 7638 指纹。示意中，同一密钥获准用于认证与文档证明；生产客户端应当（SHOULD）采用第 10.1 节密钥分离。内联 context 将实验性 service 词项定义为本规范中的 IRI；部署应固定完整 context 及方法/套件依赖。`zDOCUMENT_PROOF_PLACEHOLDER` 不是可验证签名。发布方及任何增强验证方都须验证 WBA 指纹与文档证明。普通 CIMD AS 不获取此 DID 文档。
+
+service 摘要覆盖下方 CIMD 代码块的精确 UTF-8 字节，包括末尾 LF 换行。内嵌 JWKS 也被摘要覆盖。任何序列化变化都要求重新计算摘要。示例不包含私钥。
 
 ```json
 {
   "@context": [
     "https://www.w3.org/ns/did/v1",
     "https://w3id.org/security/data-integrity/v2",
-    "https://w3id.org/security/multikey/v1"
+    "https://w3id.org/security/multikey/v1",
+    {
+      "ANPCIMD": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anpcimd",
+      "anp_oauth_keys": {
+        "@id": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anp-oauth-keys",
+        "@type": "@id",
+        "@container": "@set"
+      },
+      "anp_metadata_sha256": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anp-metadata-sha256"
+    }
   ],
   "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verificationMethod": [
@@ -686,9 +640,12 @@ Cache-Control: no-store
   "service": [
     {
       "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#oauth-client",
-      "type": "ANPOAuthClientMetadata",
-      "serviceEndpoint": "https://agents.example/agent-a/oauth/native-client.json",
-      "anp_metadata_sha256": "44de16f707659c7925b458d9c247edb892405e7c26c17e2cf64d8874b6f2cbcb"
+      "type": "ANPCIMD",
+      "serviceEndpoint": "https://agents.example/agent-a/oauth/client.json",
+      "anp_metadata_sha256": "3d03045553c170ab505cc6b3211c903b4b1b23823d8f46881f312a6242b83ff5",
+      "anp_oauth_keys": [
+        "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
+      ]
     }
   ],
   "assertionMethod": [
@@ -705,14 +662,14 @@ Cache-Control: no-store
 }
 ```
 
-`https://agents.example/agent-a/oauth/native-client.json` 上的原生文档使用 Agent DID 作为 `client_id`；URL 只是该文档的发布位置：
+HTTPS 端点 `https://agents.example/agent-a/oauth/client.json` 返回 HTTP 200、`Content-Type: application/json` 及以下正文。该 URL 就是其 OAuth `client_id`。可选 `anp_did` 仅用于反向发现；仅使用标准字段的部署可省略它，此时须重新计算适用的固定摘要，并在要求增强验证时另行提供可信绑定。
 
 ```json
 {
-  "anp_profile": "anp.authorization.oauth2.did.v1-draft4",
-  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "client_id": "https://agents.example/agent-a/oauth/client.json",
   "client_name": "Example Agent A",
   "token_endpoint_auth_method": "private_key_jwt",
+  "token_endpoint_auth_signing_alg": "Ed25519",
   "grant_types": [
     "client_credentials",
     "authorization_code",
@@ -725,22 +682,36 @@ Cache-Control: no-store
     "https://agents.example/agent-a/callback"
   ],
   "scope": "documents.read",
-  "anp_application_type": "web"
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "VEpJi1nTD8okbTyhNIyr-NlO4dH7if8D8FOccCQyxQQ",
+        "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
+        "use": "sig",
+        "alg": "Ed25519"
+      }
+    ]
+  },
+  "anp_did": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28"
 }
 ```
 
-此前未知的原生客户端可以向声明 `self_published` 的 AS 提交该 DID。AS 获取这些文档，按第 4.3 节完成准入及后续证明/授权验证。该流程无需提前调用注册 API。
+JWK 的 `x` 是从 Multikey 验证得到的 32 字节 Ed25519 公钥的 base64url 编码。部署可以单独发布 JWKS 并改用 `jwks_uri`，但须遵守第 4.2 节实际密钥检查；不得在 CIMD 中同时放入两个字段，也不得让 `jwks_uri` 指向未转换的 DID 文档。
+
+此前未知的客户端向允许首次接触准入的 AS 提交 CIMD URL。AS 获取标准客户端元数据及公钥。只有增强 AS 额外解析 `anp_did`、验证 DID 到 URL 的回指及摘要，并检查实际签名密钥是否同时受 `anp_oauth_keys` 与 `authentication` 授权。发布或成功发现均不授予权限。AS 接纳自发布客户端时，无需调用注册接口。
 
 ### 9.3 用户与 Agent 归因
 
-以下是示意 AS 签署 RFC 9068 访问令牌解码后的载荷，不是客户端断言；其 JWS 头应使用 typ=at+jwt 和 AS 签名密钥。签发域内的用户为 user-248，client_id 为 Agent DID。Bearer 令牌不额外证明出示者持有密钥。获准查询方的活动 introspection 结果以 active=true 及适用令牌属性返回同一 client_id；非活动结果不披露该身份。
+此解码后的 RFC 9068 访问令牌载荷由 AS 签署，不是由 Agent 签署。其头部使用 `typ=at+jwt` 和 AS 签名密钥。issuer 范围内的资源所有者为 `user-248`，`client_id` 标识 CIMD URL。Bearer 令牌不额外证明出示者持有私钥。活动 introspection 若返回 `client_id`，其值同样为 URL；非活动响应不披露客户端身份。需要关联 DID 证据时遵循第 3 节，不能通过在该标准字段中替换为 DID 来虚构证据。
 
 ```json
 {
   "iss": "https://auth.example",
   "sub": "user-248",
   "aud": "https://docs.example/api",
-  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "client_id": "https://agents.example/agent-a/oauth/client.json",
   "iat": 1790467200,
   "exp": 1790467800,
   "jti": "example-access-token-01",
@@ -750,24 +721,24 @@ Cache-Control: no-store
 
 ### 9.4 本地 Agent 回调示例
 
-另一个本地 Agent did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE 发布并完整性绑定自己的完整元数据，其中包括 anp_application_type=native、authorization_code（可选 refresh_token）、private_key_jwt 和获准 loopback 条目。下表仅展示匹配规则，不能替代完整元数据文档或用户批准。
+另一个本地 Agent `did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE` 将其 DID 关联到 `https://agents.example/local-a/oauth/client.json`，并发布自己的公开 JWKS、`authorization_code`（可选 `refresh_token`）、`private_key_jwt` 及获准 loopback 回调。它先确认 AS 接受该部署及 loopback 模式。普通 CIMD 不增加必选 `anp_application_type` 字段。增强发布还固定自身元数据摘要及获准 DID 密钥。以下匹配值不能替代完整客户端配置或用户批准：
 
 | 项目 | 值 |
 | --- | --- |
-| 获准元数据回调 | http://127.0.0.1/callback |
+| 元数据中获准回调 | http://127.0.0.1/callback |
 | 实际授权请求回调 | http://127.0.0.1:49152/callback |
-| 必须重复的兑换回调 | http://127.0.0.1:49152/callback |
-| 仅在兑换时更换端口 | http://127.0.0.1:49153/callback — 拒绝 |
-| 不同路径或 localhost 写法 | http://localhost:49152/callback — 拒绝 |
+| 兑换时必须重复的回调 | http://127.0.0.1:49152/callback |
+| 仅在兑换时改变端口 | http://127.0.0.1:49153/callback — 拒绝 |
+| 改变路径或 localhost 写法 | http://localhost:49152/callback — 拒绝 |
 
-Agent 启动系统浏览器前先打开本地监听；通过 state/iss 验证后，用新断言兑换授权码，其 iss、sub 为本地 Agent DID，不是前述托管示例的 DID。以下占位符不是实时凭据：
+Agent 在启动系统浏览器前打开监听。通过会话及 issuer 验证后，用新的断言兑换 code，其 `iss`、`sub` 为本地 CIMD URL。本例选择 RFC 8707，占位值不是当前有效凭据：
 
 ```http
 POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
+grant_type=authorization_code&client_id=https%3A%2F%2Fagents.example%2Flocal-a%2Foauth%2Fclient.json&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
 ```
 
 <a id="lifecycle"></a>
@@ -775,42 +746,40 @@ grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae
 
 ### 10.1 日常运行密钥轮换与身份迁移
 
-e1_ OAuth 部署应当（SHOULD）将指纹绑定密钥保护在文档控制用途，日常客户端断言使用另行授权的 authentication 运行密钥。AS 策略在验证 e1_ 文档证明/指纹及 authentication 关系后，应当（SHOULD）接受此类运行密钥。这利用 ANP-03 第 3.1.1 节明确允许非绑定认证密钥的条款，不改变其他请求 Profile 的 ANP-03 默认选择，也不跳过本地批准。根密钥仍按方法要求保有相应授权，但不必为每次令牌请求暴露给运行进程。
+e1_ 部署应当（SHOULD）保护用于文档控制的指纹绑定密钥，并使用独立获准认证密钥生成日常断言。发布方将运行期密钥导出到 JWKS；增强验证方通过方法有效的 DID 文档及 `anp_oauth_keys` 检查其授权。这使用 ANP-03 第 3.1.1 节允许非绑定认证密钥的规则，不改变 ANP-03 对其他请求 Profile 的默认策略，也不免除本地批准。方法要求保留的根密钥不必为每次令牌请求暴露给运行实例。
 
-只轮换获准运行密钥、仍用原绑定密钥更新 DID 文档，不会改变 DID。AS 可依既有策略保留仍有效的客户端/授权记录，增加密钥不等于扩大权限；观察到密钥移除后，旧密钥断言失败。绑定密钥轮换是另一类操作，会改变指纹路径 DID，需要下文明确的迁移检查。v1 不保证自动迁移授权，也不要求删除全部历史；未来经验证迁移扩展须定义重新批准、泄露处置及在途令牌处理。
+保留 DID 和 CIMD URL 不变，仅轮换运行期密钥，不会产生新的 OAuth 客户端。应一致更新 DID 授权、所选 OAuth 密钥列表及 JWKS；CIMD 字节变化时重新计算元数据摘要。协调发布，使增强验证能够观察到有效组合；不一致的中间状态应拒绝。AS 可以按当前策略保留已批准记录/授权；增加密钥不等于扩权。相关验证方观察到密钥移除后，阻止该密钥的断言。外部 JWKS 更新不会改变仅覆盖其 URI 的摘要；增强验证仍须检查实际密钥当前是否受 DID 授权。
 
-本 Profile 要求 DID 解析结果和自发布客户端元数据具有有界认证新鲜度，最长不得（MUST NOT）超过 300 秒；方法或本地策略更严格时以其为准。结果过期后，AS 必须（MUST）重新验证才能接受新断言。重新验证失败时不得（MUST NOT）无限使用旧密钥或退回未验证密钥材料。未知 `kid` 可以（MAY）触发一次有界刷新，不能无限重试。本地已知 DID 停用、密钥移除或泄露时，必须（MUST）立即使相应缓存失效。
+普通 CIMD 服务器遵循其支持的 HTTP 元数据/JWKS 缓存及密钥刷新策略。对不解析 DID 的 AS，仅从 DID 文档移除密钥不足以将其撤销。发布方必须（MUST）同时从被接受的 JWKS 移除该密钥，需要及时控制影响时还须使用 AS 支持的客户端/授权控制。发布新摘要不会强制标准 AS 重新获取任何内容。
 
-必须（MUST）通过当前 DID service 关联及其固定摘要重新验证元数据，不得无限使用已经脱离 DID 的元数据 URL。回调、授权类型、认证、service 地址或客户端身份变化时，须重新准入并检查未完成流程和已有授权；元数据刷新不得（MUST NOT）自动扩大同意范围。无效/错误响应不能成为获准元数据。可以短期限制滥用请求，但不能将其当成成功身份缓存。
+`did_bound` 模式下，DID 解析、CIMD 及认证密钥的新鲜度必须（MUST）限制在不超过 300 秒；方法或本地更严格限制优先。AS 在接受新断言前必须（MUST）重新验证过期材料。重新验证失败不得导致无限沿用旧密钥或回退到普通 CIMD。找不到 `kid` 时可触发一次有界刷新。本地已知的停用、密钥移除或泄露立即使受影响缓存失效。当前状态表明密钥未获授权后，即使断言的 `iat` 早于移除时间，也必须拒绝。远端变化存在有界检测延迟，本 Profile 不声称全网即时撤销。
 
-当前状态已显示密钥被移除或不再获准后，使用该密钥的断言必须（MUST）失败，即使其 `iat` 早于移除时间。新鲜度窗口意味着远端变化存在有界发现延迟；本 Profile 不宣称全网瞬时撤销密钥。
+增强元数据必须（MUST）通过当前 DID service URL 与摘要重新验证。回调、授权类型、认证、绑定或选定密钥的安全相关变更，需要新的准入/策略决定及未完成流程检查。刷新元数据不得（MUST NOT）自动扩大用户同意。无效响应不能成为已接受元数据；拒绝/限流缓存不是正向身份证据。
 
-DID 不变时，符合方法规则的密钥轮换可以（MAY）保留获准客户端记录与授权，除非策略或泄露处置使其失效。发生泄露时，运维方必须（MUST）能够禁用客户端绑定、阻止令牌签发/刷新，并通过部署的撤销路径使受影响授权或令牌失效。
+不同身份变化分别处理：
 
-DID 变化，包括 WBA 后继 DID，不得（MUST NOT）通过字符串相似性、Handle、`stableSubjectId` 或未验证 `successorDid` 提示，自动继承 OAuth 客户端记录、回调 URI、授权码、刷新令牌或授权。迁移需要方法验证的连续性，以及 AS 明确作出的绑定/授权决定。客户端 DID 变化还必须（MUST）触发对 issuer 专属令牌缓存、未完成任务和下游授权的检查；任务可以保留标识，但失去执行权限。本草案不定义自动授权迁移流程；不存在获准流程时，应建立新客户端绑定和授权。ANP-03 的 HTTP 409 提示不是 OAuth 令牌端点错误格式。
+| 变化 | 必须采取的处理 |
+| --- | --- |
+| DID 与 CIMD URL 不变，轮换获准运行期密钥 | 重新验证当前密钥与元数据；只按 AS 既有策略保留授权。 |
+| DID 不变，CIMD URL 改变 | 产生新的 OAuth `client_id`。已有客户端记录、code、刷新令牌及授权不得（MUST NOT）自动转移。除非另行定义的 AS 迁移流程明确允许，否则建立新的客户端/准入及授权。 |
+| CIMD URL 不变，关联 DID 改变（包括 WBA successor） | 普通 AS 可能观察不到 DID 变化。增强 AS 必须（MUST）使旧 DID 绑定失效，并要求明确的重新绑定/准入决定；不得通过 Handle、`stableSubjectId` 或未经验证的 `successorDid` 静默继承授权。仅验证方法连续性不授权迁移 grant。 |
+| 元数据/JWKS 托管方、密钥或绑定泄露 | 禁用受影响客户端/绑定，阻止签发/刷新，并执行部署的授权/令牌撤销流程。将处置范围限定为受影响身份与授权。 |
 
-DID 密钥撤销不会自行撤销已经由 AS 签发的令牌。部署必须（MUST）定义并记录授权/令牌过期与撤销行为，采用短期访问令牌、可信状态检查或其他受支持机制。可以（MAY）支持 RFC 7009 令牌撤销与 RFC 7662 introspection；这些端点的认证策略必须（MUST）单独配置，不能从令牌端点支持情况推断。授权撤销后必须（MUST）阻止该授权下的新签发和刷新。
+本草案不定义 DID 或 URL 的自动授权迁移协议。绑定变化需要检查 issuer 范围内的令牌缓存、未完成任务及下游授权；任务可以保留标识，但失去权限。ANP-03 的 HTTP 409 successor 提示不是 OAuth 令牌端点错误格式。旧 DID 作为 client_id 的 Profile 与本 URL 客户端 Profile 对应不同客户端，不能仅改 Profile 标识就共用授权。
 
-**运行密钥轮换、身份变化与泄露处置（资料性）。**
+DID 或 JWKS 密钥撤销，本身不撤销 AS 已签发的访问令牌。部署必须（MUST）明确记录授权/令牌的有效期与撤销行为，包括已签令牌失效延迟及第 8.3 节 RS 的逐操作检查。可以（MAY）使用 RFC 7009 撤销与 RFC 7662 introspection，但须分别配置其认证策略，不能由令牌端点策略推定。撤销某授权必须（MUST）阻止该授权下的新令牌签发及刷新。撤回某个服务的访问，通常只撤销该 issuer/资源的授权，无需停用 Agent DID 或无关服务的授权。
+
+**运行期密钥轮换、身份变更与泄露处理（资料性）。**
 
 ```mermaid
 flowchart TD
-  Change{"发生了什么变化？"}
-  Same["绑定密钥与 DID 不变<br/>重新验证当前密钥、元数据与策略"]
-  Retain["可按策略保留仍有效的记录/授权<br/>观察到移除后拒绝旧密钥断言"]
-  New["新的客户端 DID<br/>不自动继承记录或授权"]
-  Rebind["取得新的获准绑定/授权<br/>迁移须验证连续性并由 AS 明确决定"]
-  Block["使受影响缓存失效<br/>按部署策略处置绑定、签发与撤销"]
-  Reject["拒绝新断言<br/>不退回旧的或未验证的密钥"]
-  Change -->|"只轮换获准运行密钥"| Same
-  Same -->|"当前验证通过且策略允许"| Retain
-  Same -->|"发现泄露"| Block
-  Same -->|"验证失败"| Reject
-  Change -->|"e1_ 绑定密钥或客户端 DID 变化"| New
-  New --> Rebind
-  Change -->|"泄露"| Block
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class Block,Reject reject
+  Change{"发生什么变化？"}
+  Change -->|"仅运行期密钥"| Check["按需重新验证 DID 策略、CIMD 与 JWKS"]
+  Check -->|"有效且策略允许"| Retain["保留适用授权，观察到移除后拒绝旧密钥"]
+  Check -->|"无效"| Reject["拒绝，不回退旧密钥或模式"]
+  Change -->|"CIMD URL"| New["新 OAuth 客户端，不自动转移授权"]
+  Change -->|"同一 URL 的 DID"| Rebind["增强模式要求明确重新绑定"]
+  Change -->|"泄露"| Block["阻止受影响签发并执行撤销策略"]
 ```
 
 <a id="vc-authorization"></a>
@@ -823,14 +792,14 @@ OAuth Profile 使用 OAuth 错误；不要在令牌端点返回 ANP-02 `DIDWba` 
 | 条件 | 错误 / 行为 |
 | --- | --- |
 | 缺少必选字段、安全参数重复、同时使用多种认证方式 | `invalid_request` |
-| 客户端发现/准入/绑定失败，断言、DID/密钥/声明/算法/时间绑定错误，或重放 | 令牌端点返回 `invalid_client`；启用自发布时，DID 未知本身不是失败理由 |
+| 客户端发现/准入/绑定失败，断言、DID/密钥/声明/算法/时间绑定错误，或重放 | 令牌端点返回 `invalid_client`；启用首次接触准入时，URL 客户端未知本身不是失败理由，但必选 DID 绑定仍须验证 |
 | 已认证客户端无权使用所选授权类型 | `unauthorized_client` |
 | 授权码/刷新令牌无效、过期、已使用、已撤销或绑定不正确 | `invalid_grant` |
 | 未知授权类型 | `unsupported_grant_type` |
 | scope 无效或无法授予 | `invalid_scope` |
 | 目标资源不可接受 | RFC 8707 的 `invalid_target` |
 | 用户在授权端点拒绝授权 | 按授权端点规则返回 `access_denied` |
-| 解析器或重放存储暂时不可用 | 拒绝放行；允许无令牌的 HTTP 503。不得声称认证成功或伪造成功的 OAuth 响应。 |
+| 元数据/JWKS/解析器或重放存储暂时不可用 | 拒绝放行；允许无令牌的 HTTP 503。不得声称认证成功或伪造成功的 OAuth 响应。 |
 
 使用正文断言认证时，令牌错误通常采用 HTTP 400 与 RFC 6749 第 5.2 节的 JSON 格式；适用的 OAuth HTTP 认证专用状态码/头规则仍然有效。通用 `invalid_client` 描述应当（SHOULD）避免暴露账号是否存在、签发方是否被信任或私有策略。RS 错误遵循所选 Bearer/DPoP 规范，不使用此令牌端点错误表。VC 直接出示的错误格式由承载接口定义；VP、持有者、凭证状态、签发方权限或约束检查失败时必须（MUST）拒绝操作，错误同样不应暴露具体是哪一步验证失败。本版不为这些失败新增 OAuth 错误。不得把无效授权请求重定向到未经批准的 URI。
 
@@ -839,7 +808,7 @@ OAuth Profile 使用 OAuth 错误；不要在令牌端点返回 ANP-02 `DIDWba` 
 
 自发布准入必须（MUST）限制获取/并发和候选记录数量，对失败请求限流，避免未认证洪泛产生持久分配。缓存未命中不得（MUST NOT）抹除停用或撤销策略。熟悉的名称/logo 和元数据自述权限不构成背书。
 
-DID/元数据解析是 SSRF 边界。实现必须（MUST）限制允许的协议与目标；除非在受控部署中明确批准，否则阻止回环、链路本地、私网、云元数据及对应 IPv6 目标；按相同策略验证每次重定向与解析地址；限制时间、大小、重定向次数与递归深度。DNS 重绑定不得（MUST NOT）绕过目标检查。解析器或元数据失败不得（MUST NOT）降低 HTTPS 或身份验证要求。
+CIMD、JWKS 与 DID 解析都是 SSRF 边界。实现必须（MUST）限制允许的协议与目标；除非在受控部署中明确批准，否则阻止回环、链路本地、私网、云元数据及对应 IPv6 目标；不得自动跟随 CIMD 重定向；其他获取协议允许重定向时，须按相同策略验证每一跳及解析地址；限制时间、大小、重定向次数与递归深度。对于 CIMD 及其中包含的 URL，CIMD draft-02 第 8.6 节优先于一般的受控部署例外：AS 在生产环境不得（MUST NOT）获取特殊用途 IP 目标。唯一允许放宽的是该草案的开发/测试情形，即 AS 自身运行在 loopback，且解析地址为同一个 loopback 接口。DNS 重绑定不得（MUST NOT）绕过目标检查。解析器或元数据失败不得（MUST NOT）降低 HTTPS 或身份验证要求。
 
 AS 必须（MUST）绑定所选 issuer、客户端记录、资源与授权事务，并执行防混淆和 CSRF 保护。不得（MUST NOT）允许断言声明、自然语言指令、未验证 Agent Description 或 DID service 端点覆盖这些绑定。所有权限必须（MUST）由确定性的服务端策略判断，不能由 LLM 从请求者表面意图中推断。
 
@@ -847,7 +816,7 @@ AS 必须（MUST）绑定所选 issuer、客户端记录、资源与授权事务
 
 资源策略要求独立逐笔批准时，RS 必须（MUST）在执行前验证实际操作的批准及适用的一次性/期限条件，否则拒绝；不得（MUST NOT）以一般用户同意、任务指令、客户端认证或 DPoP 替代。该要求定义安全拒绝边界，不是在 v1 中新增批准凭据。
 
-跨服务稳定 DID 会增加关联风险。部署应当（SHOULD）说明标识使用方式，最小化令牌声明与日志，并避免在公开描述或运维日志中嵌入原始 VC、私有用户数据、断言或令牌。
+跨服务稳定 DID 或 CIMD URL 会增加关联风险。部署应当（SHOULD）说明标识使用方式，最小化令牌声明与日志，并避免在公开描述或运维日志中嵌入原始 VC、私有用户数据、断言或令牌。
 
 VC 验证与 DID/元数据解析使用同一套 SSRF 控制：签发方 DID、状态列表 URL 与允许列表外的 context 都是不可信输入。VC 或 VP 不得（MUST NOT）被当作 Bearer 访问凭据，也不得放入 URL、提示词、任务文本或产物。人类或组织的签发密钥不得（MUST NOT）复制给 Agent；Agent 持有凭证不等于能签发凭证。签发方的信任策略必须（MUST）按凭证类型和资源限定：信任某组织签发其员工的委托，不等于信任它为其他组织或其他资源签发委托。凭证文本中的自然语言描述不构成权限。
 
@@ -856,15 +825,15 @@ VC 验证与 DID/元数据解析使用同一套 SSRF 控制：签发方 DID、�
 <a id="conformance"></a>
 ## 14. 一致性与发布证据
 
-OAuth 客户端一致性要求实现原生 DID 元数据发布/发现、第 6 节断言、可信 AS 发现、所声明授权流程与令牌处理。AS 一致性要求实现原生 DID、自发布准入、明确的已启用策略声明、所支持方法验证、防重放、独立授权与生命周期处理。RS 一致性要求实现所选标准令牌验证与真实资源策略执行。本 Profile 内的可选能力必须（MUST）在使用前声明并验证。
+OAuth 客户端一致性要求实现 DID 到 CIMD 的发布/发现、标准 URL 标识与 JWKS、第 6 节断言、可信 AS/能力选择、已声明授权流程及令牌处理。普通 AS 互通要求支持 CIMD 及所选标准 OAuth 能力，不要求 ANP 解析器、摘要检查或专用能力声明。声明 `did_bound` AS 一致性时，还须强制执行已声明扩展，验证当前方法/URL/摘要/实际密钥，以及有界新鲜度、防重放和生命周期检查。必须准确说明准入策略及不支持能力；CIMD 不要求开放注册。RS 一致性要求所选令牌验证与真实资源策略执行。须明确报告达到的模式；普通互通不是 AS 已验证 DID 身份的证据。
 
 声明 VC Profile 时，持有者须实现第 11.3 节的持有者绑定 VP 签署和第 11.6 节的 Profile 检查；验证方须实现第 11.6 节的直接出示、第 11.4 节的完整验证顺序、持有者绑定、签发方权限确认、状态检查、权限求交与约束执行；使用 session 时，还须验证第 11.6 节的绑定身份、逐次授权与有限期限规则。OAuth 一致性与 VC 直接出示一致性相互独立。签发方一致性只要求凭证格式、证明与状态列表发布正确，本版不认证签发界面或签发协议。
 
 发布或公开启用前，应验证适用正向流程及全部相关拒绝路径；未实现的可选能力应记录为不支持，不能报告为通过。详细场景清单、稳定证据标识及编号维护说明见[ANP-05 实现验证指南](../docs/chinese/anp-05-validation-guide.md)及其[英文镜像](../docs/anp-05-validation-guide.md)。
 
-草案或实验原型可以凭一套完整实现及明确的拒绝路径证据评审，但必须（MUST）标记为实验状态。宣称 OAuth Profile 稳定、可互操作的 v1 发布时，须具备两套独立开发的客户端/AS 实现及交叉实现测试、适用 RS 测试、各 AS 首次准入与关闭准入行为、元数据篡改/更新、声明授权码支持时的托管与 loopback 回调、方法/运行密钥生命周期、所声明流程的多资源隔离，以及明确的安全评审。声明 VC Profile 时，还须具备独立实现的持有者与验证方之间的交叉测试，覆盖直接出示、Profile 版本匹配，以及凭证撤销。独立性指协议代码路径的独立实现，不是同一服务器运行两个实例；须记录共享组件。该门槛不阻止发布或评审草案。
+草案或实验原型可以凭一套完整实现及明确的拒绝路径证据评审，但必须（MUST）标记为实验状态。宣称 OAuth Profile 稳定、可互操作的 v1 发布时，须具备两套独立开发的客户端/AS 实现及交叉实现测试、适用 RS 测试、不使用 ANP 扩展的标准 CIMD 互通、首次接触与限制准入行为、元数据/JWKS 更新、已声明回调模式、密钥/URL 生命周期、所声明流程的多资源隔离，以及明确安全评审。DID 绑定能力还需要元数据篡改、复制公钥/实际密钥替换、绑定/摘要强制检查、方法生命周期和拒绝降级证据。声明 VC Profile 时，还须具备独立实现的持有者与验证方之间的交叉测试，覆盖直接出示、Profile 版本匹配，以及凭证撤销。独立性指协议代码路径的独立实现，不是同一服务器运行两个实例；须记录共享组件。该门槛不阻止发布或评审草案。
 
-对自定义元数据及可选算法/类型处理须记录兼容性决定。高风险批准测试验证拒绝行为或部署明确的业务批准策略，不认证 v1 尚未定义的通用批准格式。仅有规范正文、图示检查和文档测试不能证明运行时或稳定发布一致性。
+对每个目标 AS 的可选元数据、签名算法、断言受众/类型、回调模式及资源/issuer 绑定机制，须记录兼容性决定。高风险批准测试验证拒绝行为或部署明确的业务批准策略，不认证 v1 尚未定义的通用批准格式。仅有规范正文、图示检查和文档测试不能证明运行时或稳定发布一致性。
 
 <a id="references"></a>
 ## 15. 参考资料
@@ -878,7 +847,10 @@ OAuth 客户端一致性要求实现原生 DID 元数据发布/发现、第 6 �
 - [RFC 7515](https://www.rfc-editor.org/rfc/rfc7515.html)、[RFC 7517](https://www.rfc-editor.org/rfc/rfc7517.html)、[RFC 7518](https://www.rfc-editor.org/rfc/rfc7518.html)、[RFC 7519](https://www.rfc-editor.org/rfc/rfc7519.html) 与 [RFC 8725](https://www.rfc-editor.org/rfc/rfc8725.html)：JWS、密钥、算法、JWT 与 JWT 安全。
 - [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037.html) 与 [RFC 9864](https://www.rfc-editor.org/rfc/rfc9864.html)：Edwards 密钥与完整指定的 JOSE 算法。
 - [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html)、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728.html) 与 [RFC 9207](https://www.rfc-editor.org/rfc/rfc9207.html)：AS/资源元数据与授权响应 issuer 绑定。
-- [RFC 7591 第 2 节](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)：复用 OAuth 客户端元数据名称与语义；原生发现不要求其注册交互。
+- [OAuth Client ID Metadata Document draft-02](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02)：固定的实验性 CIMD 依赖，定义 HTTPS URL 客户端标识及元数据发现；不是已发布 RFC。
+- [OpenID Connect Core 1.0 第 9 节](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication)：标准 `private_key_jwt` 客户端认证方法及 issuer/subject 语义；本 Profile 不要求 OIDC 登录或 ID Token。
+- [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638.html)：用于不依赖表示形式的公钥比较的指纹。
+- [RFC 7591 第 2 节](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)：复用 OAuth 客户端元数据名称与语义；CIMD 发现不要求其注册交互。
 - [RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html) 与 [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707.html)：PKCE 与目标资源限制。
 - [RFC 6750](https://www.rfc-editor.org/rfc/rfc6750.html)、[RFC 9068](https://www.rfc-editor.org/rfc/rfc9068.html) 与 [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html)：Bearer、JWT 访问令牌与可选 DPoP。
 - [RFC 7009](https://www.rfc-editor.org/rfc/rfc7009.html) 与 [RFC 7662](https://www.rfc-editor.org/rfc/rfc7662.html)：可选撤销与 introspection。
@@ -906,7 +878,9 @@ VC Profile 的规范性引用，在声明该 Profile 时适用：
 <a id="future-extensions"></a>
 ## 16. 未来扩展（资料性）
 
-未来版本计划支持与 CIMD 的兼容，以便不原生支持 DID 的授权服务器也能接入。本版本仅定义 DID 原生的 OAuth 与 VC 授权流程，不包含相关转换、映射或发布适配的实现要求；具体方案将在后续独立扩展中制定，且不会成为核心协议的必选依赖。
+未来扩展可以探索 DID 本身作为 OAuth `client_id`，由支持 DID 的 AS 或另行规定的适配器处理。届时须明确标识协商、DID 解析与元数据规则、标准 JWT issuer/subject 处理、安全分析及迁移边界。该方向可以使 DID 身份成为 AS 原生身份，但需要超出标准 CIMD 服务器的支持。本修订的 URL 客户端或 DID 绑定失败后，不能将它作为回退，也不能自动继承 URL 客户端的授权。
+
+本修订有意保持 CIMD/OAuth 接口不变，使 ANP Agent 能通过已发布 URL 与 JWKS 连接现有兼容授权服务器。未来直接使用 DID 的研究须保留这条互通路径，并单独协商。
 
 ### 16.1 VC–OAuth 组合
 

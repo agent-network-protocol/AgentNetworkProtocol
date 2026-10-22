@@ -118,7 +118,7 @@ for (const file of [...nextVersionDrafts, ...authorizationDrafts]) {
     check(/^- (?:Specification Set: |规范集版本：)ANP Messaging vNext$/m.test(text), {file, reason: 'group-draft-specification-set-changed'});
     continue;
   }
-  const version = authorizationDrafts.includes(file) ? '0\\.6' : '1\\.2';
+  const version = authorizationDrafts.includes(file) ? '0\\.7' : '1\\.2';
   check(new RegExp('^- (?:Version: |版本：)' + version + '$', 'm').test(text), {file, reason: 'new-draft-version-changed'});
 }
 

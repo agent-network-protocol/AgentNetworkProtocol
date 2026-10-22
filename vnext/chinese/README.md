@@ -13,7 +13,7 @@
 
 ## 主目录中的授权草案
 
-[ANP-05：基于 DID 的授权协议](../../chinese/05-ANP-基于DID的授权协议.md)及其[英文镜像](../../05-anp-did-authorization-protocol-specification.md)已移至主文档路径。版本仍为 v0.6，状态仍为草案 / 未发布，不属于 ANP 1.2。草案定义 OAuth 的 DID 客户端身份，以及独立的 VC 委托与组织角色凭证直接出示。
+[ANP-05：基于 DID 的授权协议](../../chinese/05-ANP-基于DID的授权协议.md)及其[英文镜像](../../05-anp-did-authorization-protocol-specification.md)已移至主文档路径。版本仍为 v0.7，状态仍为草案 / 未发布，不属于 ANP 1.2。草案定义 OAuth 的 DID 关联 CIMD URL 客户端身份，以及独立的 VC 委托与组织角色凭证直接出示。
 
 ANP-05 引用当前 ANP 1.2 身份材料绑定。正式发布或公开启用前，必须完成评审与客户端/AS/RS 互操作验证。
 

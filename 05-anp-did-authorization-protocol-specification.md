@@ -2,20 +2,20 @@
 
 - Document ID: ANP-05
 - Status: Draft / not released
-- Version: 0.6
+- Version: 0.7
 - Specification set: ANP vNext; not part of the ANP 1.2 release
-- Draft Profile identifiers: OAuth Profile `anp.authorization.oauth2.did.v1-draft4`; VC Profile `anp.authorization.vc.v1-draft2`
+- Draft Profile identifiers: OAuth Profile `anp.authorization.oauth2.cimd.v1-draft1`; VC Profile `anp.authorization.vc.v1-draft2`
 - Language: English
 - Chinese mirror: [ANP 基于 DID 的授权协议](chinese/05-ANP-基于DID的授权协议.md)
 
 <a id="scope"></a>
 ## 1. Scope, authorization problem, and roadmap
 
-ANP-05 defines the DID-based agent authorization workstream with two complementary mechanisms: the **OAuth Profile**, in which an authorization server trusted by the resource side issues access tokens, and the **VC Profile**, in which a user or organization that holds the authority issues a W3C Verifiable Credential (VC) that the Agent holds and presents. Both identify the authorizing party and the authorized Agent by DID. **The first release (v1) is a DID–OAuth client identity and basic delegated-access Profile, plus directly presented single-level VC delegation and organization-role credentials, not a complete agent delegation system.** The current document is its unreleased v0.6 draft. In this document, “v1” names that first-release scope; it does not mean that v1 has shipped or that all later roadmap capabilities are implemented.
+ANP-05 defines the DID-based agent authorization workstream with two complementary mechanisms: the **OAuth Profile**, in which an authorization server trusted by the resource side issues access tokens, and the **VC Profile**, in which a user or organization that holds the authority issues a W3C Verifiable Credential (VC) that the Agent holds and presents. DID identifies principals at the ANP layer. In the OAuth path, an ordinary AS uses the URL client identifier and its own resource-owner identity; only an explicitly verified DID binding establishes the associated DID at that AS. The VC path identifies its issuer and authorized Agent by DID. **The first release (v1) is a DID–OAuth client identity and basic delegated-access Profile, plus directly presented single-level VC delegation and organization-role credentials, not a complete agent delegation system.** The current document is its unreleased v0.7 draft. In this document, “v1” names that first-release scope; it does not mean that v1 has shipped or that all later roadmap capabilities are implemented.
 
-In the OAuth Profile, an Agent uses its own DID-backed key to authenticate as an OAuth client; the resource owner authorizes access, the authorization server (AS) issues a restricted token, and the resource server (RS) enforces it. That path does not require VC, VP, an OIDC login bridge, or a blockchain. In the VC Profile, a principal with authority issues a credential to an Agent. The Agent presents it through a holder-bound Verifiable Presentation (VP); the verifier independently validates the issuer, holder, credential status, permissions, constraints and local trust policy, then performs or rejects the requested operation.
+In the OAuth Profile, an Agent associates its DID with a standard OAuth Client ID Metadata Document (CIMD) HTTPS URL and uses a published authentication key to authenticate that URL client; the resource owner authorizes access, the authorization server (AS) issues a restricted token, and the resource server (RS) enforces it. That path does not require VC, VP, an OIDC login bridge, or a blockchain. In the VC Profile, a principal with authority issues a credential to an Agent. The Agent presents it through a holder-bound Verifiable Presentation (VP); the verifier independently validates the issuer, holder, credential status, permissions, constraints and local trust policy, then performs or rejects the requested operation.
 
-The OAuth Profile's normative baseline is **OAuth 2.0 plus published extensions**, including RFC 6749 and RFC 9700. OAuth 2.1 draft-16 and JWT client-authentication update draft-11 are informative design references, not published RFC dependencies. The VC Profile's normative baseline is the W3C VC Data Model 2.0, VC Data Integrity 1.0 with its EdDSA cryptosuites, and Bitstring Status List 1.0. Capitalized MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY use BCP 14 meanings. The restrictions below are this Profile's rules, not amendments to the referenced specifications.
+The OAuth Profile's baseline is **OAuth 2.0 plus published extensions**, including RFC 6749 and RFC 9700, together with the explicitly pinned CIMD draft-02 for URL client identifiers and metadata discovery. CIMD is a work-in-progress dependency, not a published RFC. OAuth 2.1 draft-16 and JWT client-authentication update draft-11 are informative design references, not published RFC dependencies. The VC Profile's normative baseline is the W3C VC Data Model 2.0, VC Data Integrity 1.0 with its EdDSA cryptosuites, and Bitstring Status List 1.0. Capitalized MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY use BCP 14 meanings. The restrictions below are this Profile's rules, not amendments to the referenced specifications.
 
 **ANP-05 v1 defines two independent authorization paths: DID-backed OAuth for resource-side access authorization, and holder-bound VC presentation for portable delegation and organization-role credentials. V1 does not define conversion from VC/VP to OAuth access tokens. Standalone qualification or attribute credential profiles are not defined by this version.**
 
@@ -41,9 +41,9 @@ A basic consent record and a VC delegation credential both already delegate limi
 
 **Reuse OAuth for the authorization lifecycle.** RFC 6749 already separates resource owner, client, AS and RS and supplies consent/grant, access-token and refresh flows. RFC 7523 Section 2.2 supplies the client assertion transport; RFC 7636, RFC 8707, RFC 7009 and RFC 7662 supply code protection, target restriction, revocation and status checks. This lets ANP focus on reusable Agent identity and the missing agent-specific delegation semantics, rather than invent another grant/token ecosystem. OAuth is not the whole solution: it does not by itself define a task-wide budget, permission attenuation, or a user's approval of a specific business action.
 
-**Use DID as the principal, not as permission.** The same method-validated DID and authentication-key relationships can be reused for ordinary ANP authentication, communication and OAuth access. Native did:web retains DNS/HTTPS/hosting trust; it does not gain a fingerprint-bound identity or protection from its own DID-document host merely by using this Profile. Path-based did:wba e1_ adds binding-key fingerprints and a verified document proof. Those properties are conditional on correct method validation and key custody; neither method proves software integrity or human consent. This is a common identity/lifecycle model, not a claim that only DID can offer portable identifiers.
+**Use DID as the principal, not as permission.** The same method-validated DID and selected authentication-key relationships can be reused for ordinary ANP authentication, communication and publication of OAuth client keys. In the standard CIMD mode, the AS authenticates the URL client; only a verifier performing the additional DID-binding checks can claim to have authenticated the associated DID. Native did:web retains DNS/HTTPS/hosting trust; it does not gain a fingerprint-bound identity or protection from its own DID-document host merely by using this Profile. Path-based did:wba e1_ adds binding-key fingerprints and a verified document proof. Those properties are conditional on correct method validation and key custody; neither method proves software integrity or human consent. This is a common identity/lifecycle model, not a claim that only DID can offer portable identifiers.
 
-**Require an explicit AS adapter.** A stock OAuth AS is not expected to accept this flow unchanged. The adapter must accept DID client identifiers, resolve their method/key policy, discover and verify self-published client metadata, perform admission, and advertise the ANP capability. Existing OAuth grant/token engines and RS validation can be reused where their capabilities suffice. No whole-server rewrite is required by the architecture, but zero-modification compatibility is not claimed. A client needs DID key access, metadata publication, discovery and standard OAuth flow support. The private key stays with the Agent or its explicitly authorized signer.
+**Reuse CIMD to connect to the existing OAuth ecosystem.** The primary advantage is that an authorization server already supporting CIMD and the selected standard OAuth features can process the client without an ANP-specific change to its client identifier, metadata discovery, grant or token flow. The OAuth `client_id` remains the CIMD HTTPS URL; the DID document supplies an ANP identity association and the publisher exports selected authentication keys as standard JWKS. This places DID adaptation in the Agent SDK or metadata publisher instead of requiring a DID resolver at every AS. Compatibility is conditional on the AS's admission policy, supported authentication algorithms and selected flow; it does not imply that every OAuth server supports CIMD or that a standard CIMD server has verified a DID. Section 4 separates ordinary CIMD processing from optional, explicitly negotiated DID-binding verification. A future extension may explore using the DID itself as `client_id` (Section 16), with explicit AS support and migration rules. The private key stays with the Agent or its explicitly authorized signer.
 
 **Use VC to carry authority that originates outside the resource side.** The basis for much agent authorization is not held by the resource side: a company appoints an Agent as its purchasing representative, a user gives an Agent a mandate it can show to several merchants, or an institution attests which organization an Agent belongs to or what qualification it has. An OAuth consent record lives inside each AS; it cannot be carried to another service or verified by a peer that has no AS. W3C VC 2.0 lets the authorizing party sign a statement under its own DID; the Agent holds it and presents it to any verifier that trusts that issuer. Verification only requires resolving the issuer and holder DIDs and checking a status list, with no prior integration between verifier and issuer. ANP already uses Data Integrity eddsa-jcs-2022 for did:wba document proofs and the messaging binding; the VC Profile reuses that proof mechanism rather than adding another signature stack. VC has costs too: revocation depends on a status list and has cache latency; each verifier must maintain its own policy on which issuers it trusts for which claims; and once presented, a credential's contents are visible to the verifier.
 
@@ -52,9 +52,9 @@ A basic consent record and a VC delegation credential both already delegate limi
 <a id="v1-scope"></a>
 ### 1.3 What v1 delivers
 
-V1's deliverable is **DID client identity plus usable, auditable basic user delegation**: DID-as-client-ID; integrity-bound self-published metadata; policy-controlled first-contact admission without per-AS preregistration; RFC 7523 client authentication; client credentials for qualified confidential deployments; authorization code with S256 PKCE for hosted HTTPS and local loopback clients; target-specific tokens, optional refresh, and lifecycle enforcement. A deployment claiming user-delegated support under the OAuth Profile MUST implement the authorization-code path; a client-credentials-only implementation MUST NOT claim OAuth user-delegation capability. A verifier that accepts delegation only through the VC Profile is not subject to this requirement.
+V1's deliverable is **DID-associated OAuth client identity plus usable, auditable basic user delegation**: standard CIMD URL client identifiers; DID-to-CIMD discovery and public-key publication; optional integrity-checked DID binding; policy-controlled first-contact admission without per-AS preregistration where enabled; RFC 7523 client authentication; client credentials for qualified confidential deployments; authorization code with S256 PKCE for hosted HTTPS and local loopback clients; target-specific tokens, optional refresh, and lifecycle enforcement. A deployment claiming user-delegated support under the OAuth Profile MUST implement the authorization-code path; a client-credentials-only implementation MUST NOT claim OAuth user-delegation capability. A verifier that accepts delegation only through the VC Profile is not subject to this requirement.
 
-For user-delegated grants, the AS MUST retain the authenticated resource-owner identifier in its issuer/tenant context, Agent DID, target resource, granted scopes, approval source and time, applicable lifetime/revocation policy, and a stable internal grant reference. An existing consent or administrator grant may supply approval only under documented policy. This is an OAuth authorization-record requirement; the portable, cross-system mandate is defined by the VC Profile. New permissions require another approval decision. User credentials and an Agent's authentication key remain separate.
+For user-delegated grants, the AS MUST retain the authenticated resource-owner identifier in its issuer/tenant context, URL client identifier, associated Agent DID only when verified, target resource, granted scopes, approval source and time, applicable lifetime/revocation policy, and a stable internal grant reference. An existing consent or administrator grant may supply approval only under documented policy. This is an OAuth authorization-record requirement; the portable, cross-system mandate is defined by the VC Profile. New permissions require another approval decision. User credentials and an Agent's authentication key remain separate.
 
 The VC Profile is an optional capability. It delivers delegation and organization-role credentials, holder-bound presentation, issuer and holder verification, credential-status checking, permission and constraint evaluation, and direct presentation to a resource server or peer Agent. An implementation claiming the VC Profile MUST satisfy the Section 11 requirements that apply to its role; an implementation without VC support can still fully conform to the OAuth Profile. A valid delegation credential does not replace the verifier's authorization decision.
 
@@ -67,14 +67,14 @@ These are ordered capability stages, not promised delivery dates. Later stages c
 
 | Stage | Solution direction | Evidence before claiming the capability |
 | --- | --- | --- |
-| v1: identity and basic delegation | Implement the scope in Section 1.3. The same DID obtains separate authorizations at multiple services; retain user/Agent attribution and explicit revocation. When authority originates outside the resource side, use a single-level VC delegation or role credential through direct presentation. | Native first contact; hosted and loopback user flows; two-resource isolation; metadata tampering; key rotation; revocation; positive and negative VC direct-presentation cases; interoperable client/AS evidence under Section 14. |
+| v1: identity and basic delegation | Implement the scope in Section 1.3. The same DID obtains separate authorizations at multiple services; retain user/Agent attribution and explicit revocation. When authority originates outside the resource side, use a single-level VC delegation or role credential through direct presentation. | CIMD first contact and optional DID-bound verification; declared hosted and loopback user flows; two-resource isolation; metadata tampering; key rotation; revocation; positive and negative VC direct-presentation cases; interoperable client/AS evidence under Section 14. |
 | Next: precise authority and high-risk approval | Evaluate RFC 9396 RAR for structured resource/action/constraint requests; define a separately verified one-operation approval, possibly a dedicated VC type or another credential, bound to Agent, resource, exact normalized action digest, critical parameters, expiry and a unique identifier. Check and consume it atomically at execution. | Parameter substitution, replay, double execution, expiry and approval withdrawal fail safely. Fresh login, a signed transport request, or a broad delegation credential cannot substitute for transaction approval. |
 | Then: controlled redelegation | Evaluate VC delegation chains (a child credential referencing its parent and narrowing authority) and RFC 8693 Token Exchange actor attribution; define authorized delegation depth, child permissions no greater than the parent's effective authority, audience/expiry narrowing, grant-family revocation and audit. Cross-AS exchanges need explicit trust and account/authority mappings. V1 defines neither VC-to-OAuth token exchange nor multi-level redelegation. | A-to-B-to-C delegation; attempted expansion or wrong actor rejected; root withdrawal blocks new child grants; existing-token invalidation latency documented. Do not treat actor-history claims alone as authorization. |
 | Alongside those stages: long-running and noninteractive execution, privacy | Evaluate RFC 8628 for remote/headless approval, additional backchannel flows, verified DID migration, and shared budget/counter enforcement. Evaluate VC selective-disclosure cryptosuites and OpenID4VP/OpenID4VCI bindings for human wallets. Evaluate interoperable action vocabularies for common business functions such as purchasing and HR, defined and governed by the corresponding domain protocols. V1 loopback covers a browser on the Agent's own device, not every headless environment. | User-to-device/transaction binding, phishing and polling controls, no client-only fallback after user-grant expiry; shared limits remain correct under concurrent child actions; selective disclosure does not leak unpresented permission entries. |
 
 The planned common model is an identified delegator, intended Agent, resource/action, constraints, parent grant where relevant, approval evidence, and revocation state. Subsequent extensions will define precise wire schemas and enforcement rules. A signed claim stating a budget does not itself implement a global counter; a token exchange does not itself propagate revocation or prove permission attenuation.
 
-Publication of this draft does not establish SDK, AS or product support. The OAuth Profile v1-draft4 and VC Profile v1-draft2 identifiers are both experimental. Revision 0.6 removes VC-to-OAuth token exchange and advances the VC Profile to v1-draft2; the OAuth Profile v1-draft4 wire rules remain unchanged. Revision 0.5 added the VC Profile; revision 0.4 changed metadata integrity, local redirects and assertion-compatibility rules. Implementations MUST match the exact revision and revalidate affected metadata and pending transactions before migration; changing a Profile string MUST NOT reinterpret old grants or codes.
+Publication of this draft does not establish SDK, AS or product support. Revision 0.7 replaces the earlier DID-as-client-ID OAuth design with experimental `anp.authorization.oauth2.cimd.v1-draft1`; the independent VC Profile remains `anp.authorization.vc.v1-draft2`. The former `anp.authorization.oauth2.did.v1-draft4` identifier is not an alias for this revision. Revision 0.6 removed VC-to-OAuth token exchange; revision 0.5 added the VC Profile. Implementations MUST match the exact revision and revalidate affected metadata and pending transactions before migration. A changed client identifier is a new OAuth client, not a Profile-string update to an existing grant or code.
 
 <a id="anp-boundary"></a>
 ## 2. Relationship to ANP and mechanism selection
@@ -148,15 +148,15 @@ flowchart LR
     D["Agent DID document<br/>authentication key and metadata digest"]
   end
   subgraph MH["Metadata hosting boundary"]
-    M["Self-published OAuth client metadata"]
+    M["Standard CIMD and JWKS"]
   end
   subgraph IS["Credential issuer boundary"]
     I["User or organization<br/>issuing key and status list"]
   end
   U["Resource owner"] -->|"consent / revoke"| S["Authorization server"]
   I -->|"issues delegation credential"| W
-  D -->|"authentication key and pinned digest"| S
-  M -->|"bytes verified before use"| S
+  D -.->|"Optional DID binding: URL, keys and pinned digest"| S
+  M -->|"Standard metadata and client public keys"| S
   A -->|"client assertion and OAuth grant"| S
   I -.->|"issuer DID and credential status"| R
   S -->|"resource-specific token"| A
@@ -164,7 +164,7 @@ flowchart LR
   S -->|"issuer trust / token status"| R
 ```
 
-The diagram draws DID-document hosting as a separate boundary. For did:wba e1_, document integrity comes from the Agent-controlled binding-key proof, so the host can only deny service or replay an old document; for native did:web, a compromised host can replace keys and digest (see Section 4.2). The issuer and the resource owner may be the same person, but the issuing key always stays under the issuer's control and is never given to the Agent.
+The architecture and the OAuth/VC division of roles are unchanged. The solid metadata path works with an ordinary CIMD AS; the dotted DID path is enabled only for DID-binding verification. The diagram draws DID-document hosting as a separate boundary. For did:wba e1_, document integrity comes from the Agent-controlled binding-key proof, so the host can only deny service or replay an old document; for native did:web, a compromised host can replace keys and digest (see Section 4.2). The issuer and the resource owner may be the same person, but the issuing key always stays under the issuer's control and is never given to the Agent.
 
 <a id="roles"></a>
 ## 3. Roles and identifiers
@@ -174,361 +174,304 @@ Sections 3–10 define the OAuth Profile. Section 11 defines the independent VC 
 | Term | Meaning |
 | --- | --- |
 | Client / Agent runtime | The software deployment requesting and using an access token; its identity is distinct from the resource owner. |
-| Client DID | The DID whose authentication key proves the client's identity. It is not necessarily a user's DID. |
-| `client_id` | The bare Agent DID used as the OAuth client identifier in this Profile. |
+| Agent DID | The ANP identity associated with the OAuth client through its DID document; it is not the OAuth wire identifier or necessarily a user's DID. |
+| `client_id` | The exact HTTPS CIMD URL used as the OAuth client identifier. |
 | Resource owner | The user or organization entitled to authorize access. |
-| Authorization server (AS) | Authenticates the client, validates the grant and policy, and issues tokens. |
+| Authorization server (AS) | Authenticates the URL client, validates the grant and policy, and issues tokens; it verifies the Agent DID only when DID-bound processing is enabled. |
 | Resource server (RS) | The target Agent, API, or gateway enforcing resource access. |
 
-A client assertion's `sub` identifies the client. An access token's `sub` identifies the subject of the authorization: normally the resource owner for user-delegated access, or a subject determined by the AS for client-only access. Implementations MUST NOT copy the assertion's `sub` into a user-delegated token merely because authentication succeeded.
+The request `client_id`, CIMD `client_id`, and client assertion `iss` and `sub` MUST be the same exact CIMD URL. A client assertion's `sub` identifies the client. An access token's `sub` identifies the subject of the authorization: normally the resource owner for user-delegated access, or a subject determined by the AS for client-only access. Implementations MUST NOT copy the assertion's `sub` into a user-delegated token merely because authentication succeeded.
 
-A client assertion's `aud` identifies the AS; an access token's audience identifies the intended RS. The same DID may be accepted by several ASs, but enrollment, grants, and tokens remain scoped to each AS. A token from one AS does not become acceptable everywhere because the client has a DID.
+A client assertion's `aud` identifies the accepted AS under the pinned authentication policy; an access token's audience identifies the intended RS. The same Agent DID and CIMD URL may be used at several ASs, but admission, grants, user accounts and tokens remain scoped to each AS. A token does not become acceptable everywhere because the client has a DID.
 
-The AS MUST keep the resource-owner subject, authenticated client/Agent, tenant or trust domain, grant, and target resource distinguishable in its authorization records. Client-only and user-delegated permissions MUST NOT be interchangeable.
+Client records, grants and token caches MUST be scoped by (issuer, tenant-or-trust-domain, client_id), retaining the resource owner, grant, target resource and processing mode separately. For RFC 9068 JWT access tokens, the required `client_id` claim carries the URL, never the associated DID. RFC 7662 introspection keeps its standard semantics: `client_id`, when returned, is the URL. An RS whose policy depends on client identity MUST obtain that identity through a trusted token/introspection context or equivalent trusted state; it MUST reject such a decision when the needed identity is unavailable, rather than trust a caller-supplied field. This Profile does not require an ordinary CIMD AS to add a DID claim to its tokens.
 
-Client records, grants, and token caches MUST be scoped by (issuer, tenant-or-trust-domain, client_id). The expected client DID is the exact client_id, not a caller-supplied replacement. For RFC 9068 JWT access tokens, the existing required client_id claim MUST carry that DID; a user-delegated token's sub remains the user subject. For an authorized RFC 7662 active-token response under this Profile, the AS MUST include client_id with the same meaning. RFC 7662 makes that field optional in general; this Profile requires it on active responses to avoid proprietary Agent-DID claims. Inactive responses remain minimal and do not disclose it. Other trusted opaque-token validation paths MUST supply equivalent client identity context to the RS.
+An ANP-aware AS records a successfully verified DID binding separately, with its Profile revision and verification state. Conveying that result to an RS needs an explicitly trusted channel or agreed token extension; no new token claim is mandated here. An RS MUST NOT infer a verified DID from an unvalidated `anp_did`, a `kid` label, or the current contents of a URL alone. If the AS did not verify the binding, a resource requiring DID authentication needs an independent proof bound to the actual request/token, under a separately agreed binding, or MUST refuse that operation. Such a proof exchange is not defined by this revision.
 
-The RS uses client_id only after verifying the trusted issuer or introspection channel, token status, intended audience, and scopes. A plain request field is not evidence. This identifies the Agent to which the token was issued, not proof that a Bearer token's current presenter still controls the Agent's key; sender constraint is a separate check. The DID does not identify a model version, software integrity, or a human owner by implication.
+A shared CIMD URL represents one OAuth client even when used by multiple Agent instances. Deployments requiring independent per-Agent client identities SHOULD publish separate stable URLs and authentication keys. A URL shared across users does not replace issuer-scoped resource-owner identities. This is an identity association, not automatic account merging, software attestation or permission.
 
 <a id="enrollment"></a>
 ## 4. Client enrollment and binding
 
-### 4.1 DID as the client identifier
+### 4.1 CIMD URL as the client identifier
 
-An AS claiming this revision's core conformance MUST implement DID-as-client-ID and the self-published metadata discovery/admission procedure below. The bare DID is the client identifier; it has no DID URL path, query, or fragment. DID method-specific colon-separated paths are part of the DID, not DID URL paths. For example, `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28` identifies the client and `did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1` identifies a key.
+This revision uses the HTTPS Client Identifier URL defined by CIMD draft-02. It MUST have a path and MUST NOT contain userinfo, a fragment, or single-dot/double-dot path components. Publishers under this Profile MUST omit a query. Compare identifiers by exact string equality after one normal form/JSON decoding step; do not normalize ports, case, paths or aliases into equivalence. A DID or DID URL MUST NOT replace the CIMD URL in an OAuth `client_id` field.
 
-The AS MAY retain pre-registered native clients, and MAY disable open first-contact admission by local policy. It MUST advertise the enabled enrollment modes in Section 5. A deployment allowing only pre-registration cannot claim that its clients can onboard without pre-registration. Admission MAY be automated; per-client human administrative approval is not a core prerequisite.
+There are two processing modes, selected before a transaction starts:
 
-The request `client_id`, assertion `iss`, assertion `sub`, and native metadata `client_id` MUST identify the same exact bare DID. The DID part of `kid` MUST match it. Compare identifiers after one normal form/JSON decoding step; case folding, recursive percent decoding, prefix matching, and WNS/alias substitution MUST NOT make mismatched identifiers equal.
+| Mode | Verification responsibility |
+| --- | --- |
+| `cimd` | Standard CIMD metadata discovery, URL-client authentication and OAuth authorization. The AS need not resolve DIDs, understand ANP extensions or check DID-pinned digests. |
+| `did_bound` | The same standard URL client and OAuth messages, plus the DID/URL/metadata/actual-authentication-key checks in Sections 4.2 and 6.2. The AS explicitly advertises this enhancement under Section 5. |
 
+Requirements explicitly assigned to `did_bound` apply only when that enhancement is implemented and enabled. They MUST NOT be prerequisites for an ordinary CIMD AS to process the standard flow. The common OAuth safety requirements below are requirements on participating implementations and capability selection; CIMD support alone does not advertise every optional OAuth extension used here. A connection that requires an unsupported feature fails before authorization rather than demanding an ANP-specific replacement protocol.
+
+A client MUST pin the accepted issuer, URL `client_id`, selected mode and authentication policy before authorization. If DID-bound identity is required, absence of the exact enhanced capability or failure of its checks MUST abort the operation; it MUST NOT trigger an automatic retry in `cimd` mode. An explicitly configured `cimd` connection is valid, but MUST NOT be reported as AS-verified DID authentication. Future DID-as-client-ID work belongs to a separately negotiated extension (Section 16).
+
+<a id="anpcimd"></a>
+<a id="anp-oauth-keys"></a>
+<a id="anp-metadata-sha256"></a>
 ### 4.2 Self-published OAuth client metadata
 
-A self-published client MUST expose exactly one service of type `ANPOAuthClientMetadata` in its method-validated DID document. The service `id` MUST be that DID plus a non-empty fragment; `serviceEndpoint` MUST be a single absolute HTTPS URL with a path, no userinfo, query, or fragment. Duplicate service IDs or multiple matching services are rejected. Other DID services remain unaffected. This is an **ANP-defined experimental DID service type**, not an existing W3C type. JSON-LD deployments need an explicit, pinned extension context; implementations MUST NOT assume the DID Core context defines this term.
+An ANP publisher associates the Agent DID with exactly one service of type `ANPCIMD` for this Profile. Its `id` MUST be the DID plus a non-empty fragment, and `serviceEndpoint` MUST be the exact CIMD HTTPS URL. Duplicate service IDs or multiple matching services are rejected by ANP discovery. `ANPCIMD` is an ANP-defined experimental DID service type, not a W3C-defined type. JSON-LD deployments need an explicit, pinned extension context; the DID Core context does not define these extension terms. The earlier `ANPOAuthClientMetadata` service does not select this new Profile.
 
-The service URL locates a JSON OAuth client metadata document, NOT the authorization server or a token endpoint. It is resolved only from the validated DID, never from a caller-supplied override. A successful HTTPS fetch MUST return HTTP 200 and `application/json`; redirects, malformed or duplicate JSON members, private material, and oversized content are rejected. Implementations MUST support documents up to 5 KiB and enforce a finite configured maximum, fetch timeout, and Section 13 SSRF controls. Do not send credentials or cookies with public metadata requests.
+The publisher MUST combine method-validated DID material with explicit OAuth application configuration. The following mapping is normative for publication; it does not require a standard AS to perform DID resolution:
 
-The selected service MUST also carry anp_metadata_sha256, an ANP-defined 64-character lowercase hexadecimal SHA-256 digest of the entire metadata representation. Hash the UTF-8 response bytes after HTTP transfer/content decoding, including all whitespace and any final newline; do not reserialize JSON, normalize text, or include HTTP headers. Reject a BOM or invalid UTF-8, and bound decoded size before hashing/parsing. The controller computes the digest after serialization and publishes it through the DID method's authenticated document-update procedure. For e1_, it is inside the document covered by the binding-key proof.
-
-Before using any client name, redirect URI or grant metadata, the AS MUST compare the computed digest with the value from the current method-validated DID document. Missing, malformed or mismatched digests fail closed. A Content-Digest response header or a digest supplied only by the metadata host is not a replacement. This binds the content without another credential format or an online metadata-signing service. A metadata update, even cosmetic, requires updating the digest in the DID document; Section 4.3 still governs whether a pending transaction can continue.
-
-The following field definitions reuse OAuth client metadata from RFC 7591 where applicable; no RFC 7591 registration endpoint is required:
-
-| Field | Rule for native metadata |
+| Output | Source and rule |
 | --- | --- |
-| `anp_profile` | Required; exact current draft Profile identifier. ANP-defined experimental discriminator. |
-| `client_id` | Required; exact bare client DID, NOT the metadata URL. |
-| `client_name` | Required non-empty display string; self-asserted, not a verified organization name. |
-| `token_endpoint_auth_method` | Required; `private_key_jwt`. |
-| `grant_types` | Required non-empty array of requested supported core grants: `client_credentials`, `authorization_code`, `refresh_token`. Not a permission grant. |
-| `response_types` | Required as `["code"]` when requesting authorization code; otherwise absent. |
-| `redirect_uris` | Required non-empty array for authorization code; approved HTTPS callbacks or explicitly declared native loopback entries under Section 7.2.1. Otherwise absent or empty. |
-| `anp_application_type` | Optional ANP-defined `web` (default) or `native`; `native` is required for loopback. It describes the application deployment, not confidential-client status. |
-| `scope` | Optional space-delimited requested capabilities; the AS and resource owner independently decide actual rights. |
-| `token_endpoint_auth_signing_alg` | Optional allowed JOSE algorithm; intersect it with the DID's authorized key and AS capabilities, never expand either. |
-| `client_uri`, `logo_uri` | Optional display metadata, with independent fetch/rendering protections. |
+| `client_id` | The exact DID-associated CIMD URL. |
+| `jwks` or `jwks_uri` | Public signing keys selected from the DID's authorized `authentication` methods; never export private key material. A `jwks_uri` MUST serve a standard JWK Set, not an unconverted DID document. Use exactly one of these two metadata fields. |
+| `client_name`, `client_uri`, `logo_uri` | Explicit application display configuration; a self-asserted name is not a verified organization identity. |
+| `redirect_uris` | Actual application callback configuration; do not infer callbacks merely from a DID domain. |
+| `grant_types`, `response_types`, `scope` | Implemented/requested OAuth features and application configuration; these values are not grants of permission. |
+| `token_endpoint_auth_method` | `private_key_jwt` for this Profile's authenticated-client path. A `none` public-client connection is outside its DID-backed client-authentication claim. |
+| `token_endpoint_auth_signing_alg` | If supplied, a supported asymmetric algorithm compatible with the selected key; actual use also requires AS support. |
 
-`jwks`, `jwks_uri`, shared secrets, private keys, and bearer credentials MUST NOT appear in native metadata. The DID's `authentication` relationship remains the sole client-key authority. Unsupported security extensions MUST NOT override these rules. The metadata URL is only a retrieval location and MUST NOT replace the DID as `client_id`.
+The CIMD document MUST obey CIMD draft-02 and the applicable RFC 7591 metadata semantics. It MUST contain its exact URL as `client_id` and a non-empty `client_name`. Authorization-code publication includes `response_types=["code"]` and configured `redirect_uris`. The document MUST be available by an unauthenticated HTTPS GET returning HTTP 200 and JSON; publishers SHOULD use `application/json`. Fetchers MUST NOT automatically follow redirects or accept an error response as metadata. Do not publish shared secrets, private keys or bearer credentials. Each fetch, including an external JWKS fetch, is subject to Section 13.
 
-The service delegates delivery, not independent authority to edit metadata. A separate metadata host cannot change the accepted bytes without a corresponding method-valid DID-document update. For e1_, this includes a valid binding-key document proof; for did:web, an attacker controlling the DID-document host can still replace its keys and digest. Integrity pinning does not prevent a host from withholding data or replaying a previously valid DID document and matching metadata where the DID method cannot prove latest state. It is not rollback resistance or independent organizational endorsement. Apply current method-state checks, bounded cache freshness and local suspension policy; display the DID alongside the self-asserted client name.
+`anp_profile` and `anp_application_type` are not required CIMD members. A standards-only CIMD document is sufficient for `cimd` mode. The optional experimental `anp_did` member identifies a candidate bare Agent DID for reverse discovery; it has no authority until the DID-bound checks succeed. A publisher MAY omit it when reverse discovery is unnecessary or a trusted out-of-band binding supplies the DID. Ordinary ASs do not need to interpret it; compatibility with their accepted metadata must be established without silently changing a transaction's client identity or security mode.
+
+For `did_bound` publication and verification, the `ANPCIMD` service MUST additionally contain:
+
+- `anp_oauth_keys`: a non-empty array of distinct verification-method IDs from this DID's `authentication` relationship, explicitly authorizing those keys for the associated URL client. Each reference must resolve to this DID plus a non-empty fragment after DID Core relative-reference processing. This field does not authorize `keyAgreement` or arbitrary keys merely listed in `verificationMethod`.
+- `anp_metadata_sha256`: the 64-character lowercase hexadecimal SHA-256 digest of the entire CIMD representation. Hash the UTF-8 response bytes after HTTP transfer/content decoding, including whitespace and any final newline; do not reserialize JSON or include HTTP headers. Reject a BOM, invalid UTF-8 and duplicate JSON members. Compute the digest after serialization and publish it through the DID method's authenticated document-update procedure.
+
+Before an enhanced AS uses the metadata for a callback or authorization decision, it MUST obtain the candidate DID from trusted configuration or the optional `anp_did` discovery hint, validate the DID and service, require exact URL and any reverse-DID agreement, and verify the pinned digest. A missing/malformed/mismatched required binding fails closed. A caller-supplied override or a digest supplied only by the metadata host is not a replacement. A conflicting reverse DID MUST NOT override an existing accepted binding. A fetched candidate name or callback is untrusted before these checks. Enhanced fetchers MUST support documents up to 5 KiB and impose a finite maximum, timeout and concurrency bound.
+
+The digest covers an embedded `jwks` value but only the URL string of `jwks_uri`; it does not protect the separately fetched JWKS bytes. In either form, the **actual key used for this client's authentication** MUST be one of the service's `anp_oauth_keys` and currently authorized by the validated DID's `authentication` relationship. Compare validated public-key material or an RFC 7638 JWK thumbprint, not just `kid`, and reject ambiguous key selection. Finding one matching key elsewhere in a JWKS is insufficient. This revision protects the CIMD bytes and the actual permitted authentication key; it does not define a digest for an entire external JWKS document.
+
+The ordinary CIMD AS trusts its accepted HTTPS metadata and client-authentication policy; a publisher's local DID check does not prove that the AS fetched the same state or verified a DID. In enhanced mode, the DID-authorized digest limits the metadata host to delivery rather than independent modification. For did:wba e1_, the binding is covered by the method-valid document proof; for did:web, control of the DID-document host can still replace its keys and digest. Neither mode gains rollback resistance beyond the selected DID method and freshness policy. A later metadata update, even cosmetic, requires recomputing a pinned digest where that protection is used.
 
 ### 4.3 First-contact admission without per-AS preregistration
 
-When `self_published` is enabled, an unknown bare DID is a candidate for discovery, not an immediate `invalid_client` solely for lacking a database row. No new grant type, registration endpoint, client secret, VC, or OIDC login bridge is required.
+A CIMD AS MAY admit previously unknown Client Identifier URLs, or restrict admission to approved/pre-registered clients. CIMD does not require open admission. No mandatory manual registration or registration API call is introduced by ANP for an AS that enables CIMD first contact. Admission does not grant resource access.
 
-The AS MUST perform these steps in order, with bounded work:
+For a first-contact flow:
 
-1. Validate the request's `client_id` syntax, supported method, requested flow and local deny/suspension records before initiating permitted network work. Previously disabled clients MUST NOT bypass a block by appearing new after cache eviction.
-2. Resolve and validate that DID under Section 6.2, select its metadata service, fetch and validate Section 4.2 metadata, including its DID-pinned digest, and require exact `client_id` and `anp_profile` matches. Check flow consistency: refresh requires the authorization-code flow; no implicit/password flow or `none` client authentication is allowed.
-3. Apply explicit local admission policy to the DID/method, metadata origin, requested grants, client deployment, redirect URIs and target resources. The policy MAY admit unfamiliar clients automatically, or refuse them. This decision does not grant resource access. Requested metadata is not AS policy.
-4. Create a bounded, issuer/tenant-scoped **candidate transaction record** containing the DID, service ID/URL, accepted metadata snapshot and its DID-pinned digest, authentication policy, selected resource and policy decision. An implementation need not preallocate a permanent client database record. Discovery/cache entries and an active authenticated client MUST remain distinct.
-5. At `/token`, verify a fresh Section 6 assertion and atomically consume its `jti`. Bind the proof to the candidate DID and accepted metadata. Then approve the client binding and independently evaluate the grant, user consent where applicable, resources and scopes before any access token is issued.
+1. Check the URL syntax, selected flow, accepted issuer and local suspension/admission policy before permitted network work. A cache miss MUST NOT erase a prior block.
+2. Fetch and validate CIMD metadata and the public-key source. In `did_bound` mode additionally resolve the candidate DID and perform Section 4.2 before using its callbacks or configuration. In `cimd` mode the AS follows standard CIMD without an ANP resolver dependency.
+3. Apply AS admission policy to the client, deployment, metadata origin, authentication algorithms, callback and requested grant/resource. Self-published values do not override that policy.
+4. Bind the candidate transaction to the issuer, URL `client_id`, selected mode, accepted metadata/callback, resource and authentication policy. An enhanced transaction also pins the verified DID, service and metadata digest. A discovery/cache entry is not evidence of private-key possession.
+5. At `/token`, verify a fresh Section 6 client assertion against the accepted client keys, then independently validate the grant, resource owner where applicable, target and permissions before issuing a token. Enhanced verification rechecks current key authorization and binding freshness; a changed binding or security-relevant metadata invalidates the pending transaction rather than replacing its values.
 
-For authorization code, discovery and callback approval occur at `/authorize` before displaying consent or issuing a code. This follows OAuth's usual separation: client proof is required at code redemption, not invented as an extra front-channel signature. The AS MUST bind any issued code and user authorization to the candidate DID, accepted metadata snapshot, exact callback, issuer, resource and S256 PKCE transaction. It MUST NOT report that the Agent has proved key possession merely because metadata was retrieved. Before redemption, it MUST revalidate freshness, current DID key authorization, accepted metadata and local policy. A changed authentication policy, metadata endpoint or callback/grant configuration invalidates that pending transaction; restart rather than substituting new values. Cosmetic-only changes MAY be recognized as equivalent by a documented deterministic comparison.
+For authorization code, client discovery and callback approval occur at `/authorize`; client key possession is verified at code redemption. Do not invent an additional front-channel DID signature or report key possession merely because metadata was fetched. Bind a code to its exact client, issuer, actual callback, S256 PKCE, resource and accepted transaction state. For client credentials, admission and proof can complete in the first token request, but an existing AS policy/grant must independently authorize access. Refresh never creates a new grant.
 
-For client credentials, discovery, admission and proof can complete in the first token request. Access still requires AS policy authorizing this client for that resource; a self-published `scope` or a valid DID signature is not enough. Refresh never creates a new grant: an existing valid refresh-token/client/issuer binding remains required.
-
-Thus **no per-AS preregistration** means no mandatory advance manual enrollment or registration API call. It does not mean no admission decision, no local state, no consent, or unconditional acceptance of every DID. Pre-registered clients MAY use approved out-of-band metadata without publishing a service, but the AS MUST preserve that source choice and MUST NOT silently replace it with newly discovered metadata.
+A pre-registered CIMD URL remains a URL client. Its accepted metadata source and binding policy MUST be preserved; newly discovered data cannot silently replace a pinned registration. Implementations MUST distinguish policy-controlled admission from unconditional acceptance and report disabled first contact accurately.
 
 **First-contact admission overview (informative).**
 
 ```mermaid
 flowchart TD
-  Request["Unknown client DID<br/>self_published enabled"]
-  Precheck["1. Check request syntax,<br/>method, flow and deny records"]
-  Discover["2. Validate DID and metadata<br/>digest, client_id and Profile"]
-  Admission{"3. Admission policy accepts?"}
-  Candidate["4. Save candidate transaction<br/>not yet authenticated"]
-  Proof["5. At /token: revalidate and verify<br/>fresh assertion, then consume jti"]
-  Grant["Approve binding and check<br/>grant, consent, resource and scope"]
-  Issue["Issue target-limited access token"]
-  Reject["Reject without a token"]
-  ConsumedReject["Reject the grant<br/>the assertion remains consumed"]
-  Request --> Precheck
-  Precheck -->|"Pass"| Discover
-  Precheck -->|"Fail"| Reject
-  Discover -->|"Pass"| Admission
-  Discover -->|"Fail"| Reject
-  Admission -->|"Accept"| Candidate
-  Admission -->|"Deny"| Reject
-  Candidate --> Proof
-  Proof -->|"Pass"| Grant
-  Proof -->|"Fail"| Reject
-  Grant -->|"Approve"| Issue
-  Grant -->|"Deny"| ConsumedReject
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class Reject,ConsumedReject reject
-  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
-  class Issue allow
+  Request["CIMD URL client request"] --> Metadata["Validate CIMD and local admission"]
+  Metadata --> Mode{"DID-bound mode selected?"}
+  Mode -->|"Yes"| Binding["Validate DID, URL, metadata digest and key policy"]
+  Mode -->|"No"| Proof["Verify fresh standard client assertion"]
+  Binding -->|"Pass"| Proof
+  Binding -->|"Fail"| Reject["Reject without mode fallback"]
+  Proof --> Grant["Check independent grant, user, resource and scope"]
+  Grant -->|"Approved"| Token["Issue resource-specific token"]
+  Grant -->|"Denied"| Reject
 ```
 
 ### 4.4 Client boundaries
 
-Public clients do not become confidential merely by owning a key or using PKCE. This Profile requires a per-Agent asymmetric authentication binding, not a secret embedded in every copy of an application. A local Agent with its own authorized DID key can use authorization code and the loopback binding in Section 7.2.1 while remaining classified as public. The AS MUST record and evaluate the actual client type; client credentials still requires qualified confidential custody. Hosted HTTPS callbacks remain supported. Remote/headless clients without a same-device browser need a later device/backchannel authorization extension, not an unrestricted callback exception.
+Owning a key or using PKCE does not by itself prove that a deployment meets confidential-client custody requirements. This Profile uses a selected per-Agent authentication key, not a private key embedded in every distributed application copy. The AS's accepted client type and authentication model must match the deployment; CIMD support alone does not imply support for every native per-instance-key arrangement. Client credentials remains restricted to qualified confidential deployments. An ordinary public-client `none` flow cannot be claimed as DID-backed client authentication or used as a fallback after a required binding check fails.
+
+Hosted callbacks and explicitly supported native loopback callbacks use Section 7.2.1. A publisher may serve public CIMD/JWKS for a local Agent without possessing its signing key. Remote/headless clients without a same-device browser need a later device/backchannel authorization extension, not an unrestricted callback exception.
 
 <a id="discovery"></a>
 ## 5. AS discovery and capability advertisement
 
-For dynamically discovered HTTP resources, the RS MUST publish RFC 9728 protected-resource metadata containing its `resource` and one or more `authorization_servers`; clients MUST implement that discovery path. A `401` challenge can carry `resource_metadata`, otherwise clients use the RFC 9728 well-known location rules. Before selecting an AS, the client MUST validate the resource/metadata association against the requested RS and an accepted trust policy. Trusted out-of-band configuration MAY be used for closed deployments; the resource/issuer relationship must still be validated.
+For dynamically discovered HTTP resources, clients use RFC 9728 protected-resource metadata and RFC 8414 AS metadata where available, validating the resource/AS association and exact issuer. A `401` challenge can identify `resource_metadata`. Trusted out-of-band configuration MAY establish the same association for existing or closed deployments. An arbitrary DID service or Agent Description is not authority to select a different AS for a resource.
 
-The client MUST obtain the expected issuer from that accepted resource relationship or trusted configuration, implement RFC 8414 discovery, and validate the discovered AS metadata with exact issuer matching. A URL in an arbitrary DID document or Agent Description is not authority to change the target resource's AS.
+Client records, transactions and token caches MUST remain isolated by AS issuer and tenant/trust domain. A changed issuer requires a newly validated resource relationship; never send the old AS's code, refresh token or assertion to it. A newly accepted AS requires a fresh audience-bound assertion.
 
-Client records, authorization transactions, and token caches MUST be isolated by AS issuer and tenant/trust domain. A changed issuer requires a newly validated relationship and applicable registration/binding approval; do not send the old AS's code, refresh token, secret, or client assertion to it. The DID/key can be reused only under an approved new relationship with a freshly created audience-bound assertion.
+In `cimd` mode, establish CIMD support from `client_id_metadata_document_supported=true` in the AS metadata or an explicit trusted deployment configuration. Verify support for `private_key_jwt`, a mutually acceptable signing algorithm and the selected grant flow. For authorization code, require S256 PKCE and an accepted callback/issuer-validation strategy. Additional standards such as RFC 8707, RFC 9207, loopback redirects or DPoP are selected only when supported or explicitly configured. If policy requires one of them, lack of support aborts that flow; it is not permission to weaken its safety requirements. An ordinary CIMD AS need not advertise `anp_did_oauth` or any other ANP capability.
 
-For this Profile, the AS MUST publish RFC 8414 metadata including `issuer`, `token_endpoint`, `token_endpoint_auth_methods_supported` containing `private_key_jwt`, its supported signing algorithms, and grant types. An AS supporting authorization code MUST also publish its authorization endpoint, code response support, `S256` PKCE support, and `authorization_response_iss_parameter_supported=true`, and implement RFC 9207 response issuer identification.
+An AS offering `did_bound` processing MUST advertise the following experimental RFC 8414 extension, `anp_cimd_binding`. It adds binding verification to the same URL client and standard OAuth flow; it does not define a new grant or token-endpoint authentication method.
 
-This draft defines the optional RFC 8414 extension member `anp_did_oauth`. It is REQUIRED to advertise this Profile and has the following required fields:
-
-| Field | Type and rule |
+| Field | Rule |
 | --- | --- |
-| `profile` | String; exactly `anp.authorization.oauth2.did.v1-draft4`. |
-| `did_methods_supported` | Non-empty array of method identifiers, such as `did:web` and `did:wba`, that the AS actually validates. |
-| `client_id_modes_supported` | Exactly `["did"]`; this version defines only native DID client identifiers. |
-| `client_enrollment_methods_supported` | Non-empty array of enabled `self_published` and/or `pre_registered` native modes. Supporting the self-published implementation is required; local policy may restrict admission. |
-| `redirect_uri_modes_supported` | Required when authorization code is enabled; non-empty array of enabled `https` and/or `loopback` modes. Code-capable implementations implement both; local admission may restrict their use. Omit for client-credentials-only deployments. |
+| `profile` | Exact `anp.authorization.oauth2.cimd.v1-draft1`. |
+| `did_methods_supported` | Non-empty array of methods actually validated under Section 6.2. |
+| `client_enrollment_methods_supported` | Non-empty array of enabled `self_published` and/or `pre_registered` CIMD URL modes. |
+| `redirect_uri_modes_supported` | When authorization code is enabled, the supported/enabled subset of `https` and `loopback`; neither mode is implied by CIMD itself. |
 
-`anp_did_oauth` and the draft Profile identifier are ANP-defined, unregistered experimental metadata, not existing IETF/IANA features. They create no new token endpoint authentication method: that method remains `private_key_jwt`. Without an exact Profile match, the client MUST NOT assume DID-aware processing or silently fall back to a different identity or weaker authentication.
+Advertising this exact capability commits the AS to enforce `did_bound` for every CIMD client transaction accepted at its advertised authorization and token endpoints. A missing DID hint or trusted binding, invalid digest, unauthorized key or unsupported DID method MUST fail closed; a request cannot opt out into ordinary processing. This initial extension has no per-request mode selector. An AS offering ordinary CIMD processing omits the extension; a deployment offering both policies needs separate, unambiguous issuer/endpoint configurations. A client requiring DID-bound identity MUST provide discoverable binding material or an established trusted binding and select the enforcing configuration before authorization. Capability discovery is not a per-token proof to an RS that a token from another context was issued under that mode.
 
-Clients MUST pin the issuer, client DID, Profile revision, and credential policy before starting a flow. Authentication or admission failure MUST NOT trigger an automatic switch of client identity or weaker authentication to bypass that rejection.
-
-The following metadata is illustrative; addresses do not identify deployed services:
+The following enhanced-AS example also exposes the standard CIMD capability. The endpoints are illustrative; a standard AS can omit `anp_cimd_binding` entirely:
 
 ```json
 {
   "issuer": "https://auth.example",
   "authorization_endpoint": "https://auth.example/authorize",
   "token_endpoint": "https://auth.example/token",
-  "token_endpoint_auth_methods_supported": [
-    "private_key_jwt"
-  ],
-  "token_endpoint_auth_signing_alg_values_supported": [
-    "RS256",
-    "Ed25519",
-    "EdDSA"
-  ],
-  "grant_types_supported": [
-    "client_credentials",
-    "authorization_code",
-    "refresh_token"
-  ],
-  "response_types_supported": [
-    "code"
-  ],
-  "code_challenge_methods_supported": [
-    "S256"
-  ],
+  "client_id_metadata_document_supported": true,
+  "token_endpoint_auth_methods_supported": ["private_key_jwt"],
+  "token_endpoint_auth_signing_alg_values_supported": ["RS256", "Ed25519", "EdDSA"],
+  "grant_types_supported": ["client_credentials", "authorization_code", "refresh_token"],
+  "response_types_supported": ["code"],
+  "code_challenge_methods_supported": ["S256"],
   "authorization_response_iss_parameter_supported": true,
-  "anp_did_oauth": {
-    "profile": "anp.authorization.oauth2.did.v1-draft4",
-    "did_methods_supported": [
-      "did:web",
-      "did:wba"
-    ],
-    "client_id_modes_supported": [
-      "did"
-    ],
-    "client_enrollment_methods_supported": [
-      "self_published",
-      "pre_registered"
-    ],
-    "redirect_uri_modes_supported": [
-      "https",
-      "loopback"
-    ]
+  "anp_cimd_binding": {
+    "profile": "anp.authorization.oauth2.cimd.v1-draft1",
+    "did_methods_supported": ["did:web", "did:wba"],
+    "client_enrollment_methods_supported": ["self_published", "pre_registered"],
+    "redirect_uri_modes_supported": ["https", "loopback"]
   }
 }
 ```
 
-
-
-[ANP-07 Agent Description](07-anp-agent-description-protocol-specification.md) MAY link to an interface document explaining this OAuth requirement and the RFC 8414/RFC 9728 metadata locations. This version does not redefine ANP-07's `securityDefinitions`, require a new `scheme` value there, or place credentials in a public description. Description and discovery are not authorization.
+[ANP-07 Agent Description](07-anp-agent-description-protocol-specification.md) MAY link to an interface describing this authorization requirement. Such a link is descriptive; it does not override the trusted issuer, selected client identity or capability checks.
 
 <a id="client-assertion"></a>
-## 6. DID-backed JWT client authentication
+## 6. DID-associated JWT client authentication
 
 ### 6.1 Transport and JWT fields
 
-The client MUST send an HTTPS POST to the validated token endpoint with `application/x-www-form-urlencoded` content and exactly one of each required parameter: `grant_type`, `client_id`, `client_assertion_type`, and `client_assertion`. The assertion type MUST be `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`. Grant-specific parameters follow Section 7. Duplicate security-relevant form parameters MUST be rejected, not resolved by first/last-value selection.
+The client sends an HTTPS POST to the accepted token endpoint using `application/x-www-form-urlencoded` with exactly one `grant_type`, `client_id`, `client_assertion_type` and `client_assertion`, plus the selected grant parameters. The assertion type is `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`. Duplicate security-relevant parameters MUST be rejected. A client assertion uses compact signed JWT/JWS serialization, not a JWE, detached payload, access token or multiple simultaneous authentication methods. It MUST NOT be placed in a URL, ordinary task data or logs.
 
-`client_assertion` MUST contain one compact JWS with an attached, base64url-encoded JWT payload. JWE, detached payloads, unencoded payloads, multiple assertions, and simultaneous client authentication methods are not permitted by this Profile. The client MUST NOT put the assertion or private key into a URL, log, or Agent Description.
-
-The JWS protected header has the following fields; alg and kid are REQUIRED, while typ is RECOMMENDED:
-
-| Field | Requirement |
+| Header | Rule |
 | --- | --- |
-| `typ` | RECOMMENDED: `client-authentication+jwt`. Compatibility rules below also permit the earlier `anp-did-client-auth+jwt`, `JWT`, or omission. |
-| `alg` | An allowed asymmetric JOSE signature algorithm compatible with the resolved key. |
-| `kid` | A complete DID URL formed as the expected client DID plus a non-empty fragment, identifying an authentication verification method. No DID URL path or query is allowed in this Profile's key reference. |
+| `alg` | A mutually accepted asymmetric JOSE signature algorithm compatible with the selected public key. |
+| `kid` | The unambiguous key identifier in the accepted CIMD/JWKS. It MAY be a DID URL used as an opaque label, but an ordinary AS does not need to parse or resolve it as a DID. |
+| `typ` | Use the target AS's supported standard client-authentication type policy. `JWT`, omission or an explicitly supported `client-authentication+jwt` may be used as agreed; no ANP-specific type is required. A type label never replaces context and signature checks. |
 
-Clients SHOULD use client-authentication+jwt, the explicit type recommended by the informative JWT client-authentication update draft-11. The AS MUST accept that value, the earlier anp-did-client-auth+jwt, generic JWT, or no typ, provided every other validation succeeds. A present typ MUST be a string from that allowlist; an access-token type or other unsupported role is rejected. The AS MUST NOT rely on typ alone to select the identity, issuer, grant, permissions, or validation policy. Dedicated client_assertion processing, exact DID/issuer binding, current key authorization and replay protection remain mandatory. This compatibility rule does not turn an access token or metadata document into a client assertion. The type name is adopted by this Profile with the draft's work-in-progress status acknowledged.
-
-The payload MUST contain:
-
-| Claim | Requirement |
+| Claim | Rule |
 | --- | --- |
-| `iss` | Exact request `client_id`; the client issues this assertion. |
-| `sub` | Exact request `client_id`; this is client authentication, not user delegation. |
-| `aud` | The validated AS `issuer` as the sole audience: either that exact JSON string or a one-element string array containing it. Empty/multi-element arrays, non-strings, and a token-endpoint URL different from the issuer are rejected. |
-| `iat` | Integer NumericDate in seconds; signing time. |
-| `exp` | Integer NumericDate; `0 < exp - iat <= 300`. |
-| `jti` | A fresh, non-empty identifier with at least 128 bits of cryptographic randomness. It MUST NOT be reused across requests, keys, or retries. |
+| `iss` | The exact URL `client_id`; the client signs its own assertion. |
+| `sub` | The exact URL `client_id`, not the Agent DID or resource owner. |
+| `aud` | One exact audience for the accepted AS under its pre-established authentication policy: the validated issuer, or the validated token-endpoint URL when the AS uses that RFC 7523/OIDC convention. It MUST NOT be selected from an untrusted error or changed as an automatic authentication fallback. |
+| `iat` | Integer NumericDate signing time. |
+| `exp` | Integer NumericDate with `0 < exp - iat <= 300` for assertions generated by this Profile. |
+| `jti` | A fresh non-empty identifier with at least 128 bits of cryptographic randomness, never reused across requests, keys or retries. |
 
-`nbf` is optional; when present it MUST be an integer NumericDate not greater than `exp` and MUST be enforced. AS clock-skew allowance MUST NOT exceed 60 seconds. With AS time `now` and permitted skew `s`, acceptance requires `iat <= now + s`, `now < exp + s`, and, if present, `nbf <= now + s`. ISO date strings are not NumericDate values.
+The issuer-only audience rule and explicit type from JWT client-authentication update draft-11 are available when both sides support that rule; they are not automatically imposed on existing CIMD servers. The example in Section 9 chooses issuer audience. A client MUST pin the AS's accepted audience/type policy before sending credentials; a mismatch fails that transaction. Extra claims do not override client identity, user consent, permissions or the grant.
 
-An AS MUST reject duplicate JSON member names in the protected header or payload, unknown critical JWS parameters, and malformed encodings. Extra non-critical claims MUST NOT create permissions or override the approved client record, resource owner, request parameters, or grant. This version does not use the JWT `assertion` grant parameter or `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer`.
+Enhanced verifiers MUST require every claim in the table and reject duplicate JSON members, malformed encodings, unknown critical JWS parameters, unsupported algorithms and role-confused JWTs. They MUST enforce integer time values, `0 < exp - iat <= 300`, `iat <= now + skew`, `now < exp + skew`, and a skew allowance no greater than 60 seconds. If `nbf` is present, it MUST be an integer with `nbf <= exp` and `nbf <= now + skew`. Ordinary ASs use their supported standards-compliant validation policy; a deployment MUST verify that it meets its required assurance rather than infer ANP's additional limits from CIMD support.
 
 ### 6.2 DID resolution and key authorization
 
-The AS MUST derive the expected DID from Section 4 and validate its supported method before trusting its document. At least one of the defined method bindings MUST be implemented and advertised:
+In `cimd` mode the AS obtains the authentication key from the accepted CIMD/JWKS. The ANP publisher validates its DID and selected key before publication, but this does not turn an ordinary AS's result into verified DID authentication.
 
-- `did:web`: apply native method resolution, HTTPS validation, exact document `id` checking, and ANP-02 Web identity-material rules. WBA fingerprints and WBA document proofs MUST NOT be imposed on native Web DIDs.
-- `did:wba`: apply ANP-03's selected method profile, document integrity/binding checks, active-state checks, and authentication-key policy. A valid JWT alone does not replace the WBA E1 proof and fingerprint validation.
+In `did_bound` mode the verifier MUST validate Section 4.2's DID-to-URL relationship, metadata digest and selected key authorization. The candidate DID comes from trusted state or the optional CIMD discovery hint, never solely from a JWT header. The document `id` MUST equal the expected bare DID; the DID must identify the same subject as the accepted binding, and the `ANPCIMD` endpoint must exactly equal `client_id`. At least one supported method binding must be implemented and advertised:
 
-This v1 did:wba binding covers the e1_ path profile and ANP-03's bare-domain form. The separate k1_ extension is not implemented by this binding: reject k1_ DIDs rather than imply that advertising did:wba enables every variant. Adding it would require both its fingerprint/document-proof policy and correct ES256K/secp256k1 JOSE verification, not ES256/P-256 or just an algorithm-name alias. That extension requires a separately reviewed binding and test evidence.
+- `did:web`: apply native method resolution, HTTPS validation, exact document `id` checking and ANP-02 Web identity-material rules. WBA fingerprints or document proofs are not imposed on native Web DIDs.
+- `did:wba`: apply ANP-03's e1_ path profile or bare-domain binding, including integrity/proof, fingerprint where applicable, active-state and authentication-key checks. A valid JWT does not replace method validation. The k1_ extension is outside this binding and must not be implicitly enabled.
 
-Other DID methods require a documented adapter with a pinned method specification, state rules, supported verification methods, JOSE conversion, and verification evidence before advertisement. DID Core compatibility alone does not establish support; this draft does not automatically enable `did:webvh` or BID.
+Other methods, including `did:webvh` or BID, require a documented adapter with pinned method specification, state rules, supported key representations and verification evidence before enhanced support is advertised. Ordinary CIMD operation does not require the AS to implement those adapters.
 
-The resolved document `id` MUST match the expected DID. The DID part of `kid` MUST match that DID. The selected verification method MUST be resolvable from that validated document and authorized by its `authentication` relationship, whether embedded there or referenced there. Merely appearing in `verificationMethod`, `assertionMethod`, or `keyAgreement` is insufficient. Relative document references MUST be resolved using DID Core rules before exact comparison. Cross-DID authentication keys are outside this initial Profile and MUST be rejected.
+The actual verification key MUST be authorized by both `service.anp_oauth_keys` and the current DID `authentication` relationship. Embedded or referenced methods are allowed after exact reference resolution; cross-DID methods are outside this initial binding. Merely appearing in `verificationMethod`, `assertionMethod` or `keyAgreement` is insufficient. Check the real public key or its RFC 7638 thumbprint against the key used to verify the assertion, not only matching labels. A client-supplied JWS `jwk`, `jku`, `x5u` or `x5c` MUST NOT replace this accepted key source. JSON-LD contexts required by a method/suite must be pinned or allowlisted.
 
-The verifier MUST obtain public key material from this validated relationship. It MUST NOT trust a client-supplied JWS `jwk`, `jku`, `x5u`, or `x5c` as a replacement; those header fields are disallowed here. JSON-LD contexts needed by a method or verification suite MUST be pinned or allowlisted, not unrestricted network fetches.
+DID/URL declarations and matching public keys are public configuration that can be copied. The successful fresh assertion supplies proof of private-key possession; none of these configuration checks alone proves possession, user consent or access rights.
 
 ### 6.3 Algorithms and serialization
 
-The AS MUST implement RS256 verification: RFC 7523 Section 5 explicitly makes it mandatory to implement. It MUST also implement Ed25519 verification for this Profile. This does not require an Ed25519-only client to acquire an RSA key or require RSA use for every DID. The AS advertises only algorithms it implements and enables; actual use intersects the client's authorized key, metadata and AS policy.
+Select the intersection of the published key's capabilities, enabled client algorithms and the target AS's declared/configured policy. RFC 7523 specifies RS256 as mandatory to implement for conforming implementations; this does not require every Agent to use RSA or imply that a CIMD AS supports Ed25519. Enhanced ANP implementations MUST support Ed25519 in addition to their RFC 7523 baseline; clients still negotiate the actual algorithm rather than assume that enhancement algorithms exist in ordinary mode.
 
-Ed25519 is the fully specified JOSE identifier in RFC 9864. New deployments SHOULD prefer it. To interoperate with older libraries, an AS SHOULD provide an explicitly configured EdDSA verification option restricted to Ed25519 keys; advertise it only when enabled. RFC 9864 deprecates the polymorphic EdDSA identifier but does not prohibit it. An implementation may disable that compatibility option under documented policy; it is not a universal mandatory new-deployment algorithm. Never rewrite the signed alg header or treat an Ed448 key as Ed25519. A client lacking a mutually enabled algorithm fails closed instead of silently substituting one. ES256 and other algorithms require explicit implementation, key-format and policy support. Reject none, HS* algorithms, key/algorithm mismatches and unsupported curves.
+For Ed25519, RFC 9864's fully specified `Ed25519` identifier is preferred when supported. The earlier `EdDSA` identifier is an explicitly enabled compatibility choice restricted to Ed25519 keys; never rewrite a signed header or reinterpret Ed448 as Ed25519. ES256 or other algorithms require explicit key-format and policy support. Reject `none`, shared-secret `HS*` methods, unsupported curves and key/algorithm mismatches for this authenticated path.
 
-DID `publicKeyJwk` material MUST be validated as a public key of the required type and size; RSA keys MUST be at least 2048 bits. Ed25519 `Multikey` material MUST be decoded and checked for its declared multicodec/key type and length before use. An implementation MUST NOT treat arbitrary multibase bytes as an Ed25519 key. An AS supporting WBA E1 MUST support the Ed25519 key representation required by that binding.
-
-The JWT signature covers the JWS signing input, not the ANP-02 HTTP signature base or a JCS-normalized JSON reconstruction. Converting key representations MUST preserve the same public key; signature encoding MUST follow the selected JOSE algorithm.
+A JWK export converts a representation, not one cryptographic algorithm into another. Validate public key types and lengths; RSA keys must be at least 2048 bits. Ed25519 Multikey conversion must validate multibase, multicodec and the 32-byte public key before constructing an OKP JWK. Do not export private JWK parameters. The JWT signature covers the JWS signing input, not an ANP-02 HTTP signature base or JCS-reserialized payload.
 
 ### 6.4 Verification and replay handling
 
-The AS MUST perform bounded parsing, lookup of an approved record or Section 4.3 candidate discovery/admission, expected-DID selection, Profile and algorithm checks, method/document/key validation, JWT signature verification, exact claim checks, and time checks before accepting authentication. An unknown DID in enabled self-published mode is not rejected merely for having no pre-existing record; it must satisfy the full admission procedure. It MUST then atomically reserve `(AS issuer, client_id, jti)` until `exp + allowed skew`. Reuse MUST fail even with another `kid`, across server replicas, or through concurrent requests. Invalid signatures MUST NOT poison the replay store. If replay protection is unavailable, the AS MUST fail closed.
+Verify a fresh assertion using the selected mode, accepted metadata/key source, exact URL `iss`/`sub`, audience, algorithm/type policy and time bounds. Enhanced processing additionally checks current DID authorization and metadata freshness. Invalid identity or binding checks MUST fail closed, not fall back to another key source or mode.
 
-A successfully verified assertion MUST be considered consumed before grant processing or token issuance; a later grant error does not make it reusable. A retry requires a freshly signed assertion and a new `jti`, and still follows the grant's own single-use rules.
+An enhanced AS MUST atomically reserve `(AS issuer, client_id, jti)` until `exp + allowed skew` after successful cryptographic/claim validation and before grant processing. Reuse fails across keys, replicas and concurrent requests; invalid signatures must not poison the replay store. Replay-store failure fails closed. A later grant error does not make the assertion reusable; a retry uses a fresh assertion and follows the grant's own single-use rules. Ordinary mode uses the AS's supported replay controls, which must meet the deployment's required assurance.
 
-Finally the AS MUST independently validate the grant, resource owner where applicable, allowed resource, requested permissions, and current policy. A valid client assertion is insufficient to issue a token. It does not sign the OAuth form body; HTTPS protects transport, and OAuth binds the grant and validates parameters. It is not a transaction-signing or human-consent proof.
+Finally the AS independently validates the grant, resource owner where applicable, resource, permissions and policy. Client authentication alone is insufficient to issue a token. The assertion does not sign the OAuth form body or a business transaction; HTTPS protects transport, and the OAuth flow validates and binds its own parameters.
 
 **Client assertion verification and replay handling (informative).**
 
 ```mermaid
 flowchart TD
-  Request["Incoming token request"]
-  Checks["Parse and select client DID<br/>check Profile, method and key<br/>verify JWT signature, claims and time"]
-  BeforeReject["Reject authentication<br/>do not reserve jti"]
-  Reserve["Atomically reserve<br/>(AS issuer, client_id, jti)"]
-  ReplayReject["Reject replay or replay-store failure<br/>no token"]
-  Consumed["Assertion consumed<br/>retain record until exp + skew"]
-  Grant["Check independent grant and owner<br/>resource, permissions and policy"]
-  GrantReject["Reject grant<br/>retry needs a fresh assertion and jti"]
-  Issue["Issue access token for the approved grant"]
-  Request --> Checks
-  Checks -->|"Fail"| BeforeReject
-  Checks -->|"Pass"| Reserve
-  Reserve -->|"No"| ReplayReject
-  Reserve -->|"Yes"| Consumed
-  Consumed --> Grant
-  Grant -->|"Deny"| GrantReject
-  Grant -->|"Approve"| Issue
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class BeforeReject,ReplayReject,GrantReject reject
-  classDef allow fill:#ecfdf5,stroke:#047857,color:#064e3b
-  class Issue allow
+  Input["Client assertion for a CIMD URL"] --> Keys["Select accepted JWKS key and authentication policy"]
+  Keys --> Mode{"DID-bound processing?"}
+  Mode -->|"Yes"| DID["Validate current DID, URL, digest and actual key"]
+  Mode -->|"No"| JWT["Verify JWT signature, claims and freshness"]
+  DID -->|"Pass"| JWT
+  DID -->|"Fail"| Reject["Reject without fallback"]
+  JWT --> Replay["Enforce replay controls"]
+  Replay --> Grant["Evaluate grant and requested resource permissions"]
+  Grant -->|"Approved"| Token["Issue token"]
+  Grant -->|"Denied"| Reject
 ```
 
 <a id="authorization-flows"></a>
 ## 7. Authorization flows
 
-An implementation MUST support at least one flow below and advertise only supported flows. This version uses a single target resource per grant. The client MUST supply exactly one absolute HTTPS `resource` URI without a fragment, using RFC 8707, on authorization requests and on all token requests covered here, including code redemption and refresh. This explicit repetition is an ANP Profile requirement. The AS MUST validate it against permitted resources and bind the grant and token to that target. Scope names have AS/RS-defined semantics; a DID is not a scope.
+An implementation MUST support at least one flow below and advertise only supported flows. Each grant/token in this revision is restricted to one target resource. Where RFC 8707 is supported and selected, the client sends exactly one absolute HTTPS `resource` URI without a fragment and the AS validates the target. In the enhanced binding, `resource` MUST be explicit on authorization, code-redemption, client-credentials and refresh requests. An ordinary CIMD connection MAY use the AS's existing, explicitly configured target-binding mechanism instead, including a deployment restricted to one resource, provided the client, grant and token still bind unambiguously to the intended resource. Absence of RFC 8707 is not permission to mint an unrestricted token. Select and pin the mechanism before authorization; a connection requiring RFC 8707 MUST fail if it is unavailable. Scope names retain AS/RS-defined semantics; a DID is not a scope.
 
-**One target per token is an isolation rule, not one service per Agent.** An Agent can hold separate grants and tokens for a calendar service and a document service using the same DID. Cache them by issuer, tenant, resource owner, client DID, resource, scopes and sender key where applicable; never choose a token only by the Agent DID. Each AS authenticates its own user account and independently approves access. An aggregate task is not an aggregate token, and identical user names/DIDs at different ASs do not silently merge accounts. Requiring resource on redemption and refresh prevents target ambiguity; it deliberately excludes ASs lacking RFC 8707 from native conformance. Enabling several resource indicators or a cross-AS grant would need another Profile and is not required here.
+**One target per token is an isolation rule, not one service per Agent.** An Agent can hold separate grants and tokens for calendar and document services using the same DID and CIMD URL. Cache them by issuer, tenant, resource owner, URL `client_id`, resource, scopes, processing mode and sender key where applicable; never choose a token only by the DID. Each AS independently authenticates its user account and approves access. An aggregate task is not an aggregate token, and identical user names or DIDs at different ASs do not merge accounts. Multiple resource indicators or cross-AS grants need a separate extension.
 
 ### 7.1 Client credentials
 
-Use `grant_type=client_credentials` only for a confidential client acting on its own behalf or under a prior resource-owner authorization arrangement recognized by the AS. It MUST NOT be used to obtain an arbitrary user's permissions based solely on an Agent DID.
+Use `grant_type=client_credentials` only for a confidential client acting on its own behalf or under a prior resource-owner authorization arrangement recognized by the AS. It MUST NOT be used to obtain an arbitrary user's permissions based solely on an Agent DID or CIMD publication.
 
-The AS MUST verify Section 6, check a current policy/grant allowing this client to access the requested resource and scopes, and issue only permitted access. In this Profile, no refresh token is issued for client credentials; the client authenticates again for another token.
+The AS MUST verify Section 6, check a current policy/grant allowing this URL client to access the selected resource and scopes, and issue only permitted access. In this Profile, no refresh token is issued for client credentials; the client authenticates again for another token.
 
 ### 7.2 User-delegated authorization code with PKCE
 
-The client uses the AS authorization endpoint with `response_type=code`, its accepted `client_id`, an approved `redirect_uri`, the target `resource`, requested `scope`, fresh session-bound `state`, and PKCE `code_challenge_method=S256`. The AS authenticates the resource owner using its own supported method and obtains consent or applies an existing valid authorization. DID client authentication does not authenticate that user or replace consent.
+The client uses the AS authorization endpoint with `response_type=code`, the CIMD URL as `client_id`, an approved `redirect_uri`, the selected resource binding, requested `scope`, fresh session-bound `state`, and PKCE `code_challenge_method=S256`. The AS authenticates the resource owner using its supported method and obtains consent or applies an existing valid authorization. URL-client authentication, including optional DID-binding verification, does not authenticate that user or replace consent.
 
-Before authorization, the client MUST retain the validated issuer, resource, client binding, redirect URI, `state`, and PKCE verifier in one transaction record. On both success and error callbacks, it MUST validate `state` and RFC 9207 `iss` against that record before sending a code or accepting an error. Missing, duplicate, or mismatched `iss` MUST abort this Profile flow; comparison is exact after normal response decoding, without URL normalization. Unvalidated response fields MUST NOT select another AS or token endpoint. Redirect URIs MUST be approved from the integrity-validated metadata snapshot or pre-registration before code issuance. Apply Section 7.2.1 matching, including its sole loopback-port exception; no wildcard matching is permitted.
+Before authorization, the client MUST retain the validated issuer, resource, URL client identifier, processing mode, authentication policy, approved redirect URI, `state` and PKCE verifier in one transaction record. Success and error callbacks MUST be bound to that record before sending a code or accepting an error. When RFC 9207 is supported or required, validate exactly one `iss` against the retained issuer; a missing, duplicate or mismatched value aborts. An ordinary AS without RFC 9207 may instead use an explicitly configured RFC 9700 anti-mix-up defense, such as a separate redirect URI for each issuer. The client MUST pin that strategy beforehand; it MUST NOT fall back after an issuer-check failure. Enhanced authorization-code processing MUST support RFC 9207. No callback field may select an unvalidated AS or token endpoint.
 
-At the token endpoint the client sends `grant_type=authorization_code`, `code`, the same `redirect_uri`, `code_verifier`, and a fresh Section 6 assertion. `resource` MUST be sent and MUST equal the grant's original target; omission or a changed target is rejected by this Profile. The AS MUST validate the single-use code's client, redirect, PKCE, target, and grant bindings. It MUST NOT substitute a client-only identity for the resource owner in the output authorization.
+Redirect URIs MUST be approved from accepted CIMD metadata or pre-registration before code issuance; enhanced processing additionally validates the DID-pinned digest before trusting a callback. Apply Section 7.2.1 matching, including its sole loopback-port exception; no wildcard matching is permitted. At the token endpoint the client sends `grant_type=authorization_code`, the same URL `client_id`, `code`, the same actual `redirect_uri`, `code_verifier` and a fresh Section 6 assertion. It preserves the original target under the selected resource-binding mechanism. The AS MUST validate and atomically consume the single-use code with its client, redirect, PKCE, target and grant bindings. It MUST NOT substitute a client-only identity for the resource owner in the output authorization.
 
 ### 7.2.1 Hosted and local redirect bindings
 
-An AS implementing the authorization-code flow MUST implement HTTPS and RFC 8252 loopback matching, and advertise enabled modes under Section 5. A client checks that its chosen mode is enabled before starting. Local policy can reject a deployment independently of implementation support.
+A client MUST establish support for its callback mode before starting. CIMD support alone does not imply that an AS accepts loopback callbacks or a native per-instance authentication key. Enhanced ASs advertise the enabled modes under Section 5; an implementation claims and tests only those it supports. No `anp_application_type` extension is required at an ordinary AS; its accepted application configuration and standard metadata determine the permitted deployment.
 
-For hosted callbacks, require an absolute HTTPS URI without a fragment or userinfo, and exact matching to an approved redirect URI. For native loopback, require anp_application_type=native and an approved metadata entry with scheme http, the literal host 127.0.0.1 or [::1], and an exact non-empty path. Query, fragment, userinfo, localhost names, alternative numeric IP spellings, wildcard hosts and path wildcards are not allowed in this initial loopback binding. Metadata entries may omit a port or contain one concrete valid port; they are not URI templates. Only the port is ignored when comparing an authorization request to that approved loopback entry, as in RFC 8252 Section 7.3. The requested redirect MUST include an explicit port from 1 through 65535; any such port is permitted by matching. IPv4 and IPv6 entries are separate approved values, and all other components must match exactly without decoding/normalizing paths into a different value.
+For hosted callbacks, require an absolute HTTPS URI without a fragment or userinfo, and exact matching to an approved redirect URI. When native loopback is explicitly supported, require an approved metadata entry with scheme `http`, literal host `127.0.0.1` or `[::1]`, and an exact non-empty path. Query, fragment, userinfo, `localhost` names, alternative numeric IP spellings and wildcards are outside this initial loopback binding. Metadata may omit a port or contain one concrete valid port; it is not a URI template. Only the port is ignored when comparing an authorization request with that entry, as in RFC 8252 Section 7.3. The requested redirect MUST include an explicit port from 1 through 65535. IPv4 and IPv6 entries are separate approved values; all other components match exactly without decoding or normalizing paths into a different value.
 
-The AS MUST bind the full actual redirect URI, including the selected port, to the authorization code. Redemption MUST repeat that exact value; the port exception applies only to metadata-to-authorization-request matching, not to code redemption. The metadata snapshot does not change when an ephemeral request port changes. S256 PKCE, state, response iss and the Agent's fresh client assertion remain mandatory.
+The AS MUST bind the full actual redirect URI, including its port, to the code. Redemption MUST repeat that exact value; the port exception applies only to metadata-to-authorization-request matching. An ephemeral request port does not change the metadata snapshot. S256 PKCE, `state`, the selected issuer-validation strategy and a fresh client assertion remain mandatory.
 
-The local client opens a loopback-only listener before launching the external system browser, binds only the selected loopback interface, and closes it on completion or timeout. An embedded login webview, 0.0.0.0 listener or LAN callback is not a substitute. This HTTP exception never authorizes the AS to fetch a callback or to access loopback/private metadata endpoints: the browser returns to its own device, while AS-to-DID/metadata traffic remains subject to Section 13 SSRF controls. Remote Agents without a browser on the same device are not covered by this binding.
+The local client opens a loopback-only listener before launching the external system browser, binds only the selected loopback interface, and closes it on completion or timeout. An embedded login webview, `0.0.0.0` listener or LAN callback is not a substitute. This HTTP exception never authorizes the AS to fetch a callback or private metadata endpoint: the browser returns to its own device, while AS-to-metadata/DID traffic remains subject to Section 13. Remote Agents without a browser on the same device are outside this binding.
 
 ### 7.2.2 First-contact user-delegation sequence (informative)
 
 ```mermaid
 sequenceDiagram
     participant U as User / system browser
-    participant A as Agent (own DID key)
+    participant A as Agent
     participant R as Resource server
     participant S as Authorization server
-    participant D as DID resolver / host
-    participant M as Metadata host
+    participant P as Public CIMD / JWKS / DID hosts
     A->>R: Request resource without token
     R-->>A: 401 and resource_metadata
-    A->>S: Discover and validate issuer / capabilities
-    A->>U: Open authorize URL (DID, resource, state, S256 PKCE)
-    U->>S: Authorization request
-    S->>D: Resolve and validate DID document
-    D-->>S: Authentication key, service URL and pinned digest
-    S->>M: Fetch metadata bytes
-    M-->>S: Self-published metadata
-    S->>S: Verify digest, admit client, approve callback
+    A->>S: Validate issuer, CIMD and selected capabilities
+    A->>U: Open authorize URL (CIMD URL, resource, state, S256)
+    U->>S: Standard authorization request
+    S->>P: Fetch CIMD and accepted JWKS
+    P-->>S: Standard metadata and public keys
+    opt Advertised DID-bound processing
+        S->>P: Resolve and method-validate associated DID
+        P-->>S: Service URL, digest and allowed keys
+        S->>S: Verify binding before accepting metadata
+    end
+    S->>S: Apply admission and approve callback
     S->>U: Authenticate user and request scoped consent
     U->>S: Approve or deny
     alt User approves
-        S-->>U: Redirect with code, state and iss
+        S-->>U: Code and state, iss when selected
         U->>A: Approved HTTPS or loopback callback
-        A->>A: Validate state and iss
-        A->>S: Code, exact callback, verifier, resource, client_assertion
-        S->>S: Revalidate metadata/key, verify proof and grant, consume jti/code
+        A->>A: Validate session and pinned issuer strategy
+        A->>S: Code, exact callback, verifier, fresh assertion, target binding
+        S->>S: Verify current key/binding, assertion, code and grant
         S-->>A: Resource-specific access token
         A->>R: Token and permitted action
-        R->>R: Verify issuer, audience, client_id, scope and policy
+        R->>R: Validate token, current authorization and operation policy
     else User denies
-        S-->>U: Error on an approved callback, state and iss
-        U->>A: Error, stop the operation
+        S-->>U: Error on approved callback, state, iss when selected
+        U->>A: Validate error binding and stop
     end
 ```
 
 ### 7.3 Refresh
 
-An AS MAY issue refresh tokens for the authorization-code flow. Refresh requests MUST include a fresh Section 6 client assertion and use the original client's binding. They MUST preserve the resource, resource owner, and grant; scopes MUST NOT increase. `resource` MUST be present and MUST equal the original single target.
+An AS MAY issue refresh tokens for the authorization-code flow. Refresh requests MUST include a fresh Section 6 assertion for the original URL client and processing mode. They MUST preserve the resource owner, grant and original single target; scopes MUST NOT increase. Enhanced processing requires an explicit unchanged `resource`. Ordinary processing preserves the target under the preselected AS mechanism; omission cannot broaden it.
 
-The AS MUST enforce expiration and revocation and implement refresh-token rotation with reuse detection or a supported sender-constrained refresh mechanism. DID authentication alone does not constrain a refresh token's sender. Invalidated client bindings or grants MUST prevent refresh. Existing valid grants need not prompt the user on every API call, but new permissions require a new authorization decision.
+The AS MUST enforce expiration and revocation and implement refresh-token rotation with reuse detection or a supported sender-constrained refresh mechanism. A DID association alone does not constrain a refresh token's sender. Invalidated client bindings or grants MUST prevent refresh. Existing valid grants need not prompt the user on every API call, but new permissions require a new authorization decision.
 
 <a id="tokens"></a>
 ## 8. Access tokens and resource enforcement
@@ -541,7 +484,7 @@ Tokens MAY be opaque or JWT. The RS MUST validate the trusted AS, validity, revo
 
 The client assertion MUST NOT be accepted as an access token, ID Token, refresh token, or authorization grant. `Bearer` access uses RFC 6750. DPoP is RECOMMENDED when both AS and RS support it; it remains optional in this initial Profile. Where used, RFC 9449 applies, including `token_type=DPoP`, `Authorization: DPoP`, proof validation, `ath` at the RS, and `cnf.jkt` for JWT key binding. DPoP does not replace client authentication and its key need not be the long-lived DID key. Policy requiring DPoP MUST NOT silently fall back to Bearer.
 
-The RS need not resolve a DID merely to accept an AS-issued token if its existing token/policy implementation suffices. It still needs support for any negotiated extension such as DPoP and MUST enforce the permissions rather than assume that a familiar DID has unrestricted access. Authentication, authorization, TLS, and message E2EE remain separate guarantees.
+The RS need not resolve a DID merely to accept an AS-issued token if its existing token/policy implementation suffices. The OAuth client identity remains the CIMD URL; claims of verified DID identity require the trusted evidence described in Section 3. It still needs support for any negotiated extension such as DPoP and MUST enforce the permissions rather than assume that a familiar DID has unrestricted access. Authentication, authorization, TLS, and message E2EE remain separate guarantees.
 
 ### 8.2 Inbound and outbound authorization
 
@@ -571,18 +514,18 @@ flowchart LR
 
 An RS with no valid token uses `401`; insufficient granted permissions use `403` with an applicable `insufficient_scope` challenge. For dynamic HTTP discovery, the RS SHOULD include `resource_metadata` and the minimal scopes for the operation. The client MUST verify the challenge belongs to its selected RS and authorized AS relationship, then request an independently approved scope increase; it MUST NOT treat the challenge as permission or silently switch to a privileged client credential. Requested scope increases remain subject to resource-owner consent and local policy; retries MUST be bounded.
 
-Authorization MUST cover the actual resource/action and caller's task access, not merely a known DID or task identifier. Pending authorization blocks the affected operation. Session IDs, open streams, and successful previous calls do not themselves grant future authority. Credentials MUST stay in the dedicated authentication/authorization channel, not ordinary prompts, task text, or artifacts.
+Authorization MUST cover the actual resource/action and caller's task access, not merely a known DID or task identifier. Before each operation, the RS MUST check that the applicable authorization is still valid under the deployment's expiry/revocation policy; discovery, a cached client binding or a previous successful operation is not a fresh grant. A cached status result is usable only within the deployment's documented validity interval. Policy requiring current online status MUST fail closed when that status cannot be obtained. Pending authorization blocks the affected operation. Session IDs, open streams, and successful previous calls do not themselves grant future authority. Credentials MUST stay in the dedicated authentication/authorization channel, not ordinary prompts, task text, or artifacts.
 
 <a id="examples"></a>
 ## 9. Wire examples (informative)
 
-These are schematic messages, not executable cryptographic fixtures. `SIGNED_CLIENT_ASSERTION` and `OPAQUE_ACCESS_TOKEN` are placeholders, and the example NumericDates are fixed examples, not live credentials. The client may have been pre-approved or admitted under Section 4.3; its active `#auth-1` Ed25519 key and grant must be validated before a token is issued.
+These are schematic messages, not executable cryptographic fixtures. `SIGNED_CLIENT_ASSERTION` and `OPAQUE_ACCESS_TOKEN` are placeholders, and the fixed NumericDates are not live credentials. This example selects RFC 8707, issuer audience and a server accepting `typ=JWT` and Ed25519. It may run against a compatible standard CIMD AS or the enhanced AS in Section 5; only the latter verifies the DID binding. Admission, proof of key possession and a valid independent grant are required before token issuance.
 
-Decoded JWS header and payload for DID-as-client-ID mode:
+Decoded JWS header and payload: the `kid` happens to be a DID URL used as a JWKS label, while `iss` and `sub` are the CIMD URL:
 
 ```json
 {
-  "typ": "client-authentication+jwt",
+  "typ": "JWT",
   "alg": "Ed25519",
   "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
 }
@@ -590,8 +533,8 @@ Decoded JWS header and payload for DID-as-client-ID mode:
 
 ```json
 {
-  "iss": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
-  "sub": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "iss": "https://agents.example/agent-a/oauth/client.json",
+  "sub": "https://agents.example/agent-a/oauth/client.json",
   "aud": "https://auth.example",
   "iat": 1790467200,
   "exp": 1790467500,
@@ -606,7 +549,7 @@ POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=client_credentials&client_id=did%3Awba%3Aagents.example%3Aagent-a%3Ae1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
+grant_type=client_credentials&client_id=https%3A%2F%2Fagents.example%2Fagent-a%2Foauth%2Fclient.json&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=SIGNED_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi&scope=documents.read
 ```
 
 ```http
@@ -631,7 +574,7 @@ Host: docs.example
 Authorization: Bearer OPAQUE_ACCESS_TOKEN
 ```
 
-The AS's server-side opaque-token record binds this token to `https://docs.example/api` and the approved client/grant; the audience is not omitted merely because it is not visible in an opaque token. Authorization-code redemption uses the same assertion transport but `grant_type=authorization_code` with `code`, `redirect_uri`, and `code_verifier` from Section 7.2.
+The AS's server-side record binds the opaque token to `https://docs.example/api` and the approved URL client/grant; an opaque token still has an intended audience. Code redemption uses the same assertion transport with `grant_type=authorization_code`, `code`, `redirect_uri` and `code_verifier` under Section 7.2.
 
 ### 9.1 Resource discovery
 
@@ -660,16 +603,27 @@ Cache-Control: no-store
 
 The client validates the resource association before discovering `https://auth.example`. The metadata does not grant `documents.read`.
 
-### 9.2 Native DID publication
+### 9.2 DID association and standard CIMD publication
 
-The following did:wba e1_ example uses an Ed25519 Multikey (multicodec 0xed, unsigned-varint bytes ed 01, followed by 32 public-key bytes). The final DID segment is the RFC 7638 thumbprint of this public key. The same key is authorized for authentication and the document proof in this schematic example; production clients SHOULD use the key separation described in Section 10.1. The required contexts, assertion relationship, and Data Integrity proof structure are shown, but `zDOCUMENT_PROOF_PLACEHOLDER` is not a verifiable signature. The AS must validate the WBA fingerprint and document proof before accepting client assertions. This example contains no private key. The service digest hashes the exact UTF-8 native-metadata block below, including its final LF newline; any changed serialization requires a recomputed digest.
+The following did:wba e1_ example uses an Ed25519 Multikey (multicodec 0xed, unsigned-varint bytes ed 01, followed by 32 public-key bytes). The final DID segment is the RFC 7638 thumbprint of that key. The same key is authorized for authentication and the document proof in this schematic example; production clients SHOULD use Section 10.1's key separation. The inline context defines the experimental service terms as IRIs in this specification; deployments pin the complete context and method/suite dependencies. `zDOCUMENT_PROOF_PLACEHOLDER` is not a verifiable signature. The publisher and any enhanced verifier must validate the WBA fingerprint and document proof. An ordinary CIMD AS does not fetch this DID document.
+
+The service digest hashes the exact UTF-8 CIMD block below, including its final LF newline. The embedded JWKS is covered by that digest. Any changed serialization requires a recomputed digest. No private key is included.
 
 ```json
 {
   "@context": [
     "https://www.w3.org/ns/did/v1",
     "https://w3id.org/security/data-integrity/v2",
-    "https://w3id.org/security/multikey/v1"
+    "https://w3id.org/security/multikey/v1",
+    {
+      "ANPCIMD": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anpcimd",
+      "anp_oauth_keys": {
+        "@id": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anp-oauth-keys",
+        "@type": "@id",
+        "@container": "@set"
+      },
+      "anp_metadata_sha256": "https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/05-anp-did-authorization-protocol-specification.md#anp-metadata-sha256"
+    }
   ],
   "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
   "verificationMethod": [
@@ -686,9 +640,12 @@ The following did:wba e1_ example uses an Ed25519 Multikey (multicodec 0xed, uns
   "service": [
     {
       "id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#oauth-client",
-      "type": "ANPOAuthClientMetadata",
-      "serviceEndpoint": "https://agents.example/agent-a/oauth/native-client.json",
-      "anp_metadata_sha256": "44de16f707659c7925b458d9c247edb892405e7c26c17e2cf64d8874b6f2cbcb"
+      "type": "ANPCIMD",
+      "serviceEndpoint": "https://agents.example/agent-a/oauth/client.json",
+      "anp_metadata_sha256": "3d03045553c170ab505cc6b3211c903b4b1b23823d8f46881f312a6242b83ff5",
+      "anp_oauth_keys": [
+        "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1"
+      ]
     }
   ],
   "assertionMethod": [
@@ -705,14 +662,14 @@ The following did:wba e1_ example uses an Ed25519 Multikey (multicodec 0xed, uns
 }
 ```
 
-The native document at `https://agents.example/agent-a/oauth/native-client.json` uses the Agent DID as `client_id`; the URL is only its publication location:
+The HTTPS endpoint `https://agents.example/agent-a/oauth/client.json` returns HTTP 200 with `Content-Type: application/json` and the following body. Its URL is its OAuth `client_id`. The optional `anp_did` is only a reverse-discovery hint; a publisher may omit it for a standards-only deployment, in which case it must recompute any pinned digest and supply a trusted binding separately if enhanced verification is required.
 
 ```json
 {
-  "anp_profile": "anp.authorization.oauth2.did.v1-draft4",
-  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "client_id": "https://agents.example/agent-a/oauth/client.json",
   "client_name": "Example Agent A",
   "token_endpoint_auth_method": "private_key_jwt",
+  "token_endpoint_auth_signing_alg": "Ed25519",
   "grant_types": [
     "client_credentials",
     "authorization_code",
@@ -725,22 +682,36 @@ The native document at `https://agents.example/agent-a/oauth/native-client.json`
     "https://agents.example/agent-a/callback"
   ],
   "scope": "documents.read",
-  "anp_application_type": "web"
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "VEpJi1nTD8okbTyhNIyr-NlO4dH7if8D8FOccCQyxQQ",
+        "kid": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28#auth-1",
+        "use": "sig",
+        "alg": "Ed25519"
+      }
+    ]
+  },
+  "anp_did": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28"
 }
 ```
 
-A previously unknown native client can present this DID to an AS advertising `self_published`. The AS retrieves these documents, performs admission and later proof/grant verification as specified in Section 4.3. No advance registration API call is required for that flow.
+The JWK's `x` is the base64url encoding of the validated 32-byte Ed25519 public key from the Multikey. A deployment can publish a separate JWKS and use `jwks_uri` instead, subject to Section 4.2's actual-key checks; it must not put both fields in CIMD or point `jwks_uri` to an unconverted DID document.
+
+A previously unknown client presents the CIMD URL to an AS permitting first-contact admission. The AS retrieves standard client metadata and keys. Only an enhanced AS additionally resolves `anp_did`, verifies the DID-to-URL backlink and digest, and checks the actual signing key against `anp_oauth_keys` and `authentication`. Neither publication nor successful discovery grants permissions. No registration API call is required when the AS admits the self-published client.
 
 ### 9.3 User and Agent attribution
 
-The following is the decoded payload of an illustrative AS-signed RFC 9068 access token, not a client assertion. Its JWS header would use typ=at+jwt and an AS signing key. The issuer-scoped user is user-248; client_id is the Agent DID. A Bearer token does not additionally prove the presenter's key ownership. For an authorized active introspection response, the same client_id is returned with active=true and the applicable token attributes; an inactive response discloses no such identity.
+This illustrative decoded RFC 9068 access-token payload is signed by the AS, not the Agent. Its header uses `typ=at+jwt` and an AS signing key. The issuer-scoped resource owner is `user-248`; `client_id` identifies the CIMD URL. A Bearer token does not additionally prove its presenter's private-key ownership. If active introspection returns `client_id`, it likewise returns the URL. An inactive response discloses no client identity. Associated DID evidence, if required, follows Section 3 and is not invented by substituting a DID into this standard field.
 
 ```json
 {
   "iss": "https://auth.example",
   "sub": "user-248",
   "aud": "https://docs.example/api",
-  "client_id": "did:wba:agents.example:agent-a:e1_RfdmtK_McXAgc6fbIC55GcOjXyXGPWixGhrDaiLsv28",
+  "client_id": "https://agents.example/agent-a/oauth/client.json",
   "iat": 1790467200,
   "exp": 1790467800,
   "jti": "example-access-token-01",
@@ -750,7 +721,7 @@ The following is the decoded payload of an illustrative AS-signed RFC 9068 acces
 
 ### 9.4 Local Agent callback example
 
-A separate local Agent, did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE, publishes and integrity-binds its own complete metadata with anp_application_type=native, authorization_code (and optionally refresh_token), private_key_jwt and an approved loopback entry. The following values illustrate the matching rule; they are not a substitute for that full metadata document or user approval.
+A separate local Agent, `did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE`, associates its DID with `https://agents.example/local-a/oauth/client.json` and publishes its own public JWKS, `authorization_code` (optionally `refresh_token`), `private_key_jwt` and an approved loopback callback. It first confirms that the AS accepts its deployment and loopback mode. No mandatory `anp_application_type` field is added to ordinary CIMD. Enhanced publication also pins its own metadata digest and allowed DID keys. The following matching values do not replace a complete client configuration or user approval:
 
 | Item | Value |
 | --- | --- |
@@ -760,14 +731,14 @@ A separate local Agent, did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92
 | Different port only during redemption | http://127.0.0.1:49153/callback — reject |
 | Different path or localhost spelling | http://localhost:49152/callback — reject |
 
-The Agent opens its loopback listener before invoking the system browser. After state/iss validation it redeems the code using a fresh assertion whose iss and sub equal the local Agent DID, not the DID of the earlier hosted example. Placeholders below are not live credentials:
+The Agent opens its listener before invoking the system browser. After session and issuer validation it redeems the code using a fresh assertion whose `iss` and `sub` are the local CIMD URL. This example selects RFC 8707; placeholders are not live credentials:
 
 ```http
 POST /token HTTP/1.1
 Host: auth.example
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
+grant_type=authorization_code&client_id=https%3A%2F%2Fagents.example%2Flocal-a%2Foauth%2Fclient.json&code=ONE_TIME_LOCAL_CODE&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcallback&code_verifier=LOCAL_PKCE_VERIFIER&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=FRESH_LOCAL_CLIENT_ASSERTION&resource=https%3A%2F%2Fdocs.example%2Fapi
 ```
 
 <a id="lifecycle"></a>
@@ -775,42 +746,40 @@ grant_type=authorization_code&client_id=did%3Awba%3Aagents.example%3Alocal-a%3Ae
 
 ### 10.1 Routine runtime-key rotation versus identity migration
 
-For e1_ OAuth deployments, clients SHOULD keep the fingerprint-binding key protected for document control and use a separate authorized authentication key for routine client assertions. AS policy SHOULD accept such a runtime key after the e1_ document proof/fingerprint and authentication relationship are verified. This uses ANP-03 Section 3.1.1's explicit allowance for non-binding authentication keys; it does not change the ANP-03 default for other request profiles or waive local approval. The root key remains authorized as required by the method, but need not be exposed to the runtime for every token request.
+For e1_ deployments, clients SHOULD protect the fingerprint-binding key for document control and use a separate authorized authentication key for routine assertions. The publisher exports that runtime key to JWKS; an enhanced verifier checks its authorization through the method-valid DID document and `anp_oauth_keys`. This uses ANP-03 Section 3.1.1's allowance for non-binding authentication keys without changing ANP-03's default for other request profiles or waiving local approval. The method-required root key need not be exposed to the runtime for every token request.
 
-Changing only an authorized runtime key and updating the DID document under the unchanged binding key does not change the DID. The AS can preserve still-valid client/grant records under the existing policy; adding a key is not permission expansion. Assertions by removed keys fail once the removal is observed. Binding-key rotation is a different operation: it changes a fingerprint-path DID and requires the explicit migration checks below. V1 does not guarantee automatic grant transfer or require that all history be deleted; a future verified-migration extension must define reapproval, compromise and in-flight-token handling.
+Rotating a runtime key while keeping the DID and CIMD URL unchanged does not create a new OAuth client. Update DID authorization, the selected OAuth-key list and JWKS consistently, and recompute the metadata digest whenever the CIMD bytes change. Coordinate publication so that enhanced verification observes a valid combination; inconsistent intermediate states fail closed. An AS may preserve approved records/grants under current policy; adding a key is not permission expansion. Removing a key blocks assertions once the relevant verifier observes the removal. An external JWKS update does not change a digest covering only its URI; enhanced verification must still check the actual current DID-authorized key.
 
-DID resolution results and self-published client metadata MUST have bounded authentication freshness intervals no longer than 300 seconds in this Profile; stricter method or local limits win. Once stale, the AS MUST revalidate before accepting a new assertion. Failed revalidation MUST NOT cause indefinite use of stale keys or fallback to unvalidated key material. Unknown `kid` MAY trigger one bounded refresh, not unbounded retries. Locally known deactivation, key removal, or compromise MUST invalidate affected cache entries immediately.
+Ordinary CIMD servers follow their supported HTTP metadata/JWKS caching and key-refresh policies. Removing a key only from a DID document is insufficient to revoke it at an AS that does not resolve DIDs. The publisher MUST also remove the key from the accepted JWKS and use the AS's supported client/grant controls when prompt containment is required. Publication of a new digest does not force a standard AS to re-fetch anything.
 
-Metadata MUST be revalidated through the current DID service link and its pinned digest; do not indefinitely reuse a detached metadata URL. Changes to redirects, grants, authentication, service location or client identity require a new admission decision and checks on pending flows and existing grants; metadata refresh MUST NOT automatically expand consent. Invalid/error responses cannot become accepted metadata. Short-lived abuse throttles are permitted but are not positive identity caches.
+In `did_bound` mode, DID resolution, CIMD and authentication-key freshness MUST be bounded to no more than 300 seconds; stricter method or local limits win. The AS MUST revalidate stale material before accepting a new assertion. Revalidation failure must not cause indefinite stale-key use or a fallback to ordinary CIMD. A missing `kid` may trigger one bounded refresh. Locally known deactivation, key removal or compromise invalidates affected caches immediately. After current state shows a key unauthorized, assertions using it fail even if their `iat` predates removal. Remote changes have a bounded detection delay; this Profile does not claim instantaneous global revocation.
 
-After current state shows a key removed or unauthorized, assertions using it MUST fail even if their `iat` predates removal. The freshness interval implies a bounded detection delay for remote changes; this Profile does not claim instantaneous global key revocation.
+Enhanced metadata MUST be revalidated through the current DID service URL and digest. Security-relevant changes to redirects, grants, authentication, binding or selected keys need a new admission/policy decision and checks on pending flows. Refreshing metadata MUST NOT automatically expand consent. Invalid responses cannot become accepted metadata; negative throttling caches are not positive identity evidence.
 
-For an unchanged DID, valid method-defined key rotation MAY retain the approved client record and grants, unless policy or compromise handling invalidates them. On compromise, operators MUST be able to disable the client binding, block token issuance/refresh, and invalidate affected grants or tokens through the deployment's revocation path.
+Identity changes have separate consequences:
 
-A changed DID, including a WBA successor, MUST NOT automatically inherit an OAuth client record, redirect URIs, codes, refresh tokens, or grants through string similarity, Handle, `stableSubjectId`, or an unverified `successorDid` hint. A migration needs method-verified continuity plus an explicit AS binding/authorization decision. A change of client DID MUST also trigger review of issuer-scoped token caches, outstanding tasks, and downstream grants; a task may retain its identifier while losing authorization. This draft defines no automatic grant-migration procedure; absent such an approved procedure, establish a new client binding and authorization. ANP-03's HTTP 409 hint is not the OAuth token-endpoint error format.
+| Change | Required treatment |
+| --- | --- |
+| Same DID and CIMD URL; authorized runtime-key rotation | Revalidate the current key and metadata; retain grants only under the AS's existing policy. |
+| Same DID; changed CIMD URL | New OAuth `client_id`. Existing client records, codes, refresh tokens and grants MUST NOT automatically transfer. Establish a new client/admission and authorization unless a separately defined AS migration process explicitly permits it. |
+| Same CIMD URL; changed associated DID, including a WBA successor | Ordinary ASs may not observe a DID change. An enhanced AS MUST invalidate the old DID binding and require an explicit rebind/admission decision; no silent grant inheritance from a Handle, `stableSubjectId` or unverified `successorDid`. Verified method continuity alone does not authorize migration of grants. |
+| Compromised metadata/JWKS host, key or binding | Disable the affected client/binding, prevent issuance/refresh and apply the deployment's grant/token revocation process. Scope containment to affected identities and grants. |
 
-DID key revocation does not itself revoke an already issued AS token. Deployments MUST define and document grant/token expiry and revocation behavior, using short-lived access, trusted status checks, or another supported revocation mechanism. RFC 7009 token revocation and RFC 7662 introspection MAY be supported; their endpoint authentication policy MUST be separately configured rather than assumed from token-endpoint support. Revoking a grant MUST prevent new issuance and refresh under that grant.
+This draft defines no automatic DID or URL grant-migration protocol. A changed binding requires review of issuer-scoped token caches, pending tasks and downstream grants; a task may keep its identifier while losing authorization. ANP-03's HTTP 409 successor hint is not an OAuth token-endpoint error format. The older DID-as-client-ID Profile and this URL-client Profile are distinct clients and cannot share grants by merely changing the Profile identifier.
+
+DID or JWKS key revocation does not itself revoke an AS-issued access token. Deployments MUST document grant/token expiry and revocation, including issued-token invalidation latency and the RS's per-operation check in Section 8.3. RFC 7009 revocation and RFC 7662 introspection MAY be used; configure their authentication policies separately from the token endpoint. Revoking a grant MUST prevent new issuance and refresh under that grant. Withdrawing access at one service normally revokes that issuer/resource grant; it need not deactivate the Agent's DID or grants at unrelated services.
 
 **Runtime-key rotation, identity change and compromise handling (informative).**
 
 ```mermaid
 flowchart TD
   Change{"What changed?"}
-  Same["Binding key and DID unchanged<br/>revalidate current keys, metadata and policy"]
-  Retain["Eligible records/grants MAY remain under policy<br/>removed-key assertions fail once observed"]
-  New["New client DID<br/>no automatic inheritance of records or grants"]
-  Rebind["Obtain an approved new binding/authorization<br/>migration needs verified continuity and AS decision"]
-  Block["Invalidate affected caches<br/>apply deployment policy for binding, issuance and revocation"]
-  Reject["Reject new assertions<br/>do not fall back to stale or unvalidated keys"]
-  Change -->|"Authorized runtime-key rotation only"| Same
-  Same -->|"Current checks pass and policy permits"| Retain
-  Same -->|"Compromise is detected"| Block
-  Same -->|"Validation fails"| Reject
-  Change -->|"e1_ binding key or client DID changes"| New
-  New --> Rebind
-  Change -->|"Compromise"| Block
-  classDef reject fill:#fff1f2,stroke:#be123c,color:#881337
-  class Block,Reject reject
+  Change -->|"Runtime key only"| Check["Revalidate DID policy, CIMD and JWKS as applicable"]
+  Check -->|"Valid and policy permits"| Retain["Retain eligible grants, reject removed keys once observed"]
+  Check -->|"Invalid"| Reject["Reject without stale-key or mode fallback"]
+  Change -->|"CIMD URL"| New["New OAuth client, no automatic grant transfer"]
+  Change -->|"DID at same URL"| Rebind["Enhanced mode requires explicit rebinding"]
+  Change -->|"Compromise"| Block["Block affected issuance and apply revocation policy"]
 ```
 
 <a id="vc-authorization"></a>
@@ -823,14 +792,14 @@ For the OAuth Profile, use OAuth errors; do not return ANP-02 `DIDWba` challenge
 | Condition | Error / behavior |
 | --- | --- |
 | Missing required fields, duplicated security parameters, multiple authentication methods | `invalid_request` |
-| Client discovery/admission/binding fails; bad assertion, DID/key/claim/algorithm/time binding, or replay | `invalid_client` at the token endpoint; unknown DID alone is not failure when self-published admission is enabled |
+| Client discovery/admission/binding fails; bad assertion, DID/key/claim/algorithm/time binding, or replay | `invalid_client` at the token endpoint; an unknown URL client alone is not failure when first-contact admission is enabled; a required DID binding must still validate |
 | Authenticated client not permitted to use the selected grant | `unauthorized_client` |
 | Invalid, expired, used, revoked, or incorrectly bound authorization code/refresh token | `invalid_grant` |
 | Unknown grant type | `unsupported_grant_type` |
 | Invalid or ungrantable requested scope | `invalid_scope` |
 | Unacceptable target resource | `invalid_target` under RFC 8707 |
 | User denies authorization at the authorization endpoint | `access_denied` under the authorization-endpoint rules |
-| Temporary resolver or replay-store outage | Fail closed; HTTP 503 with no token is permitted. Do not assert successful authentication or invent a successful OAuth response. |
+| Temporary metadata/JWKS/resolver or replay-store outage | Fail closed; HTTP 503 with no token is permitted. Do not assert successful authentication or invent a successful OAuth response. |
 
 For body-carried assertion authentication, token errors normally use HTTP 400 and the RFC 6749 Section 5.2 JSON format; applicable OAuth HTTP-authentication-specific status/header rules still apply. A generic `invalid_client` description SHOULD avoid disclosing account existence, whether an issuer is trusted, or private policy. RS failures follow the selected Bearer/DPoP specification, not this token-endpoint table. VC direct-presentation error formats are defined by the carrying interface; a failed VP, holder, status, issuer-authority or constraint check MUST reject the operation, and errors likewise should not disclose which verification step failed. This version defines no new OAuth errors for those failures. Never redirect an invalid authorization request to an unapproved URI.
 
@@ -839,7 +808,7 @@ For body-carried assertion authentication, token errors normally use HTTP 400 an
 
 Self-published admission MUST impose fetch/concurrency and candidate-record limits, rate-limit failed attempts, and avoid durable allocations for unauthenticated floods. A cache miss MUST NOT erase a suspension or revocation policy. Never interpret a familiar name/logo or a published metadata permission as an endorsement.
 
-DID/metadata resolution is an SSRF boundary. Implementations MUST restrict allowed schemes and destinations; block loopback, link-local, private-network, cloud-metadata, and equivalent IPv6 destinations unless explicitly permitted for a controlled deployment; validate each redirect and resolved address against the same policy; and enforce time, size, redirect, and recursion limits. DNS rebinding MUST NOT bypass destination checks. Resolver and metadata failure MUST NOT downgrade HTTPS or identity validation.
+CIMD, JWKS and DID resolution are SSRF boundaries. Implementations MUST restrict allowed schemes and destinations; block loopback, link-local, private-network, cloud-metadata, and equivalent IPv6 destinations unless explicitly permitted for a controlled deployment; do not automatically follow CIMD redirects; where another fetch protocol permits redirects, validate each hop and resolved address against the same policy; and enforce time, size, redirect, and recursion limits. For CIMD and URLs contained in it, CIMD draft-02 Section 8.6 overrides the general controlled-deployment exception: the AS MUST NOT fetch special-use IP destinations in production. Its only permitted relaxation is the draft's development/testing case where the AS itself runs on loopback and the resolved address is the same loopback interface. DNS rebinding MUST NOT bypass destination checks. Resolver and metadata failure MUST NOT downgrade HTTPS or identity validation.
 
 The AS MUST bind the selected issuer, client record, resource, and authorization transaction and enforce anti-mix-up and CSRF protections. It MUST NOT let an assertion claim, natural-language instruction, unverified Agent Description, or DID service endpoint override these bindings. All permissions MUST be evaluated by deterministic server-side policy, not inferred by an LLM from the requester's apparent intent.
 
@@ -847,7 +816,7 @@ Clients SHOULD separate long-lived DID control keys from restricted runtime auth
 
 Where resource policy requires separate per-operation approval, the RS MUST verify approval of the actual operation and applicable one-time-use/expiry conditions before execution, or reject the operation. General user consent, a task instruction, client authentication and DPoP MUST NOT be substituted for such approval. This is a fail-closed policy boundary, not a new approval credential defined by v1.
 
-A cross-service stable DID increases correlation risk. Deployments SHOULD disclose identifier use, minimize token claims and logs, and avoid embedding raw VCs, private user data, assertions, or tokens in public descriptions or operational logs.
+A cross-service stable DID or CIMD URL increases correlation risk. Deployments SHOULD disclose identifier use, minimize token claims and logs, and avoid embedding raw VCs, private user data, assertions, or tokens in public descriptions or operational logs.
 
 VC verification uses the same SSRF controls as DID/metadata resolution: issuer DIDs, status-list URLs and contexts outside the allowlist are all untrusted input. A VC or VP MUST NOT be treated as a Bearer access credential or placed in URLs, prompts, task text or artifacts. A human's or organization's issuing key MUST NOT be copied to an Agent; holding a credential does not confer the ability to issue one. Issuer trust policy MUST be scoped by credential type and resource: trusting an organization to issue delegations for its own staff does not mean trusting it to issue delegations for other organizations or other resources. Natural-language descriptions in credential text do not constitute authority.
 
@@ -856,15 +825,15 @@ A successful VC or VP verification MUST NOT by itself create, imply, mint or aut
 <a id="conformance"></a>
 ## 14. Conformance and release evidence
 
-OAuth client conformance requires native DID metadata publication/discovery, Section 6 assertions, trusted AS discovery, the declared grant flow, and token handling. AS conformance requires native DID and self-published admission implementation, explicit enabled-policy advertisement, supported method validation, replay enforcement, independent grants, and lifecycle handling. RS conformance requires the selected standard token validation and actual resource-policy enforcement. Optional features within this Profile MUST be declared and tested before use.
+OAuth client conformance requires DID-to-CIMD publication/discovery, standard URL identifiers and JWKS, Section 6 assertions, trusted AS/capability selection, a declared grant flow and token handling. Ordinary AS interoperability requires CIMD and the selected standard OAuth features; it does not require an ANP resolver, digest check or private capability. Claims of `did_bound` AS conformance additionally require enforcement of the advertised extension, current method/URL/digest/actual-key validation, bounded freshness, replay protection and lifecycle checks. Admission policy and unsupported features must be declared accurately; CIMD does not require open registration. RS conformance requires the selected token validation and actual resource-policy enforcement. Report the achieved mode explicitly; ordinary interoperability is not evidence of AS-verified DID identity.
 
 When the VC Profile is claimed, holders implement Section 11.3 holder-bound VP creation and Section 11.6 Profile checking; verifiers implement Section 11.6 direct presentation and the complete Section 11.4 verification order, holder binding, issuer-authority confirmation, status checking, permission intersection and constraint enforcement; when session mode is used, also verify Section 11.6 identity binding, per-operation authorization and finite-lifetime rules. OAuth conformance and VC direct-presentation conformance are independent. Issuer conformance covers only correct credential format, proof and status-list publication; this version does not certify issuance interfaces or issuance protocols.
 
 Test applicable positive flows and all relevant rejection paths before release or public enablement; record unsupported optional features rather than reporting them as passes. The detailed scenario catalog, stable evidence identifiers and identifier maintenance notes are in the [ANP-05 implementation validation guide](docs/anp-05-validation-guide.md) and its [Chinese mirror](docs/chinese/anp-05-validation-guide.md).
 
-A draft or an experimental prototype may be reviewed with one complete implementation and explicit negative-test evidence, but MUST be labeled experimental. A stable interoperable v1 release claim for the OAuth Profile requires two independently developed client/AS implementations and cross-implementation tests, applicable RS tests, first-contact admission at each AS, disabled-admission behavior, metadata tampering/updates, hosted and loopback redirects when authorization-code support is claimed, method/runtime-key lifecycle, multi-resource isolation for the declared flows, and an explicit security review. When the VC Profile is claimed, it also requires cross-tests between independently implemented holders and verifiers covering direct presentation, exact Profile matching, and credential revocation. Implementation independence means independent code paths for the protocol, not two instances of the same server; deployments must document shared components. This gate does not block publishing or reviewing a draft.
+A draft or an experimental prototype may be reviewed with one complete implementation and explicit negative-test evidence, but MUST be labeled experimental. A stable interoperable v1 release claim for the OAuth Profile requires two independently developed client/AS implementations and cross-implementation tests, applicable RS tests, standard CIMD interoperability without ANP extensions, first-contact and restricted-admission behavior, metadata/JWKS updates, declared callback modes, key/URL lifecycle, multi-resource isolation for the declared flows, and an explicit security review. DID-bound claims additionally require metadata-tampering, copied-key/actual-key substitution, binding/digest enforcement, method lifecycle and downgrade-rejection evidence. When the VC Profile is claimed, it also requires cross-tests between independently implemented holders and verifiers covering direct presentation, exact Profile matching, and credential revocation. Implementation independence means independent code paths for the protocol, not two instances of the same server; deployments must document shared components. This gate does not block publishing or reviewing a draft.
 
-A recorded compatibility decision is required for custom metadata and optional algorithm/type handling. Tests for high-risk approval verify refusal or the deployment's explicit business approval policy; they do not certify a generic approval format that v1 has not defined. Specification text, diagram checks and documentation tests alone do not satisfy runtime or stable-release conformance.
+A recorded compatibility decision is required for optional metadata, signing algorithms, assertion audience/type, callback modes and resource/issuer-binding mechanisms at each target AS. Tests for high-risk approval verify refusal or the deployment's explicit business approval policy; they do not certify a generic approval format that v1 has not defined. Specification text, diagram checks and documentation tests alone do not satisfy runtime or stable-release conformance.
 
 <a id="references"></a>
 ## 15. References
@@ -878,7 +847,10 @@ Normative, where the corresponding feature is used:
 - [RFC 7515](https://www.rfc-editor.org/rfc/rfc7515.html), [RFC 7517](https://www.rfc-editor.org/rfc/rfc7517.html), [RFC 7518](https://www.rfc-editor.org/rfc/rfc7518.html), [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519.html), and [RFC 8725](https://www.rfc-editor.org/rfc/rfc8725.html): JWS, keys, algorithms, JWT, and JWT security.
 - [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037.html) and [RFC 9864](https://www.rfc-editor.org/rfc/rfc9864.html): Edwards keys and fully specified JOSE algorithms.
 - [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html), [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728.html), and [RFC 9207](https://www.rfc-editor.org/rfc/rfc9207.html): AS/resource metadata and authorization-response issuer binding.
-- [RFC 7591, Section 2](https://www.rfc-editor.org/rfc/rfc7591.html#section-2): reused OAuth client metadata names and semantics; its registration exchange is not required by native discovery.
+- [OAuth Client ID Metadata Document draft-02](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02): pinned experimental CIMD dependency for HTTPS URL client identifiers and metadata discovery; not a published RFC.
+- [OpenID Connect Core 1.0, Section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication): standard `private_key_jwt` client-authentication method and issuer/subject semantics; no OIDC login or ID Token is required by this Profile.
+- [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638.html): public-key thumbprints for representation-independent key comparison.
+- [RFC 7591, Section 2](https://www.rfc-editor.org/rfc/rfc7591.html#section-2): reused OAuth client metadata names and semantics; its registration exchange is not required by CIMD discovery.
 - [RFC 7636](https://www.rfc-editor.org/rfc/rfc7636.html) and [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707.html): PKCE and target-resource restriction.
 - [RFC 6750](https://www.rfc-editor.org/rfc/rfc6750.html), [RFC 9068](https://www.rfc-editor.org/rfc/rfc9068.html), and [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html): Bearer, JWT access tokens, and optional DPoP.
 - [RFC 7009](https://www.rfc-editor.org/rfc/rfc7009.html) and [RFC 7662](https://www.rfc-editor.org/rfc/rfc7662.html): optional revocation and introspection.
@@ -906,7 +878,9 @@ Informative:
 <a id="future-extensions"></a>
 ## 16. Future extensions (informative)
 
-A future version is planned to support compatibility with CIMD so that authorization servers without native DID support can also be reached. This version defines only DID-native OAuth and VC authorization and includes no conversion, mapping, or publication-adapter requirements. The concrete design will be specified in a separate extension and will not become a mandatory dependency of the core protocol.
+A future extension may explore using the DID itself as OAuth `client_id`, with a DID-aware AS or a separately specified adapter. It would need explicit identifier negotiation, DID resolution and metadata rules, standard JWT issuer/subject handling, security analysis and migration boundaries. That direction can make DID identity native at the AS, but requires support beyond a standard CIMD server. It is not a fallback after failure of this revision's URL client or DID binding, and cannot inherit a URL client's grants automatically.
+
+The present revision deliberately uses an unchanged CIMD/OAuth interface so an ANP Agent can connect to existing compatible authorization servers through its published URL and JWKS. Future direct-DID work must preserve this interoperable path and remain separately negotiated.
 
 ### 16.1 VC–OAuth composition
 

@@ -19,44 +19,55 @@ const enValidationFile = 'docs/anp-05-validation-guide.md';
 const cnValidationFile = 'docs/chinese/anp-05-validation-guide.md';
 const enValidation = read(enValidationFile);
 const cnValidation = read(cnValidationFile);
-const profile = 'anp.authorization.oauth2.did.v1-draft4';
+const profile = 'anp.authorization.oauth2.cimd.v1-draft1';
 const vcProfile = 'anp.authorization.vc.v1-draft2';
 const blocks = text => [...text.matchAll(/^```([^\n]*)\n([\s\S]*?)^```\s*$/gm)].map(match => ({language: match[1], text: match[2].trimEnd()}));
 const anchors = text => [...text.matchAll(/<a id="([^"]+)"><\/a>/g)].map(match => match[1]);
 const scenarios = text => [...text.matchAll(/^\| (AUTHZ-\d+) \|/gm)].map(match => match[1]);
 const jsonBlocks = text => blocks(text).filter(block => block.language === 'json').map(block => JSON.parse(block.text));
 const samples = text => {
-  const [metadata, header, claims, token, resource, did, native] = jsonBlocks(text);
-  return {metadata, header, claims, token, resource, did, native};
+  // Identify examples by their schema so adding an OAuth example cannot shift VC fixtures.
+  const examples = jsonBlocks(text);
+  const metadata = examples.find(value => value.authorization_endpoint && value.token_endpoint);
+  const header = examples.find(value => value.alg && value.kid && !value.kty);
+  const claims = examples.find(value => value.iss && value.iss === value.sub && value.jti);
+  const token = examples.find(value => value.access_token);
+  const resource = examples.find(value => value.authorization_servers);
+  const did = examples.find(value => value.verificationMethod && value.authentication);
+  const cimd = examples.find(value => value.client_id && value.token_endpoint_auth_method);
+  const access = examples.find(value => value.client_id && value.sub && value.scope);
+  return {metadata, header, claims, token, resource, did, cimd, access};
 };
 
 for (const [file, text] of [[enFile, en], [cnFile, cn]]) {
   test('authorization document is an unreleased independent draft: ' + file, () => {
     assert.match(text, /^- (?:Document ID: |文档编号：)ANP-05$/m);
     assert.match(text, /^- (?:Status: Draft \/ not released|状态：草案 \/ 未发布)$/m);
-    assert.match(text, /^- (?:Version: |版本：)0\.6$/m);
+    assert.match(text, /^- (?:Version: |版本：)0\.7$/m);
     assert(text.includes(profile));
     assert(text.includes(vcProfile));
     assert.doesNotMatch(text, /^- (?:Status: Released|状态：已发布)/m);
     assert.match(text, /not part of the ANP 1\.2 release|不属于 ANP 1\.2 发布范围/);
-    assert.doesNotMatch(text, /anp\.authorization\.oauth2\.did\.v1-draft(?:2|3)?(?:`|")/);
+    const profileHeader = text.split('\n').find(line => /^- (?:Draft Profile identifiers:|Profile 标识|草案 Profile)/.test(line));
+    assert(profileHeader && profileHeader.includes(profile));
+    assert.doesNotMatch(profileHeader, /anp\.authorization\.oauth2\.did\.v1-draft/);
   });
 }
 
 test('bilingual sections, explicit anchors and wire examples stay synchronized', () => {
-  assert.equal(anchors(en).length, 24);
+  assert.equal(anchors(en).length, 27);
   assert.deepEqual(anchors(en), anchors(cn));
   assert.equal(new Set(anchors(en)).size, anchors(en).length);
   assert.equal(anchors(en).at(-1), 'future-extensions');
   assert(!anchors(en).includes('interoperability'));
-  for (const id of ['mechanism-selection', 'vc-authorization', 'vc-oauth-composition', 'vc-direct-presentation', 'vc-organization-agents']) assert(anchors(en).includes(id), id);
+  for (const id of ['anpcimd', 'anp-oauth-keys', 'anp-metadata-sha256', 'mechanism-selection', 'vc-authorization', 'vc-oauth-composition', 'vc-direct-presentation', 'vc-organization-agents']) assert(anchors(en).includes(id), id);
   const sections = text => [...text.matchAll(/^## (\d+)\./gm)].map(match => Number(match[1]));
   assert.deepEqual(sections(en), Array.from({length: 16}, (_, index) => index + 1));
   assert.deepEqual(sections(en), sections(cn));
   // Diagram labels are localized; every other code block must match byte for byte.
   const wire = text => blocks(text).filter(block => block.language !== 'mermaid');
   assert.deepEqual(wire(en), wire(cn));
-  assert.equal(jsonBlocks(en).length, 11);
+  assert.deepEqual(jsonBlocks(en), jsonBlocks(cn));
   const diagramKinds = text => blocks(text).filter(block => block.language === 'mermaid').map(block => block.text.split('\n')[0]);
   assert.deepEqual(diagramKinds(en), ['flowchart TD', 'flowchart LR', 'flowchart TD', 'flowchart TD', 'sequenceDiagram', 'flowchart LR', 'flowchart TD', 'sequenceDiagram', 'flowchart TD', 'flowchart TD']);
   assert.deepEqual(diagramKinds(en), diagramKinds(cn));
@@ -77,16 +88,16 @@ test('metadata reuses private_key_jwt and standard OAuth grant types', () => {
   const {metadata} = samples(en);
   assert.deepEqual(metadata.token_endpoint_auth_methods_supported, ['private_key_jwt']);
   assert.deepEqual(metadata.grant_types_supported, ['client_credentials', 'authorization_code', 'refresh_token']);
-  assert.deepEqual(metadata.anp_did_oauth, {
+  assert.equal(metadata.client_id_metadata_document_supported, true);
+  assert.deepEqual(metadata.anp_cimd_binding, {
     profile,
     did_methods_supported: ['did:web', 'did:wba'],
-    client_id_modes_supported: ['did'],
     client_enrollment_methods_supported: ['self_published', 'pre_registered'],
     redirect_uri_modes_supported: ['https', 'loopback'],
   });
   assert.deepEqual(metadata.code_challenge_methods_supported, ['S256']);
   assert.equal(metadata.authorization_response_iss_parameter_supported, true);
-  assert(!Object.hasOwn(metadata, 'client_id_metadata_document_supported'));
+  assert(!Object.hasOwn(metadata, 'anp_did_oauth'));
   assert(metadata.token_endpoint_auth_signing_alg_values_supported.includes('RS256'));
   assert(metadata.token_endpoint_auth_signing_alg_values_supported.includes('Ed25519'));
   for (const field of ['issuer', 'authorization_endpoint', 'token_endpoint']) {
@@ -94,12 +105,14 @@ test('metadata reuses private_key_jwt and standard OAuth grant types', () => {
   }
 });
 
-test('illustrative assertion has exact DID, AS audience and bounded NumericDates', () => {
-  const {metadata, header, claims} = samples(en);
-  assert.equal(header.typ, 'client-authentication+jwt');
+test('illustrative assertion uses the CIMD URL, a JWKS key and bounded NumericDates', () => {
+  const {metadata, header, claims, cimd} = samples(en);
+  assert.equal(header.typ, 'JWT');
   assert.equal(header.alg, 'Ed25519');
   assert.equal(claims.iss, claims.sub);
-  assert.equal(header.kid, claims.sub + '#auth-1');
+  assert.equal(claims.sub, cimd.client_id);
+  assert.equal(new URL(claims.sub).protocol, 'https:');
+  assert(cimd.jwks.keys.some(key => key.kid === header.kid));
   assert.equal(claims.aud, metadata.issuer);
   assert.notEqual(claims.aud, metadata.token_endpoint);
   assert(Number.isInteger(claims.iat) && Number.isInteger(claims.exp));
@@ -110,7 +123,7 @@ test('illustrative assertion has exact DID, AS audience and bounded NumericDates
   assert(!Object.hasOwn(claims, 'authorization_details'));
 });
 
-test('token request uses the native DID client-assertion binding, not a new grant', () => {
+test('token request uses the CIMD URL and the standard client-assertion transport', () => {
   const requests = blocks(en).filter(block => block.language === 'http' && block.text.startsWith('POST /token ') && block.text.includes('grant_type=client_credentials&'));
   assert.equal(requests.length, 1);
   const request = requests[0];
@@ -146,11 +159,12 @@ test('mirrors retain applicable security scenarios without reusing removed scena
   ids.push(...Array.from({length: 10}, (_, index) => index + 41));
   ids.push(...Array.from({length: 5}, (_, index) => index + 53));
   ids.push(...Array.from({length: 17}, (_, index) => index + 59));
+  ids.push(...Array.from({length: 8}, (_, index) => index + 76));
   const expected = ids.map(id => 'AUTHZ-' + String(id).padStart(2, '0'));
   assert.deepEqual(scenarios(enValidation), expected);
   assert.deepEqual(scenarios(cnValidation), expected);
   assert.match(en, /not executable cryptographic fixtures/);
-  assert.match(cn, /不是可执行密码学测试向量/);
+  assert.match(cn, /不是可执行的?密码学测试向量/);
   assert.match(enValidation, /not a claim that an implementation has passed/);
   assert.match(cnValidation, /不是宣称某个实现已经通过/);
   assert.doesNotMatch(en, /^\| AUTHZ-\d+/m);
@@ -160,7 +174,7 @@ test('mirrors retain applicable security scenarios without reusing removed scena
   assert(enValidation.includes('(../' + enFile + '#conformance)'));
   assert(cnValidation.includes('(../../' + cnFile + '#conformance)'));
   for (const guide of [enValidation, cnValidation]) {
-    assert(guide.includes('v0.6'));
+    assert(guide.includes('v0.7'));
     assert(guide.includes(profile));
     assert(guide.includes(vcProfile));
   }
@@ -175,20 +189,20 @@ test('identity references use the current ANP-02 bindings', () => {
   assert(cn.includes('**不复用**其 HTTP 签名序列化'));
 });
 
-test('root and vNext indexes expose only the current native draft scope', () => {
+test('root and vNext indexes expose the current CIMD draft scope', () => {
   assert(read('README.md').includes('(' + enFile + ')'));
   assert(read('README.cn.md').includes('(' + cnFile + ')'));
   assert(read('vnext/README.md').includes('(../' + enFile + ')'));
   assert(read('vnext/chinese/README.md').includes('(../../' + cnFile + ')'));
-  assert.match(read('README.md'), /^\| Authorization \| \[ANP-05:[^\n]+\| Draft \/ not released; v0\.6 \|/m);
-  assert.match(read('README.cn.md'), /^\| 授权 \| \[ANP-05：[^\n]+\| 草案 \/ 未发布；v0\.6 \|/m);
+  assert.match(read('README.md'), /^\| Authorization \| \[ANP-05:[^\n]+\| Draft \/ not released; v0\.7 \|/m);
+  assert.match(read('README.cn.md'), /^\| 授权 \| \[ANP-05：[^\n]+\| 草案 \/ 未发布；v0\.7 \|/m);
   for (const file of ['README.md', 'README.cn.md', 'vnext/README.md', 'vnext/chinese/README.md']) {
     const draftLines = read(file).split('\n').filter(line => /ANP-05/.test(line));
-    assert.doesNotMatch(draftLines.join('\n'), /CIMD|MCP|A2A|mapped|projection|投影|映射/i);
+    assert.doesNotMatch(draftLines.join('\n'), /MCP|A2A|mapped|projection|投影|映射/i);
   }
   for (const file of ['vnext/README.md', 'vnext/chinese/README.md']) {
-    assert.match(read(file), /v0\.6/);
-    assert.doesNotMatch(read(file), /v0\.(?:2|3|4|5)/);
+    assert.match(read(file), /v0\.7/);
+    assert.doesNotMatch(read(file), /v0\.(?:2|3|4|5|6)/);
   }
 });
 
@@ -244,23 +258,25 @@ test('resource metadata and challenge bind to the illustrated RS and AS', () => 
   assert(!challenge.text.includes('access_token='));
 });
 
-test('native publication keeps DID identity separate from the metadata retrieval URL', () => {
-  const {metadata, did, native, claims} = samples(en);
-  assert.deepEqual(metadata.anp_did_oauth.client_id_modes_supported, ['did']);
-  assert(metadata.anp_did_oauth.client_enrollment_methods_supported.includes('self_published'));
-  assert.equal(native.anp_profile, profile);
-  assert.equal(native.client_id, did.id);
-  assert.equal(native.client_id, claims.sub);
-  const services = did.service.filter(item => item.type === 'ANPOAuthClientMetadata');
+test('DID service links to the exact CIMD client identifier without redefining OAuth metadata', () => {
+  const {metadata, did, cimd, claims} = samples(en);
+  assert(metadata.anp_cimd_binding.client_enrollment_methods_supported.includes('self_published'));
+  assert.equal(cimd.anp_did, did.id);
+  assert.notEqual(cimd.client_id, did.id);
+  assert.equal(cimd.client_id, claims.sub);
+  const services = did.service.filter(item => item.type === 'ANPCIMD');
   assert.equal(services.length, 1);
   assert.equal(services[0].id, did.id + '#oauth-client');
   const url = new URL(services[0].serviceEndpoint);
   assert.equal(url.protocol, 'https:');
   assert.equal(url.hash + url.search + url.username + url.password, '');
   assert.notEqual(url.pathname, '/');
-  assert.notEqual(native.client_id, services[0].serviceEndpoint);
-  for (const field of ['jwks', 'jwks_uri', 'client_secret', 'client_secret_expires_at', 'anp_cimd_uri']) {
-    assert(!Object.hasOwn(native, field), field);
+  assert.equal(cimd.client_id, services[0].serviceEndpoint);
+  assert(services[0].anp_oauth_keys.length > 0);
+  for (const id of services[0].anp_oauth_keys) assert(did.authentication.includes(id));
+  assert(cimd.jwks.keys.length > 0);
+  for (const field of ['anp_profile', 'anp_application_type', 'jwks_uri', 'client_secret', 'client_secret_expires_at', 'anp_cimd_uri']) {
+    assert(!Object.hasOwn(cimd, field), field);
   }
 });
 
@@ -281,7 +297,7 @@ function decodeBase58btc(value) {
 }
 
 test('WBA publication binds its DID fingerprint to the authorized public Multikey', () => {
-  const {did, header} = samples(en);
+  const {did, header, cimd} = samples(en);
   assert.equal(did.verificationMethod.length, 1);
   const method = did.verificationMethod[0];
   assert.equal(method.id, header.kid);
@@ -293,10 +309,18 @@ test('WBA publication binds its DID fingerprint to the authorized public Multike
   assert.equal(bytes.length, 34);
   assert.deepEqual(bytes.subarray(0, 2), Buffer.from([0xed, 0x01]));
   const key = {kty: 'OKP', crv: 'Ed25519', x: bytes.subarray(2).toString('base64url')};
+  const oauthKey = cimd.jwks.keys.find(value => value.kid === header.kid);
+  assert(oauthKey, 'The asserted key must be published in the CIMD JWKS');
+  assert.deepEqual({kty: oauthKey.kty, crv: oauthKey.crv, x: oauthKey.x}, key);
+  assert(did.service[0].anp_oauth_keys.includes(method.id));
+  assert(!Object.hasOwn(oauthKey, 'd'));
   assert.equal(key.x, 'VEpJi1nTD8okbTyhNIyr-NlO4dH7if8D8FOccCQyxQQ');
   const fingerprint = createHash('sha256').update(JSON.stringify({crv: key.crv, kty: key.kty, x: key.x})).digest('base64url');
   assert.equal(did.id, 'did:wba:agents.example:agent-a:e1_' + fingerprint);
-  assert.deepEqual(did['@context'], ['https://www.w3.org/ns/did/v1', 'https://w3id.org/security/data-integrity/v2', 'https://w3id.org/security/multikey/v1']);
+  assert.deepEqual(did['@context'].slice(0, 3), ['https://www.w3.org/ns/did/v1', 'https://w3id.org/security/data-integrity/v2', 'https://w3id.org/security/multikey/v1']);
+  const context = did['@context'][3];
+  assert(context && typeof context === 'object');
+  for (const term of ['ANPCIMD', 'anp_oauth_keys', 'anp_metadata_sha256']) assert(Object.hasOwn(context, term));
   assert.deepEqual(did.assertionMethod, [method.id]);
   assert.equal(did.proof.type, 'DataIntegrityProof');
   assert.equal(did.proof.cryptosuite, 'eddsa-jcs-2022');
@@ -323,15 +347,15 @@ test('illustrative DID identities use did:wba in both languages and form bodies'
   }
 });
 
-test('native grant and callback metadata are internally consistent', () => {
-  const {native} = samples(en);
-  assert.equal(native.token_endpoint_auth_method, 'private_key_jwt');
-  assert.deepEqual(native.response_types, ['code']);
-  assert(native.grant_types.includes('authorization_code'));
-  assert(native.grant_types.includes('refresh_token'));
-  assert(native.redirect_uris.length > 0);
-  for (const uri of native.redirect_uris) assert.equal(new URL(uri).protocol, 'https:');
-  for (const forbidden of ['implicit', 'password']) assert(!native.grant_types.includes(forbidden));
+test('CIMD grant and callback metadata are internally consistent', () => {
+  const {cimd} = samples(en);
+  assert.equal(cimd.token_endpoint_auth_method, 'private_key_jwt');
+  assert.deepEqual(cimd.response_types, ['code']);
+  assert(cimd.grant_types.includes('authorization_code'));
+  assert(cimd.grant_types.includes('refresh_token'));
+  assert(cimd.redirect_uris.length > 0);
+  for (const uri of cimd.redirect_uris) assert.equal(new URL(uri).protocol, 'https:');
+  for (const forbidden of ['implicit', 'password']) assert(!cimd.grant_types.includes(forbidden));
 });
 
 // Scope validation concerns document structure, not OAuth runtime behavior.
@@ -342,29 +366,33 @@ function scopeErrors(text) {
   if (start < 0 || end < start) return ['missing-final-future-section'];
   const before = text.slice(0, start);
   const future = text.slice(start, end);
-  if (/CIMD/i.test(before) || (text.match(/CIMD/g) ?? []).length !== 1) errors.push('cimd-not-confined-to-future');
+  if (!before.includes(profile) || !before.includes('client_id_metadata_document_supported') || !before.includes('ANPCIMD')) errors.push('current-cimd-contract-missing');
   if (/\b(?:MCP|A2A|Microsoft|Entra|VIRA|OBO)\b|modelcontextprotocol|a2a-protocol|learn\.microsoft/i.test(text)) errors.push('ecosystem-composition-remains');
-  if (/anp_cimd_uri|client_id_metadata_document_supported|oauth-compat-1|legacy-auth\.example|\bmapped\b/i.test(text)) errors.push('adapter-contract-remains');
+  for (const value of jsonBlocks(before)) {
+    if (typeof value.client_id === 'string' && !value.client_id.startsWith('https://')) errors.push('non-url-client-id-example');
+    if (/anp_did_oauth|client_id_modes_supported|ANPOAuthClientMetadata|anp\.authorization\.oauth2\.did\.v1-draft/.test(JSON.stringify(value))) errors.push('legacy-did-client-contract-remains');
+  }
   const body = future.replace(/^<a[^\n]*\n/m, '').replace(/^##[^\n]*\n/m, '').split(/^### 16\.1[^\n]*$/m)[0].trim();
-  if (body.split(/\n\s*\n/).length !== 1 || /```|^\s*[|*-]/m.test(body)) errors.push('future-section-not-one-paragraph');
-  if (!/A future version is planned|未来版本计划/.test(body) || !/includes no conversion|不包含相关转换/.test(body)) errors.push('future-scope-not-explicit');
+  if (/```/m.test(body)) errors.push('future-did-wire-contract-remains');
+  if (!/DID/.test(body) || !/future|未来/i.test(body)) errors.push('future-did-client-scope-not-explicit');
   return errors;
 }
 
-test('CIMD appears only in one final future paragraph, with no current adapter contract', () => {
+test('CIMD is the current contract and the retired DID client-ID contract is absent', () => {
   for (const text of [en, cn]) assert.deepEqual(scopeErrors(text), []);
 });
 
-test('scope guard rejects reintroduced combinations, fields, examples and early CIMD requirements', () => {
+test('scope guard rejects obsolete client identity and unrelated ecosystem contracts', () => {
   for (const text of [en, cn]) {
     const mutations = [
-      ['CIMD requirements\n' + text, 'cimd-not-confined-to-future'],
+      [text.replaceAll(profile, 'REMOVED_PROFILE'), 'current-cimd-contract-missing'],
       [text + '\nMCP composition\n', 'ecosystem-composition-remains'],
       [text + '\nA2A composition\n', 'ecosystem-composition-remains'],
       [text + '\nMicrosoft Entra adapter\n', 'ecosystem-composition-remains'],
-      [text + '\nanp_cimd_uri\n', 'adapter-contract-remains'],
-      [text + '\nclient_id_metadata_document_supported\n', 'adapter-contract-remains'],
-      [text.replace(/(## 16\.[^\n]*\n)/, '$1\n```json\n{}\n```\n'), 'future-section-not-one-paragraph'],
+      ['```json\n{"anp_did_oauth":{}}\n```\n' + text, 'legacy-did-client-contract-remains'],
+      ['```json\n{"client_id_modes_supported":["did"]}\n```\n' + text, 'legacy-did-client-contract-remains'],
+      ['```json\n{"client_id":"did:example:agent"}\n```\n' + text, 'non-url-client-id-example'],
+      [text.replace(/(## 16\.[^\n]*\n)/, '$1\n```json\n{}\n```\n'), 'future-did-wire-contract-remains'],
     ];
     for (const [changed, expected] of mutations) {
       assert.notEqual(changed, text);
@@ -373,47 +401,77 @@ test('scope guard rejects reintroduced combinations, fields, examples and early 
   }
 });
 
-// Preserve applicable native security requirements while removing ecosystem-specific checks.
-const nativeGuards = [
-  ['native identity and discovery',
-    /An AS claiming this revision's core conformance MUST implement DID-as-client-ID and the self-published metadata discovery\/admission procedure below/,
-    /声明本修订核心一致性的 AS 必须（MUST）实现 DID 直接作为客户端标识，以及下文的自发布元数据发现\/准入流程/],
-  ['exact native identity equality',
-    /The request `client_id`, assertion `iss`, assertion `sub`, and native metadata `client_id` MUST identify the same exact bare DID/,
-    /请求 `client_id`、断言 `iss`、断言 `sub` 和原生元数据 `client_id` 必须（MUST）标识完全相同的裸 DID/],
-  ['first-contact admission instead of mandatory preregistration',
-    /an unknown bare DID is a candidate for discovery, not an immediate .*solely for lacking a database row/,
-    /未知裸 DID 是待发现候选者，不能仅因数据库没有记录就立即返回/],
+// These guards check the documented CIMD contract, not a runtime implementation.
+const bindingGuards = [
+  ['ordinary CIMD processing has no ANP resolver requirement',
+    /The AS need not resolve DIDs, understand ANP extensions or check DID-pinned digests/,
+    /AS 无需解析 DID、理解 ANP 扩展或检查 DID 内固定的摘要/],
+  ['exact URL client identity equality',
+    /The request `client_id`, CIMD `client_id`, and client assertion `iss` and `sub` MUST be the same exact CIMD URL/,
+    /请求 `client_id`、CIMD `client_id` 和客户端断言 `iss`、`sub` 必须（MUST）是完全相同的 CIMD URL/],
+  ['first-contact admission is an AS policy choice',
+    /A CIMD AS MAY admit previously unknown Client Identifier URLs, or restrict admission to approved\/pre-registered clients/,
+    /CIMD AS 可以（MAY）接纳此前未知的客户端标识 URL，也可以将准入限制为已批准\/预注册客户端/],
   ['admission does not grant resource access',
-    /This decision does not grant resource access/,
-    /准入决定不授予资源权限/],
+    /Admission does not grant resource access/,
+    /准入不授予资源访问权限/],
   ['unchanged approved security snapshot at code redemption',
-    /A changed authentication policy, metadata endpoint or callback\/grant configuration invalidates that pending transaction/,
-    /认证策略、元数据端点或回调\/授权配置变化时，该未完成事务失效/],
-  ['strict authorization-response issuer validation',
-    /Missing, duplicate, or mismatched `iss` MUST abort this Profile flow/,
-    /`iss` 缺失、重复或不一致必须（MUST）终止流程/],
-  ['resource binding on every token request',
-    /on authorization requests and on all token requests covered here, including code redemption and refresh/,
-    /在授权请求及本版全部令牌请求中[\s\S]*?包括授权码兑换与刷新/],
+    /a changed binding or security-relevant metadata invalidates the pending transaction rather than replacing its values/,
+    /绑定或安全相关元数据变化时，未完成事务失效，而不是替换其中的值/],
+  ['authorization-response issuer strategy is fixed before the flow',
+    /The client MUST pin that strategy beforehand; it MUST NOT fall back after an issuer-check failure/,
+    /客户端必须（MUST）事先固定该策略，不得（MUST NOT）在 issuer 检查失败后回退/],
+  ['resource binding remains mandatory without imposing RFC 8707 on every AS',
+    /An ordinary CIMD connection MAY use the AS's existing, explicitly configured target-binding mechanism instead[\s\S]{0,300}Absence of RFC 8707 is not permission to mint an unrestricted token/,
+    /普通 CIMD 连接可以（MAY）使用 AS 既有且明确配置的目标绑定机制[\s\S]{0,160}不支持 RFC 8707 不是签发不受限令牌的理由/],
   ['no resource-token passthrough',
     /A token issued for Agent A MUST NOT be forwarded to service B as B's resource credential/,
     /签发给 Agent A 的令牌不得（MUST NOT）作为服务 B 的资源凭据直接转发给 B/],
-  ['no identity substitution after rejection',
-    /Authentication or admission failure MUST NOT trigger an automatic switch of client identity or weaker authentication/,
-    /认证或准入失败时，不得（MUST NOT）自动更换客户端身份或降低认证强度/],
+  ['a required DID binding cannot fall back after rejection',
+    /failure of its checks MUST abort the operation; it MUST NOT trigger an automatic retry in `cimd` mode/,
+    /其检查失败，必须（MUST）终止操作，不得（MUST NOT）自动切换为 `cimd` 模式重试/],
   ['atomic assertion replay enforcement',
     /atomically reserve `\(AS issuer, client_id, jti\)` until `exp \+ allowed skew`/,
-    /原子性占用 `\(AS issuer, client_id, jti\)`，保留至 `exp \+ allowed skew`/],
-  ['DID key revocation does not implicitly revoke issued tokens',
-    /DID key revocation does not itself revoke an already issued AS token/,
-    /DID 密钥撤销不会自行撤销已经由 AS 签发的令牌/],
+    /原子占用 `\(AS issuer, client_id, jti\)`，保留至 `exp \+ allowed skew`/],
+  ['key revocation does not implicitly revoke issued access tokens',
+    /DID or JWKS key revocation does not itself revoke an AS-issued access token/,
+    /DID 或 JWKS 密钥撤销[\s\S]{0,60}AS[\s\S]{0,30}访问令牌/],
+  ['advertising DID binding commits the AS to enforcement for all covered transactions',
+    /commits the AS to enforce `did_bound` for every CIMD client transaction[\s\S]{0,400}a request cannot opt out into ordinary processing/,
+    /对其已声明授权端点与令牌端点接受的每个 CIMD 客户端事务，强制执行 `did_bound`[\s\S]{0,160}请求不能选择退出并改走普通处理/],
+  ['actual key authorization cannot be satisfied by another key in the JWKS',
+    /actual key used for this client's authentication[\s\S]{0,400}Finding one matching key elsewhere in a JWKS is insufficient/,
+    /实际用于该客户端认证的密钥[\s\S]{0,300}仅在 JWKS 的其他位置找到一把匹配密钥不够/],
+  ['reverse discovery is a hint and never overrides a trusted binding',
+    /A conflicting reverse DID MUST NOT override an existing accepted binding/,
+    /冲突的反向 DID 不得（MUST NOT）覆盖已有的已接受绑定/],
+  ['a CIMD digest does not authenticate external JWKS bytes',
+    /only the URL string of `jwks_uri`; it does not protect the separately fetched JWKS bytes/,
+    /对 `jwks_uri` 只覆盖 URL 字符串，不保护独立获取的 JWKS 字节/],
+  ['metadata binding alone does not prove private-key possession',
+    /DID\/URL declarations and matching public keys are public configuration that can be copied[\s\S]{0,180}proof of private-key possession/,
+    /DID\/URL 声明及匹配公钥均为可复制的公开配置[\s\S]{0,100}私钥持有证明/],
+  ['revocation is checked before each operation',
+    /Before each operation, the RS MUST check that the applicable authorization is still valid under the deployment's expiry\/revocation policy/,
+    /每次操作[\s\S]{0,30}RS 必须（MUST）[\s\S]{0,140}撤销[\s\S]{0,100}有效/],
+  ['enhanced assertion validation requires bounded integer time claims',
+    /Enhanced verifiers MUST require every claim in the table[\s\S]{0,500}`0 < exp - iat <= 300`[\s\S]{0,400}`nbf <= exp` and `nbf <= now \+ skew`/,
+    /增强验证方必须（MUST）要求表中每个声明均存在[\s\S]{0,200}`0 < exp - iat <= 300`[\s\S]{0,250}`nbf <= exp` 和 `nbf <= now \+ skew`/],
+  ['CIMD production fetches cannot use the general private-network exception',
+    /CIMD draft-02 Section 8\.6 overrides the general controlled-deployment exception: the AS MUST NOT fetch special-use IP destinations in production[\s\S]{0,250}the same loopback interface/,
+    /CIMD draft-02 第 8\.6 节优先于一般的受控部署例外：AS 在生产环境不得（MUST NOT）获取特殊用途 IP 目标[\s\S]{0,160}同一个 loopback 接口/],
+  ['enhanced binding caches expire and failed revalidation cannot weaken processing',
+    /In `did_bound` mode, DID resolution, CIMD and authentication-key freshness MUST be bounded to no more than 300 seconds[\s\S]{0,200}Revalidation failure must not cause indefinite stale-key use or a fallback to ordinary CIMD/,
+    /`did_bound` 模式下，DID 解析、CIMD 及认证密钥的新鲜度必须（MUST）限制在不超过 300 秒[\s\S]{0,120}重新验证失败不得导致无限沿用旧密钥或回退到普通 CIMD/],
+  ['cache eviction cannot clear a prior suspension or revocation decision',
+    /A cache miss MUST NOT erase a suspension or revocation policy/,
+    /缓存未命中不得（MUST NOT）抹除停用或撤销策略/],
 ];
-for (const [name, enPattern, cnPattern] of nativeGuards) {
-  test('native requirement and deletion regression: ' + name, () => {
+for (const [name, enPattern, cnPattern] of bindingGuards) {
+  test('CIMD binding requirement and deletion regression: ' + name, () => {
     for (const [text, pattern] of [[en, enPattern], [cn, cnPattern]]) {
       assert.match(text, pattern);
-      const changed = text.replace(pattern, 'REMOVED_NATIVE_REQUIREMENT');
+      const changed = text.replace(pattern, 'REMOVED_BINDING_REQUIREMENT');
       assert.notEqual(changed, text);
       assert.throws(() => assert.match(changed, pattern), assert.AssertionError);
     }
@@ -429,10 +487,10 @@ const rawJsonExamples = text => [...text.matchAll(/^\x60{3}json\n([\s\S]*?)^\x60
 test('metadata digest matches exact serialized bytes including final newline in both languages', () => {
   for (const text of [en, cn]) {
     const raw = rawJsonExamples(text);
-    const {did, native} = samples(text);
-    const bytes = raw.find(value => JSON.parse(value).anp_profile === profile);
+    const {did, cimd} = samples(text);
+    const bytes = raw.find(value => JSON.parse(value).token_endpoint_auth_method === 'private_key_jwt');
     assert(bytes && bytes.endsWith('\n'));
-    assert.deepEqual(JSON.parse(bytes), native);
+    assert.deepEqual(JSON.parse(bytes), cimd);
     const digest = did.service[0].anp_metadata_sha256;
     assert.match(digest, /^[0-9a-f]{64}$/);
     assert.equal(hash(Buffer.from(bytes, 'utf8')), digest);
@@ -441,12 +499,13 @@ test('metadata digest matches exact serialized bytes including final newline in 
 });
 
 test('metadata example integrity detects changed presentation, permissions and callbacks', () => {
-  const raw = rawJsonExamples(en).find(value => JSON.parse(value).anp_profile === profile);
+  const raw = rawJsonExamples(en).find(value => JSON.parse(value).token_endpoint_auth_method === 'private_key_jwt');
   const expected = samples(en).did.service[0].anp_metadata_sha256;
   const variants = [
     raw.replace('Example Agent A', 'Different Agent'),
     raw.replace('documents.read', 'documents.write'),
     raw.replace('/agent-a/callback', '/agent-a/other-callback'),
+    raw.replace('VEpJi1nTD8okbTyhNIyr-NlO4dH7if8D8FOccCQyxQQ', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'),
     JSON.stringify(JSON.parse(raw)),
     raw + '\n',
   ];
@@ -457,10 +516,9 @@ test('metadata example integrity detects changed presentation, permissions and c
 });
 
 test('user-delegated access-token example uses existing client_id and a separate user sub', () => {
-  const access = jsonBlocks(en)[7];
-  const {metadata, did, resource} = samples(en);
+  const {metadata, cimd, resource, access} = samples(en);
   assert.equal(access.iss, metadata.issuer);
-  assert.equal(access.client_id, did.id);
+  assert.equal(access.client_id, cimd.client_id);
   assert.equal(access.aud, resource.resource);
   assert.notEqual(access.sub, access.client_id);
   assert.equal(access.scope, 'documents.read');
@@ -469,12 +527,13 @@ test('user-delegated access-token example uses existing client_id and a separate
   assert(!Object.hasOwn(access, 'agent_did'));
 });
 
-test('local code-redemption example repeats the actual loopback port and keeps a distinct client DID', () => {
+test('local code-redemption example repeats the actual loopback port and its distinct CIMD URL', () => {
   const request = blocks(en).find(block => block.language === 'http' && block.text.includes('grant_type=authorization_code&'));
   assert(request);
   const form = new URLSearchParams(request.text.split('\n\n')[1]);
-  assert.equal(form.get('client_id'), 'did:wba:agents.example:local-a:e1_w9B2uvMlMDEA9CP-FObx92_Y1J8fM3kxEx2ArrEkDiE');
-  assert.notEqual(form.get('client_id'), samples(en).did.id);
+  assert.equal(new URL(form.get('client_id')).protocol, 'https:');
+  assert(new URL(form.get('client_id')).pathname.includes('/local-a/'));
+  assert.notEqual(form.get('client_id'), samples(en).cimd.client_id);
   assert.equal(form.get('redirect_uri'), 'http://127.0.0.1:49152/callback');
   assert.equal(form.get('resource'), samples(en).resource.resource);
   assert.equal(form.get('code'), 'ONE_TIME_LOCAL_CODE');
@@ -488,7 +547,7 @@ test('local code-redemption example repeats the actual loopback port and keeps a
 
 test('source references retain published baseline and distinguish future-design inputs', () => {
   for (const text of [en, cn]) {
-    for (const target of ['rfc7523.html', 'rfc8252.html#section-7.3', 'rfc6234.html', 'rfc9068.html', 'rfc7662.html']) assert(text.includes(target), target);
+    for (const target of ['rfc7523.html', 'rfc8252.html#section-7.3', 'rfc6234.html', 'rfc9068.html', 'rfc7662.html', 'rfc7591.html', 'rfc7638.html', 'draft-ietf-oauth-client-id-metadata-document-02', 'openid-connect-core-1_0.html#ClientAuthentication']) assert(text.includes(target), target);
     assert(text.includes('draft-ietf-oauth-rfc7523bis-11'));
     assert(text.includes('rfc9396.html') && text.includes('rfc8693.html') && text.includes('rfc8628.html'));
   }
@@ -501,36 +560,36 @@ const reviewScopeGuards = [
   ['all four agent-authorization questions are defined',
     /Human-to-Agent delegation[\s\S]*One Agent serving a user across multiple services[\s\S]*Multi-level redelegation[\s\S]*Per-operation approval/,
     /人把权限委托给智能体[\s\S]*同一智能体代表用户访问多个服务[\s\S]*多级转委托[\s\S]*高风险操作逐笔批准/],
-  ['AS integration cost is stated rather than claiming plug-and-play',
-    /A stock OAuth AS is not expected to accept this flow unchanged/,
-    /不假设现成 OAuth AS 可以原样接受本流程/],
+  ['standard AS compatibility is conditional on its supported features and policy',
+    /Compatibility is conditional on the AS's admission policy, supported authentication algorithms and selected flow/,
+    /兼容性取决于 AS 的准入策略、支持的认证算法和所选流程/],
   ['metadata digest must be checked before its fields are used',
-    /Before using any client name, redirect URI or grant metadata, the AS MUST compare the computed digest/,
-    /在使用任何客户端名称、回调 URI 或授权元数据前，AS 必须（MUST）将计算值/],
+    /Before an enhanced AS uses the metadata for a callback or authorization decision[\s\S]{0,300}verify the pinned digest/,
+    /增强 AS 在将元数据用于回调或授权决定前[\s\S]{0,180}验证固定摘要/],
   ['metadata integrity does not remove DID-host and rollback assumptions',
-    /an attacker controlling the DID-document host can still replace its keys and digest[\s\S]*not rollback resistance/,
-    /did:web 的 DID 文档托管方被控制时[\s\S]*它不等于抗回滚/],
+    /for did:web, control of the DID-document host can still replace its keys and digest[\s\S]{0,160}Neither mode gains rollback resistance/,
+    /对 did:web，控制 DID 文档托管方仍可替换密钥与摘要[\s\S]{0,100}抗回滚能力/],
   ['loopback port exception cannot change the redemption URI',
-    /port exception applies only to metadata-to-authorization-request matching, not to code redemption/,
-    /端口例外只用于元数据与授权请求之间的匹配，不适用于授权码兑换/],
+    /Redemption MUST repeat that exact value; the port exception applies only to metadata-to-authorization-request matching/,
+    /兑换时必须（MUST）重复该精确值；端口例外只适用于元数据与授权请求之间的匹配/],
   ['loopback redirects do not relax SSRF protection',
     /This HTTP exception never authorizes the AS to fetch a callback/,
-    /此 HTTP 例外不授权 AS 抓取回调/],
-  ['routine runtime-key rotation does not force DID migration',
-    /Changing only an authorized runtime key[\s\S]*does not change the DID/,
-    /只轮换获准运行密钥[\s\S]*不会改变 DID/],
-  ['RS256 requirement is correctly attributed to RFC 7523 section 5',
-    /The AS MUST implement RS256 verification: RFC 7523 Section 5 explicitly makes it mandatory/,
-    /AS 必须（MUST）实现 RS256 验证：RFC 7523 第 5 节明确/],
+    /此 HTTP 例外不授权 AS 获取回调/],
+  ['routine key rotation preserves a client only while DID and URL remain unchanged',
+    /Rotating a runtime key while keeping the DID and CIMD URL unchanged does not create a new OAuth client/,
+    /保留 DID 和 CIMD URL 不变，仅轮换运行期密钥，不会产生新的 OAuth 客户端/],
+  ['algorithm interoperability does not assume Ed25519 support at ordinary servers',
+    /RFC 7523 specifies RS256 as mandatory to implement for conforming implementations[\s\S]{0,200}imply that a CIMD AS supports Ed25519/,
+    /RFC 7523 将 RS256 列为符合其规范的实现必须支持的算法[\s\S]{0,100}不表示 CIMD AS 支持 Ed25519/],
   ['legacy EdDSA is a configured compatibility option, not mandatory for all',
-    /AS SHOULD provide an explicitly configured EdDSA verification option restricted to Ed25519 keys/,
-    /AS 应当（SHOULD）提供可明确配置、仅接受 Ed25519 密钥的 EdDSA 验证选项/],
-  ['existing client_id is required on active introspection only by this Profile',
-    /RFC 7662 makes that field optional in general; this Profile requires it on active responses/,
-    /RFC 7662 本身将其定义为可选，本 Profile 对活动结果增加此要求/],
+    /The earlier `EdDSA` identifier is an explicitly enabled compatibility choice restricted to Ed25519 keys/,
+    /旧 `EdDSA` 标识是需明确启用、仅限 Ed25519 密钥的兼容选项/],
+  ['client-dependent policy rejects missing trusted identity rather than trusting a caller claim',
+    /An RS whose policy depends on client identity MUST obtain that identity through a trusted token\/introspection context[\s\S]{0,240}rather than trust a caller-supplied field/,
+    /策略依赖客户端身份的 RS 必须（MUST）从可信令牌\/introspection 上下文[\s\S]{0,160}不能相信调用方提供的字段/],
   ['multiple resources require isolated authorizations rather than universal rights',
     /One target per token is an isolation rule, not one service per Agent/,
-    /每个令牌一个目标是隔离规则，不是每个 Agent 只能访问一个服务/],
+    /每个令牌只对应一个目标，是隔离规则，不是限制一个 Agent 只能访问一个服务/],
   ['high-risk approval remains independently enforced',
     /the RS MUST verify approval of the actual operation[\s\S]*or reject the operation/,
     /RS 必须（MUST）在执行前验证实际操作的批准[\s\S]*否则拒绝/],
@@ -551,7 +610,10 @@ for (const [name, enPattern, cnPattern] of reviewScopeGuards) {
 
 // VC Profile examples: structural consistency only, not credential or signature verification.
 const vcSamples = text => {
-  const [presentationRequest, presentation, roleCredential] = jsonBlocks(text).slice(8);
+  const examples = jsonBlocks(text);
+  const presentationRequest = examples.find(value => value.type === 'ANPPresentationRequest');
+  const presentation = examples.find(value => Array.isArray(value.type) && value.type.includes('VerifiablePresentation'));
+  const roleCredential = examples.find(value => Array.isArray(value.type) && value.type.includes('ANPAgentRoleCredential'));
   return {presentationRequest, presentation, roleCredential};
 };
 const oneTimeValue = value => Buffer.from(value, 'base64url').length === 16 && /^[A-Za-z0-9_-]{22}$/.test(value);

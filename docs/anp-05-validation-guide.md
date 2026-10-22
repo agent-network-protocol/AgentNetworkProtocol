@@ -1,8 +1,8 @@
 # ANP-05 Implementation Validation Guide
 
 - Status: Informative validation guide for the unreleased protocol draft
-- Protocol baseline: [ANP-05 v0.6](../05-anp-did-authorization-protocol-specification.md)
-- Profiles: OAuth `anp.authorization.oauth2.did.v1-draft4`; VC `anp.authorization.vc.v1-draft2`
+- Protocol baseline: [ANP-05 v0.7](../05-anp-did-authorization-protocol-specification.md)
+- Profiles: OAuth `anp.authorization.oauth2.cimd.v1-draft1`; VC `anp.authorization.vc.v1-draft2`
 - Chinese mirror: [实现验证指南](chinese/anp-05-validation-guide.md)
 
 This guide collects implementation validation scenarios derived from ANP-05. The protocol defines the requirements and conformance rules, especially in [Section 14](../05-anp-did-authorization-protocol-specification.md#conformance). Section numbers in the scenarios below refer to the protocol.
@@ -11,45 +11,47 @@ This guide collects implementation validation scenarios derived from ANP-05. The
 
 These are design scenarios, not a claim that an implementation has passed them. Test applicable positive flows and all relevant rejection paths for the declared roles and capabilities; record unsupported optional features rather than reporting them as passes. This guide records no execution results for JWT/VC signature verification, end-to-end authorization or interoperability tests.
 
+For OAuth, record the processing mode selected before starting each flow. `cimd` uses a standard CIMD authorization server without requiring ANP metadata, DID resolution or DID-binding validation at that server. `did_bound` adds the ANP binding checks; an AS advertising `anp_cimd_binding` enforces them for the CIMD clients at the covered endpoints. Record the selected AS capabilities and policy for algorithms, assertion audience/type, redirect handling, resource indicators and mix-up protection; a failed required check cannot trigger a weaker retry. A scenario marked `did_bound` does not impose that requirement on a standard CIMD server that does not advertise that extension. The VC scenarios and Profile remain independent and unchanged.
+
 | ID | Scenario and expected result |
 | --- | --- |
-| AUTHZ-01 | Approved `did:wba` client, method-validated DID document, authorized key and client-credentials policy: issue a target-limited token. Repeat this positive flow for every advertised DID method. |
-| AUTHZ-02 | Approved WBA client: issue only after the advertised WBA binding and key policy pass. |
+| AUTHZ-01 | In `did_bound`, an approved CIMD URL client with a method-validated `did:wba` document, verified URL/metadata/key binding and client-credentials policy receives a target-limited token. Repeat for every advertised DID method. |
+| AUTHZ-02 | In `did_bound`, an approved WBA-associated CIMD client receives a token only after the advertised WBA binding and current OAuth-key authorization pass. |
 | AUTHZ-04 | User-approved authorization code with matching redirect, state/session, and S256 PKCE: preserve the user subject and resource. |
 | AUTHZ-05 | Wrong signature, `none`/`HS*`, incompatible algorithm, or unsupported curve: reject. |
-| AUTHZ-06 | Key absent from `authentication`, foreign-DID `kid`, wrong document `id`, or injected JWS key: reject. |
-| AUTHZ-07 | Wrong iss/sub, wrong or multiple AS audiences, a differing token-endpoint audience, or a conflicting JWT type: reject. A one-element issuer array and allowed/omitted typ follow Section 6.1. |
-| AUTHZ-08 | Expired, future-dated, over-300-second assertion or malformed NumericDate: reject under the stated skew bounds. |
-| AUTHZ-09 | Reuse or concurrent submission of one `jti`, including another key/replica: at most one accepted authentication. |
+| AUTHZ-06 | In `did_bound`, the actual signature key is absent from `authentication` or `anp_oauth_keys`, the DID document has the wrong `id`, or a JWS header injects a verification key: reject. A `kid` label alone never establishes DID-key authorization. |
+| AUTHZ-07 | Request `client_id`, CIMD `client_id`, fetch URL and assertion iss/sub differ: reject. Reject audience/type values outside the preselected AS policy; a token-endpoint audience may be used only when that policy explicitly accepts the standard convention. |
+| AUTHZ-08 | Profile-generated assertions have integer times and `0 < exp - iat <= 300`. Reject expired, future-dated or malformed NumericDate assertions under the selected verifier policy. `did_bound` requires all Section 6.1 claims, enforces its time/skew bounds, and rejects a noninteger `nbf`, `nbf > exp` or `nbf > now + skew`. |
+| AUTHZ-09 | In `did_bound`, reuse or concurrent submission of one `jti`, including another key/replica, permits at most one accepted authentication. Ordinary CIMD replay controls must meet the deployment's preselected assurance requirements. |
 | AUTHZ-10 | Valid DID proof without successful admission or permission, or user access attempted with client-only authority: do not grant that access. |
 | AUTHZ-11 | Wrong/reused code, redirect or PKCE mismatch, scope/resource escalation, or another client's refresh token: reject. |
-| AUTHZ-12 | Removed key, stale-resolution failure, deactivated DID, or unapproved successor migration: no new authentication or inherited grant. |
-| AUTHZ-13 | SSRF through DID/metadata/context fetch, redirects, or DNS rebinding: block without token issuance. |
+| AUTHZ-12 | A removed CIMD key prevents new authentication when current state is checked. In `did_bound`, stale-resolution failure, deactivated DID or removed DID authorization also fails; identity/URL migration never automatically inherits grants. |
+| AUTHZ-13 | SSRF through DID/metadata/context fetch, redirects, or DNS rebinding: block without token issuance. For CIMD and URLs it contains, reject special-use IP destinations in production; the only draft-02 exception is development/testing with the AS itself on the same loopback interface. Callback loopback support does not authorize a fetch. |
 | AUTHZ-14 | Client assertion used as resource token, ANP-02 cache token substituted, or wrong AS/RS audience: reject. |
-| AUTHZ-15 | Grant revocation or refresh reuse: prevent issuance/refresh according to the configured lifecycle policy. |
+| AUTHZ-15 | Grant revocation or refresh reuse prevents issuance/refresh under the lifecycle policy. Check applicable revocation/status before execution with documented freshness; an unavailable required check cannot be treated as approval. |
 | AUTHZ-16 | Duplicate form/JSON security fields or simultaneous authentication methods: reject without ambiguous parsing. |
 | AUTHZ-17 | Where DPoP is required, wrong proof/key/token hash or Bearer downgrade: reject. |
-| AUTHZ-18 | Core advertisement with a wrong Profile revision or a client-ID mode other than `did`: reject without substituting identity or weakening authentication. |
+| AUTHZ-18 | An unsupported processing mode, or an `anp_cimd_binding` advertisement with the wrong Profile when `did_bound` is required, is rejected without changing client identity or weakening authentication. Plain `cimd` does not require that extension. |
 | AUTHZ-20 | Protected-resource metadata points to a different resource, or AS metadata issuer mismatches: stop before transmitting credentials. |
-| AUTHZ-21 | Authorization response `iss` missing, duplicated, or mismatched, including error responses: reject before code redemption. |
-| AUTHZ-22 | Code redemption or refresh omits `resource`, changes its target, or reuses another AS/tenant's client record or token: reject. |
+| AUTHZ-21 | `did_bound` authorization-code processing requires RFC 9207. Wherever RFC 9207 is selected, missing, duplicated or mismatched response `iss`, including error responses, fails before code redemption. An ordinary AS without that capability requires a preselected documented mix-up defense; failed issuer validation cannot select a weaker defense. |
+| AUTHZ-22 | Code redemption or refresh changes its authorized resource, omits a resource indicator required by the preselected AS contract, or reuses another AS/tenant's client record or token: reject. `did_bound` requires RFC 8707 and explicit `resource` on authorization, client-credentials, code-exchange and refresh requests. An ordinary AS's supported single-resource binding need not require `resource` on every request. |
 | AUTHZ-23 | An inbound A-targeted token is presented to B: reject; a separately authorized B-targeted token succeeds. |
 | AUTHZ-26 | A public client is treated as confidential merely for owning a key or using PKCE: reject that client-credentials configuration. |
 | AUTHZ-27 | Scope challenge is accepted only for the trusted RS/AS context, with new approval and bounded retries; it cannot silently escalate rights. |
-| AUTHZ-29 | Unknown DID with self-published admission enabled, valid metadata/proof, and independent authorized grant: issue without a prior client row or registration API call. |
+| AUTHZ-29 | An unknown CIMD URL with self-published admission enabled, valid metadata/client proof and an independently authorized grant can receive a token without a prior client row or registration API call. In `did_bound`, validate the DID association too. |
 | AUTHZ-30 | First-contact admission disabled, policy denies, or a disabled client attempts reenrollment after cache eviction: reject without bypassing the current identity or policy checks. |
-| AUTHZ-31 | Missing/ambiguous service, wrong native metadata DID/Profile, redirected/oversized/duplicate JSON or injected JWKS: reject before code/token issuance. |
-| AUTHZ-32 | Discovery at authorization endpoint creates only a candidate; proof is checked at redemption, and changed callback/service/authentication/grant metadata aborts the pending code. |
+| AUTHZ-31 | A redirected CIMD response, or an oversized, duplicate-field or invalid CIMD/JWKS response, fails before code/token issuance. In `did_bound`, missing/ambiguous `ANPCIMD` service, wrong DID backlink, missing digest or unauthorized keys also fails; valid standard JWKS is expected. |
+| AUTHZ-32 | Discovery at the authorization endpoint establishes a candidate, with client proof checked at redemption. Changed approved callback/authentication/grant metadata aborts a pending code; `did_bound` also retains and rechecks the DID service, digest and key-authorization snapshot. |
 | AUTHZ-33 | Metadata lists privileged scopes or client_credentials: do not treat these as resource grants; refresh still needs an existing authorized token binding. |
-| AUTHZ-41 | A metadata host changes a name, callback, grants or serialization without updating the validated DID digest: reject before display, redirection or token issuance. Missing/malformed digest also fails. |
+| AUTHZ-41 | In `did_bound`, a metadata host changes a name, callback, grants, keys or serialization without updating the validated DID digest: reject before display, redirection or token issuance. Missing/malformed digest also fails. Plain CIMD does not claim this DID-pinned integrity guarantee. |
 | AUTHZ-42 | Approved native loopback metadata with an ephemeral request port and exact code-redemption URI succeeds; wrong host/path, port substitution at redemption, disabled mode or non-native application fails. |
 | AUTHZ-43 | A local callback does not authorize AS-side loopback/private metadata fetches; listener on a LAN/all-interfaces address is not this binding. |
-| AUTHZ-44 | Rotate an authorized e1_ runtime key while retaining the binding key/DID: retain valid grants under policy and reject the removed key. A new binding-key DID receives no automatic grant inheritance. |
-| AUTHZ-45 | Preferred, legacy-specific, generic or absent typ is accepted only with all other checks; singleton issuer audience is accepted, multiple/empty/non-string audiences or an access-token type are rejected. |
-| AUTHZ-46 | AS-verified token or active introspection client_id identifies the Agent while sub identifies the user; caller-injected DID and inactive-token identity disclosure are rejected. |
+| AUTHZ-44 | In `did_bound`, rotate an authorized e1_ runtime key while retaining the binding key/DID and CIMD URL, updating `anp_oauth_keys`, JWKS and the metadata digest coherently: retain grants only under policy and reject removed keys. A changed DID or CIMD URL receives no automatic grant inheritance. |
+| AUTHZ-45 | Assertion typ/audience is checked against the preselected AS contract. Use one exact AS audience and a mutually accepted client-authentication type; issuer-only audience and an explicit `client-authentication+jwt` are selected only when supported. Neither mode retries under weaker choices after rejection. |
+| AUTHZ-46 | AS-verified token or active introspection client_id identifies the CIMD URL client while sub identifies the user. A DID is trusted only through a verified binding, never a caller-injected claim or an unvalidated backlink; inactive introspection does not disclose identity. |
 | AUTHZ-47 | One Agent obtains separate user grants for two resources; token selection includes user/issuer/resource and rejects cross-resource or cross-AS account/permission substitution. |
 | AUTHZ-48 | A service requires approval of a high-risk action: absent, mismatched or already consumed operation approval blocks execution; login, broad scope or DID/DPoP proof alone cannot satisfy that policy. |
-| AUTHZ-49 | k1_ is rejected by this v1 binding; EdDSA is accepted only when enabled and using an Ed25519 key. Relabeled curves or unsupported algorithms fail. |
+| AUTHZ-49 | Reject algorithms/curves outside the preselected AS capability and policy. `did_bound` applies its advertised DID-method rules, including rejection of unsupported WBA bindings; `cimd` does not require Ed25519 or any DID method merely because the ANP example uses it. |
 | AUTHZ-50 | A client-credentials-only deployment does not claim user-delegation support; roadmap redelegation/per-operation approval/cumulative budgets do not become active capabilities merely through metadata claims. |
 | AUTHZ-53 | Invalid credential proof, signing key outside the issuer's `assertionMethod`, VP key outside the holder's `authentication`, unverifiable issuer DID, a cryptosuite that is not enabled, or a context outside the allowlist: reject. |
 | AUTHZ-54 | Credential not yet valid or expired, status revoked or suspended, status list from a different issuer, status list without `validUntil` or expired, or status list unavailable: reject and never treat as valid. |
@@ -73,10 +75,18 @@ These are design scenarios, not a claim that an implementation has passed them. 
 | AUTHZ-73 | Session expiry exceeds the local maximum or credential validity, slides forward with use, or renewal omits a newly verified fresh-challenge VP: reject that creation, extension or renewal. |
 | AUTHZ-74 | Only a qualification or attribute credential is presented without the delegation/role authorization credential required by this Profile: reject; a valid qualification signature and trusted issuer do not establish this version's standalone presentation flow. |
 | AUTHZ-75 | The resource side independently confirms enterprise-account authority to access the personal data and the role presentation passes all other type, identity, permission and constraint checks: it may allow access under that basis and interface policy; absent a valid access basis, reject. |
+| AUTHZ-76 | Standard `cimd` flow succeeds at a server advertising CIMD and `private_key_jwt` with a mutually supported signing algorithm, with no `anp_cimd_binding`, DID resolver, `anp_profile`, `anp_application_type` or mandatory `anp_did`. This result does not claim the AS verified a DID. |
+| AUTHZ-77 | Request `client_id`, assertion iss/sub, CIMD `client_id` and final metadata URL are the same HTTPS string. A DID client_id, mismatched spelling, 3xx response or an unauthorized replacement URL fails; do not follow a redirect to repair the mismatch. |
+| AUTHZ-78 | In `did_bound`, copying a victim's public key into another DID, adding a self-asserted `anp_did`, or pointing only one side at the other cannot establish the victim binding. Require the validated DID's exact URL backlink, metadata digest, authorized key set and proof with the actual signing key. |
+| AUTHZ-79 | In `did_bound`, `anp_oauth_keys` is nonempty and references current DID `authentication` methods. Match the actual JWKS signing key by public-key material; an opaque or DID-shaped `kid` neither bypasses that check nor creates authority by its spelling. |
+| AUTHZ-80 | For `jwks_uri`, a valid CIMD digest authenticates the URI, not the current bytes behind it. In `did_bound`, reject a substituted/unlisted external signing key despite a valid CIMD digest; reject documents containing both `jwks` and `jwks_uri`. |
+| AUTHZ-81 | Expired or inconsistent CIMD/JWKS/DID cache entries cannot satisfy a required fresh binding check; `did_bound` caps their freshness at 300 seconds or a stricter applicable limit. An observed digest/key change invalidates affected snapshots; cache eviction does not clear suspension, and an unavailable required refresh fails closed. |
+| AUTHZ-82 | A required `did_bound` check fails or the AS lacks the advertised capability: stop rather than retry in `cimd`, change client_id or weaken authentication. An AS advertising `anp_cimd_binding` rejects a client missing the required binding; no client opt-out or omitted discovery hint bypasses enforcement. Selecting `cimd` before the flow remains valid only when client and AS policy permit it. |
+| AUTHZ-83 | The same DID points to a new CIMD URL: treat it as a new OAuth client, without carrying over old consent, authorization codes or refresh tokens. Keeping the URL while changing the associated DID also requires policy review of the binding and grants. |
 
 ## Scenario identifier maintenance
 
-Scenario identifiers are stable evidence references, not an ordered checklist. Retired IDs (03, 19, 24, 25, 28, 34–40, and 51, 52, 58 retired in 0.6) remain unused. Requirements added in 0.4 start at 41, VC scenarios added in 0.5 start at 51 (61–64 for role credentials), and new direct-presentation scenarios in 0.6 are 65–75. Numbering gaps do not waive any listed scenario.
+Scenario identifiers are stable evidence references, not an ordered checklist. Retired IDs (03, 19, 24, 25, 28, 34–40, and 51, 52, 58 retired in 0.6) remain unused. Requirements added in 0.4 start at 41, VC scenarios added in 0.5 start at 51 (61–64 for role credentials), and direct-presentation scenarios added in 0.6 are 65–75. Version 0.7 retains those VC scenarios unchanged, updates the existing OAuth scenarios for URL client identity and mode-specific checks, and adds CIMD/binding scenarios 76–83. Numbering gaps do not waive any listed scenario; evidence must identify the protocol revision and selected mode as well as the scenario ID.
 
 ## Copyright Notice
 

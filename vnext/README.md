@@ -12,7 +12,7 @@ This directory contains protocol drafts and white paper revisions with substanti
 
 ## Authorization draft at the repository root
 
-[ANP-05: DID-Based Authorization](../05-anp-did-authorization-protocol-specification.md) and its [Chinese mirror](../chinese/05-ANP-基于DID的授权协议.md) now reside at the main document paths. Their version remains v0.6 and status remains Draft / not released; they are not part of ANP 1.2. The draft defines DID client identity for OAuth and independent VC direct presentation for delegation and organization-role credentials.
+[ANP-05: DID-Based Authorization](../05-anp-did-authorization-protocol-specification.md) and its [Chinese mirror](../chinese/05-ANP-基于DID的授权协议.md) now reside at the main document paths. Their version remains v0.7 and status remains Draft / not released; they are not part of ANP 1.2. The draft defines DID-associated CIMD URL client identity for OAuth and independent VC direct presentation for delegation and organization-role credentials.
 
 ANP-05 references the current ANP 1.2 identity-material bindings. Review and client/AS/RS interoperability evidence are required before release or public enablement.
 

@@ -2,6 +2,10 @@
 
 通用行为准则统一维护于 [Workspace AGENTS.md](../../AGENTS.md)。当前会话已加载时不重复读取；单独打开本仓库且该文件存在时，先读取其中适用的共享规则。
 
+## 全量测试执行时机
+
+开发测试过程中，全量测试默认在本次约定的开发范围全部完成后再执行，不在逐项开发或调试过程中反复运行。开发过程中按需执行必要的定向测试和最小验证；用户明确指定测试时机或范围时，以用户要求为准。
+
 ## Shared rules
 
 Engineering work follows [AI Coding Rules](../../awiki-harness/rules/ai-coding-rules.md).
